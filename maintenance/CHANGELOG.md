@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## data 1.3 · 2026-11-23 (after publishing): prerequisites narrowed
+- The six competencies that depended on a whole former group now name only the members they need (the group
+  expansion had made them wait on every member): TST-1 ← PY-3, PY-5, WEB-2 · CI-1 ← GIT-1 · CI-5 ← CI-3, GIT-4 ·
+  TM-1 ← SEC-3, WEB-8 · APPSEC-1 ← SEC-3, WEB-1, WEB-4 · COMM-3 ← CLD-7, WEB-6, WEB-8. PS-2 now waits on 9 other
+  competencies instead of about 25. Saved progress is unaffected (no IDs changed).
+
 ## 2026-11-23 — published
 - Public repo https://github.com/AymanOHM/cloud-security-roadmap; site https://aymanohm.github.io/cloud-security-roadmap/
   deployed by GitHub Actions on every push to `main` (validate, docgen check, unit, smoke, persistence and UI tests first).

@@ -186,13 +186,13 @@ Dec 2026 to mid-Feb 2027 (NTI Docker, CI/CD, AWS, Terraform, K8s, monitoring). *
 | CTR-6 | Image scanning and triage | NTI | CTR-2 | Triage scanner output, not just run it | PS-1 | Trivy report with top findings fixed or justified in the README. | High |
 | K8S-1 | Kubernetes fundamentals | NTI | CTR-5 | Deploy the grad project to a local cluster | kind or k3s locally | The grad project runs on a local kind/k3s cluster with readiness and liveness probes and a Secret; torn down and redeployed unaided. | Medium |
 | K8S-3 | Kubernetes delivery: Helm, Kustomize, GitOps | Independent | K8S-1, CI-3 | Argo CD keeps the local cluster in sync with Git | PS-6 | Argo CD syncs the grad project from Git into kind/k3s. | Low |
-| TST-1 | Testing with pytest (refresh) | Independent | PY-1–7, WEB-1–8 | Add tests that a pipeline can gate on | PS-2 | Tests run in PS-2's pipeline. | Medium |
+| TST-1 | Testing with pytest (refresh) | Independent | PY-3, PY-5, WEB-2 | Add tests that a pipeline can gate on | PS-2 | Tests run in PS-2's pipeline. | Medium |
 | TST-2 | Integration testing | Independent | TST-1, DB-2 | Run integration tests against service containers in CI | PS-2 | PS-2's integration job catches a deliberately broken migration. | Medium |
-| CI-1 | CI/CD concepts | NTI | GIT-1–4 | Explain each stage's purpose | — | 2-minute explanation. | High |
+| CI-1 | CI/CD concepts | NTI | GIT-1 | Explain each stage's purpose | — | 2-minute explanation. | High |
 | CI-2 | GitHub Actions workflow | NTI | CI-1, TST-1 | Run the grad project's tests in CI | PS-2 | Green pipeline on the grad project. | High |
 | CI-3 | Build and publish images in CI | NTI | CI-2, CTR-2 | Tagged image on every merge | PS-2 | Merge produces a tagged image. | High |
 | CI-4 | CI secrets and branch protection | NTI | CI-2 | Protect main with required checks | PS-2 | A PR with a failing check cannot merge. | High |
-| CI-5 | Release automation | Independent | CI-3, GIT-1–4 | Cut a tagged release from CI with a changelog | PS-2 | Tagged releases with a generated changelog; a /version endpoint returns the deployed version. | Medium |
+| CI-5 | Release automation | Independent | CI-3, GIT-4 | Cut a tagged release from CI with a changelog | PS-2 | Tagged releases with a generated changelog; a /version endpoint returns the deployed version. | Medium |
 | DSO-1 | Pipeline security gates | NTI | CI-2, CTR-6 | Choose and tune gates; explain each trade-off; Run an OWASP ZAP baseline scan against the staging app and triage its findings | PS-2: plant a vulnerable dependency and a fake secret | Pipeline blocks both planted issues; README explains each gate. | High |
 | CLD-1 | Cloud concepts and cost control | NTI | NET-1 | Set a budget alarm before any lab | Budget alarm on your AWS account | Budget alarm exists; explain shared responsibility. | High |
 | CLD-2 | AWS IAM basics | NTI | CLD-1, SEC-6 | Read and write a least-privilege policy | PS-3 | PS-3 uses roles only; no long-lived keys on the instance. | High |
@@ -227,8 +227,8 @@ Mid-Feb to about Jun 2027 (DEBI becomes the main structure). **Gate 3: IR runboo
 | IR-1 | Incident-response practice | Shared | SEC-7 | Run one tabletop end to end | Tabletop: leaked access key | Runbook + postmortem in the repo. | High |
 | SEC-8 | Governance and frameworks | Shared | SEC-1 | Map your controls to CIS | — | PS-7 README maps controls to CIS. | Low |
 | WIN-1 | Windows fundamentals slice | DEBI | SEC-1 | Read the Windows Security log | — | Explain 3 security event IDs. | Low |
-| TM-1 | Threat modeling | NTI | SEC-3, WEB-1–8 | One-page threat model per project stage | Grad project threat model | Threat model in the grad project README. | Medium |
-| APPSEC-1 | Exploit then fix on your own app | Shared | SEC-3, WEB-1–8 | Exploit and fix each class on the grad project | Local copy of the grad project only | Committed OWASP self-review with 3+ real fixes (doc 06). | Medium |
+| TM-1 | Threat modeling | NTI | SEC-3, WEB-8 | One-page threat model per project stage | Grad project threat model | Threat model in the grad project README. | Medium |
+| APPSEC-1 | Exploit then fix on your own app | Shared | SEC-3, WEB-1, WEB-4 | Exploit and fix each class on the grad project | Local copy of the grad project only | Committed OWASP self-review with 3+ real fixes (doc 06). | Medium |
 | APPSEC-2 | Security review write-up | Independent | APPSEC-1 | Write findings a developer can act on | — | One review document in the repo. | Low |
 | DSO-2 | Software supply chain | NTI | DSO-1 | Generate and read an SBOM | Add SBOM to PS-2 | SBOM artifact published by the pipeline. | Medium |
 
@@ -260,7 +260,7 @@ Runs throughout; shown last because it collects the evidence. **Gate 5: both CV 
 | JOB-3 | Application pipeline | Independent | JOB-1 | Apply steadily to the right titles | — | Ticked application tasks (doc 19 K1). | High |
 | COMM-1 | Explain any competency in English | Independent | — | Explain on demand | — | Spoken checks (doc 19 K4). | Medium |
 | COMM-2 | STAR stories | Independent | — | 3 polished stories | — | 3 stories under 2 min each. | Medium |
-| COMM-3 | Whiteboard the capstone | Independent | CLD-7, WEB-1–8 | Draw and defend the deployed system | — | 3-minute whiteboard passed in a mock. | High |
+| COMM-3 | Whiteboard the capstone | Independent | CLD-7, WEB-6, WEB-8 | Draw and defend the deployed system | — | 3-minute whiteboard passed in a mock. | High |
 | DSA-1 | Algorithm problems (have) | Existing | — | Stay warm, not drill | — | Give the optimal approach and its complexity for a medium problem aloud, then code it. | Low |
 
 If you switch direction at the Stage 4 decision point, the core stays the same. SecOps leans on LOG-1, IR-1 and CSEC-3/4/7. Cloud infrastructure leans on K8S-1, IAC-3 and OPS-3/4. Each competency's path tags are in the HTML's Career paths view.

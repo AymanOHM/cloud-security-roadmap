@@ -1496,21 +1496,9 @@
       "Add tests that a pipeline can gate on"
     ],
     "pre": [
-      "PY-1",
-      "PY-2",
       "PY-3",
-      "PY-4",
       "PY-5",
-      "PY-6",
-      "PY-7",
-      "WEB-1",
-      "WEB-2",
-      "WEB-3",
-      "WEB-4",
-      "WEB-5",
-      "WEB-6",
-      "WEB-7",
-      "WEB-8"
+      "WEB-2"
     ],
     "nti": null,
     "debi": null,
@@ -1572,10 +1560,7 @@
       "Explain each stage's purpose"
     ],
     "pre": [
-      "GIT-1",
-      "GIT-2",
-      "GIT-3",
-      "GIT-4"
+      "GIT-1"
     ],
     "nti": "NTI CI/CD + DevSecOps practice project (28 h).",
     "debi": "Absent from the DEBI map.",
@@ -1696,9 +1681,6 @@
     ],
     "pre": [
       "CI-3",
-      "GIT-1",
-      "GIT-2",
-      "GIT-3",
       "GIT-4"
     ],
     "nti": "NTI CI/CD module may cover it (unverified).",
@@ -2555,13 +2537,6 @@
     ],
     "pre": [
       "SEC-3",
-      "WEB-1",
-      "WEB-2",
-      "WEB-3",
-      "WEB-4",
-      "WEB-5",
-      "WEB-6",
-      "WEB-7",
       "WEB-8"
     ],
     "nti": "NTI map: STRIDE, PASTA, attack-surface mapping (verified).",
@@ -2594,13 +2569,7 @@
     "pre": [
       "SEC-3",
       "WEB-1",
-      "WEB-2",
-      "WEB-3",
-      "WEB-4",
-      "WEB-5",
-      "WEB-6",
-      "WEB-7",
-      "WEB-8"
+      "WEB-4"
     ],
     "nti": "NTI map: OWASP Top 10, SQLi/XSS prevention, input validation, Burp (verified).",
     "debi": "DEBI map: web-based attacks and OWASP Top 10 (verified).",
@@ -3141,13 +3110,7 @@
     ],
     "pre": [
       "CLD-7",
-      "WEB-1",
-      "WEB-2",
-      "WEB-3",
-      "WEB-4",
-      "WEB-5",
       "WEB-6",
-      "WEB-7",
       "WEB-8"
     ],
     "nti": null,
