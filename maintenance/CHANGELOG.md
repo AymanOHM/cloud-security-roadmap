@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2026-11-23 — published
+- Public repo https://github.com/AymanOHM/cloud-security-roadmap; site https://aymanohm.github.io/cloud-security-roadmap/
+  deployed by GitHub Actions on every push to `main` (validate, docgen check, unit, smoke, persistence and UI tests first).
+- Stage 5: workflow activated with current action versions, Dependabot, pinned test dependencies, public README,
+  pre-publish checklist passed (tree and full history), commit author set to the GitHub no-reply address.
+- The owner's encrypted timetable (`data/timetable.enc.json`) added.
+
 ## app 2026-11-23 (Stage 4: UX, flowchart, accessibility, timetable)
 - **Find things:** search box (ID or name; `/` to focus), `#ID` deep links that update as you select, Focus chain mode.
 - **Flowchart:** PY, DB, WEB and GIT drawn as collapsed group boxes (open to expand, D-04); job-readiness items with

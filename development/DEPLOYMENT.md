@@ -1,7 +1,7 @@
-# DEPLOYMENT — GitHub Pages plan (nothing published yet)
+# DEPLOYMENT — GitHub Pages
 
-**Nothing in this file has been executed.** Steps marked 🛑 need the owner's explicit approval in the Claude Code
-session (`private/docs/CLAUDE_CODE_HANDOFF.md` Gate 5).
+**Deployed 23 Nov 2026** after the owner's Gate 5 approval: repo https://github.com/AymanOHM/cloud-security-roadmap
+(public), site https://aymanohm.github.io/cloud-security-roadmap/. Every push to `main` redeploys through the workflow.
 
 ## Decisions (AUDIT D-05, D-10; Gate 1 and Stage 5)
 - Repo: **`cloud-security-roadmap`**, **public**, under the owner's account (GitHub Free serves Pages only from public
@@ -33,16 +33,15 @@ session (`private/docs/CLAUDE_CODE_HANDOFF.md` Gate 5).
 | History (every commit): record IDs, private terms, timetable text, personal email | ✅ 0 hits; author email rewritten to the GitHub no-reply address |
 | Secrets | ✅ none (`id-token: write` is a workflow permission) |
 | CI dry run in a clean clone without `private/` | ✅ validate, docgen check, 24 unit tests, build, smoke, persistence and UI tests |
-| Owner has read the file list | ⏳ at Gate 5 |
+| Owner has read the file list | ✅ approved at Gate 5 |
 
 ## GitHub setup (🛑 each step needs approval)
-1. 🛑 Create the repo (`gh repo create <name> --public|--private --source . --remote origin`), or the owner creates it
-   in the web UI.
+1. ✅ Repo created: `gh repo create AymanOHM/cloud-security-roadmap --public --source . --remote origin`.
 2. ✅ Workflow moved to `.github/workflows/deploy-pages.yml` (Stage 5, approved); action versions current on 23 Nov 2026.
-3. 🛑 First push: `git push -u origin main`.
-4. 🛑 Repo Settings → Pages → Source: **GitHub Actions**.
-5. Confirm the workflow run passes and the site loads at `https://<user>.github.io/<repo>/`.
-6. Confirm a progress export from the local file imports on the Pages site (AUDIT A-05).
+3. ✅ First push of `main` and the `v1.2-baseline` tag.
+4. ✅ Pages source set to GitHub Actions (`gh api -X POST repos/AymanOHM/cloud-security-roadmap/pages -f build_type=workflow`).
+5. ✅ First workflow run passed (build 54 s, deploy 10 s); the live page is byte-identical to the local build.
+6. ✅ A progress export from `file://` imported on the Pages site (merge preview, status and notes kept).
 
 ## Rollback
 Revert the commit and push (the workflow redeploys), or disable Pages in Settings. Progress is unaffected (it lives

@@ -8,7 +8,7 @@ plan.
 It comes with an **offline, single-file tracker**: flowchart, stage map, Kanban board, checklist, career
 paths, NTI vs DEBI comparison, projects, certification timeline, timetable and a progress dashboard.
 
-- **Live site:** `https://<user>.github.io/cloud-security-roadmap/` (after the first deploy)
+- **Live site:** https://aymanohm.github.io/cloud-security-roadmap/
 - **Written roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
 ## Use it
