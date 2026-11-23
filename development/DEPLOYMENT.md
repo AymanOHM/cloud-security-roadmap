@@ -20,9 +20,10 @@ git add -A && git commit -m "Initial import of the NTI + DEBI roadmap (data v1.2
 ## Pre-publish checklist (all must pass before 🛑 Gate 5)
 - [ ] `git check-ignore -v private/ archive/ dist/ build/` lists all four
 - [ ] `git ls-files | grep -iE "private/|archive/|\.pdf$|progress.*\.json"` returns nothing
-- [ ] `grep -rnE "H-20[0-9]{6}|Records:" data/` returns nothing (AUDIT P-01)
+- [ ] `python3 tools/validate.py` passes **with** `private/privacy-terms.txt` present (privacy lint over `data/` and every public file; AUDIT P-01, A-21). CI runs it without the terms file, so the name check only happens locally
 - [ ] No NTI course material anywhere (module names and hours only) (AUDIT P-04)
-- [ ] No personal schedule, names of private individuals, or contact details in committed files (AUDIT P-02)
+- [ ] No personal schedule, names of private individuals, or contact details in committed files (AUDIT P-02). The only exception is the encrypted timetable blob (AUDIT D-10): confirm it's ciphertext, not plain text
+- [ ] Also scan history, not just the tree: `git log -p | grep -nE "H-20[0-9]{6}-[0-9]"` returns nothing
 - [ ] No secrets: `git grep -nE "(api[_-]?key|token|password)\s*[:=]"` reviewed
 - [ ] validate, unit tests, build and smoke test pass locally
 - [ ] The owner has read the final file list (`git ls-files`)

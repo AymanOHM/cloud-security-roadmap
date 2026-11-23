@@ -5,7 +5,8 @@ Run: python3 tests/e2e_smoke.py   (exit code 1 on any failure; screenshots go to
 
 Checks: no JS errors on load; every view renders; a node opens its detail panel and its ID is shown there
 (not as the node headline); a status change persists across reload; Kanban drag changes status;
-export produces JSON; reset clears progress; the phone-size layout loads.
+export produces JSON; reset clears progress; a crafted or malformed import is sanitized and runs no
+script (AUDIT A-12); the phone-size layout loads.
 """
 import asyncio
 import json
@@ -77,6 +78,25 @@ async def main():
         await pg.wait_for_timeout(200)
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
         check(saved["status"] == {}, "reset clears progress")
+        evil = {"status": {"NET-1": 'done"><img src=x onerror="window.__x=1">', "NET-2": "banana",
+                           "NOPE-1": "done", "NET-3": "ip"},
+                "notes": "not an object", "evidence": {"NET-3": 5, "NET-4": "repo link"}}
+        for _ in range(2):  # the same file twice must import twice (A-22)
+            await pg.set_input_files("#imp", files=[{"name": "evil.json", "mimeType": "application/json",
+                                                       "buffer": json.dumps(evil).encode()}])
+            await pg.wait_for_timeout(200)
+        for v in VIEWS:
+            await pg.click(f"#tabs button[data-v={v}]")
+            await pg.wait_for_timeout(60)
+        check(await pg.evaluate("window.__x") is None, "crafted import runs no script")
+        saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
+        check(saved["status"] == {"NET-3": "ip"}, f"import keeps only known IDs and valid statuses ({saved['status']})")
+        check(saved["notes"] == {} and saved["evidence"] == {"NET-4": "repo link"}, "import drops malformed fields")
+        await pg.click("#tabs button[data-v=flow]")
+        await pg.locator("#cv-flow g.node[aria-label]").first.click()
+        await pg.fill("#pnotes", "a note")
+        saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
+        check("a note" in saved["notes"].values(), "notes still editable after a malformed import")
         m = await b.new_page(viewport={"width": 390, "height": 844})
         m.on("pageerror", lambda e: errs.append("mobile: " + str(e)))
         await m.goto(URL)

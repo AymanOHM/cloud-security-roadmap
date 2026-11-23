@@ -22,12 +22,12 @@ data/*.json ──► tools/docgen.py ──► build/docgen/*.md  (tables for R
 | `projects.json` | PS-1 … PS-8 {id, name, stage, doc19, window, comps[], arch, steps[], goal, deliv, value} |
 | `certifications.json` | {id, name, when, start "YYYY-MM", end, status, cost, fills, verdict, comps[]} |
 | `comparison.json` | NTI vs DEBI rows {area, nti, debi, cls, lead, action} |
-| `id-migrations.json` | {"migrations": {"OLD-ID": "NEW-ID"}} for renamed/retired competencies (app support pending: AUDIT A-06) |
+| `id-migrations.json` | {"migrations": {"OLD-ID": "NEW-ID" \| ["NEW-1", …]}}: a string is a rename, a list is a split (e.g. `PY-1–7` → PY-1 … PY-7, data 1.3). App support pending (AUDIT A-06) |
 
 **Competency fields** (all required; validated by `tools/validate.py`):
 | Field | Type | Meaning |
 |---|---|---|
-| `id` | string | Stable ID. Doc 06 scheme or new prefixes (IAC, K8S, DSO, VM, NSEC, LOG, IR, TM, CSEC, JOB). Group rows use ranges like `PY-1–7` (en dash) |
+| `id` | string | Stable ID. Doc 06 scheme or new prefixes (IAC, K8S, DSO, VM, NSEC, LOG, IR, TM, CSEC, JOB). Since data 1.3 there are no group rows; the retired group IDs (`PY-1–7`, `DB-1–6`, `WEB-1–8`, `GIT-1–4`) live only in `id-migrations.json` |
 | `name` | string | Short name; shown as the node headline |
 | `stage` | FND·CDE·SEN·CSS·JOB | Roadmap stage |
 | `lane` | net·lnx·code·ctr·cloud·sec·csec·career | Domain row in the stage map; drives the skills radar |
@@ -71,6 +71,9 @@ paths · compare · projects · certs · dashboard (incl. skills radar) · heade
    localStorage key family; migrate v1 → v2 on first load and keep a one-time copy under `…-v1-backup`.
 2. **ID migrations on load:** apply `D.migrations` (chained), merging into the new ID (newer `updated` wins per
    field, notes concatenated). Unknown IDs go to `orphans`, shown on the dashboard with "reassign / delete".
+   **Splits** (a list of new IDs) never copy a status, level or evidence to the parts, because a finished group
+   doesn't prove each part (that would invent progress). The old entry goes to `orphans` with a "split into …"
+   pointer so its notes can be reassigned by hand.
 3. **Data-change summary:** remember the last seen `dataVersion` and ID set; on change, show "added / removed /
    renamed since your last visit".
 4. **Export/import:** export the whole envelope; import validates the shape, shows a preview (counts, conflicts,
@@ -78,8 +81,9 @@ paths · compare · projects · certs · dashboard (incl. skills radar) · heade
 5. **Backups:** dashboard reminder when there are unsaved-to-file changes and the last export is older than 7 days;
    reset exports first.
 6. **Origins:** on a fresh origin with empty storage, offer "Import progress from a file" (file:// ↔ Pages).
-7. **Progress seed (optional):** import a seed file produced in the Study Plan Project from the records, mapping
-   evidence levels to the new fields. Never mark "done" unless the records show E4/🟢.
+7. **Progress seed (decided, AUDIT D-06):** re-importable seed produced locally by `tools/seed_from_records.py`
+   from the records snapshot in `private/progress/`. On import, the records own `level`, `u`/`e`/`d` and
+   `lastVerified`; the app owns status, notes and link. Always a preview first. The seed never sets "done".
 8. **Never** send progress anywhere. GitHub Pages hosts code only.
 
 ## 6. Known technical debt
