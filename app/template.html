@@ -131,6 +131,22 @@ tr.cl:hover td{background:var(--panel)}
 .kcard.dragging{opacity:.4}
 .kname{font-weight:600;font-size:13px;margin-bottom:4px}
 .kmeta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#notice:empty{display:none}
+#notice{border-bottom:1px solid var(--line);background:var(--panel)}
+.notice{padding:8px 16px;font-size:13px;border-left:3px solid var(--ip)}
+.notice+.notice{border-top:1px solid var(--line)}
+.notice .btn{padding:2px 8px;font-size:12px;margin-left:4px}
+dialog#dlg{background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:10px;max-width:min(760px,94vw);padding:18px 20px}
+dialog#dlg::backdrop{background:rgba(0,0,0,.6)}
+dialog#dlg h2{margin:0 0 6px;font-size:17px}
+.dlgscroll{max-height:40vh;overflow:auto;margin:8px 0;border:1px solid var(--line);border-radius:6px}
+.dlgact{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.evgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
+.evgrid label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.evgrid input,.evgrid select{background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:5px 7px;color:var(--text)}
+.evgrid .wide{grid-column:1/-1}
+.badge.noev{color:#e8d28a;border-color:#5a4a1a}
+.badge.late{color:#ffb3ae;border-color:#5a2a2a}
 footer.note{color:var(--faint);font-size:12px;padding:16px 20px;border-top:1px solid var(--line)}
 @media (max-width:900px){
   #panel{position:absolute;inset:0;width:100%;z-index:5}
@@ -155,6 +171,7 @@ footer.note{color:var(--faint);font-size:12px;padding:16px 20px;border-top:1px s
   <button data-v="certs">Certifications</button>
   <button data-v="dash">Dashboard</button>
 </nav>
+<div id="notice" role="status"></div>
 <main>
   <section class="view gview on" id="v-flow">
     <div class="toolbar gtool"></div>
@@ -180,6 +197,7 @@ footer.note{color:var(--faint);font-size:12px;padding:16px 20px;border-top:1px s
   <aside id="panel"></aside>
 </main>
 </div>
+<dialog id="dlg" aria-label="Import"></dialog>
 <script>
 "use strict";
 const D = /*DATA*/null;
@@ -194,22 +212,115 @@ const dependents = {}; D.comps.forEach(c=>dependents[c.id]=[]);
 D.comps.forEach(c=>c.pre.forEach(p=>dependents[p].push(c.id)));
 const projByComp = {}; D.projects.forEach(p=>p.comps.forEach(id=>(projByComp[id]=projByComp[id]||[]).push(p.id)));
 
-/* ---------- storage ---------- */
+/* ---------- storage (v2 envelope; see development/ARCHITECTURE.md §5) ---------- */
+const APP_ID = "nti-debi-roadmap";
+const KEY1 = "ntidebi-roadmap-v1", KEY2 = "ntidebi-roadmap-v2";
+const KEY1_BACKUP = KEY1 + "-backup", KEY2_PREV = KEY2 + "-prev";
+const LEVELS = ["E0","E1","E2","E3","E4"];
+const MARKS = {none:"⚪ Not assessed",partial:"🟡 Partial",verified:"🟢 Verified",regressed:"🔴 Regressed"};
+const DAY = 864e5, BACKUP_DAYS = 7;
 let storageOK = true;
-function blank(){return {status:{},notes:{},evidence:{},updated:{}}}
-/* Keep only known IDs, allowlisted statuses and string fields (AUDIT A-12). */
-function sanitize(o){const out=blank();if(!o||typeof o!=="object"||typeof o.status!=="object"||!o.status)return null;
-  for(const k of ["status","notes","evidence","updated"]){const src=o[k];if(!src||typeof src!=="object")continue;
-    for(const [id,v] of Object.entries(src)){if(!Object.prototype.hasOwnProperty.call(byId,id)||typeof v!=="string")continue;
-      if(k==="status"&&!Object.prototype.hasOwnProperty.call(ST_LABEL,v))continue;out[k][id]=v}}
-  return out}
-function load(){try{const s=sanitize(JSON.parse(localStorage.getItem(KEY)||"null"));return s||blank()}catch(e){storageOK=false;return blank()}}
+const has = (o,k) => Object.prototype.hasOwnProperty.call(o,k);
+const nowISO = () => new Date().toISOString();
+const isObj = o => !!o && typeof o === "object" && !Array.isArray(o);
+const str = (v,max) => typeof v === "string" ? v.slice(0,max) : undefined;
+const isoOK = v => typeof v === "string" && !isNaN(Date.parse(v));
+function blankEnv(){return {app:APP_ID,storageVersion:2,dataVersion:D.version,createdAt:nowISO(),savedAt:null,lastChangeAt:null,lastExportAt:null,seen:null,firstRunDismissed:false,progress:{},orphans:{}}}
+/* One progress entry: keep only known fields with valid values. */
+function cleanEntry(o){
+  if(!isObj(o))return null;const e={};
+  if(has(ST_LABEL,o.status))e.status=o.status;
+  for(const [k,max] of [["notes",20000],["evidence",20000],["link",2000],["levelNote",120]]){const s=str(o[k],max);if(s)e[k]=s}
+  if(LEVELS.includes(o.level))e.level=o.level;
+  for(const k of ["u","e","d"])if(has(MARKS,o[k]))e[k]=o[k];
+  if(typeof o.lastVerified==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(o.lastVerified))e.lastVerified=o.lastVerified;
+  if(isoOK(o.updated))e.updated=o.updated;
+  return Object.keys(e).length?e:null}
+/* Read any accepted file shape: v2 envelope, v1 export, or a records seed. Returns null if unrecognised. */
+function parseAny(o){
+  if(!isObj(o))return null;
+  if(o.kind==="roadmap-progress-seed"&&isObj(o.entries)){const entries={};
+    for(const [id,v] of Object.entries(o.entries)){if(typeof id!=="string"||!isObj(v))continue;const e=cleanEntry(v)||{};
+      const keep={};for(const k of ["level","levelNote","u","e","d","lastVerified"])if(has(e,k))keep[k]=e[k];
+      entries[id]=keep}  // an empty entry clears what the records no longer show
+    return {kind:"seed",progress:entries,orphans:{},meta:{snapshotDate:str(o.snapshotDate,40)||"",source:str(o.source,200)||""}}}
+  if(o.app===APP_ID&&o.storageVersion===2&&isObj(o.progress)){const progress={},orphans={};
+    for(const [id,v] of Object.entries(o.progress)){const e=cleanEntry(v);if(e)progress[id]=e}
+    if(isObj(o.orphans))for(const [id,v] of Object.entries(o.orphans)){const e=cleanEntry(v);if(!e)continue;
+      e.reason=["removed","split","unknown"].includes(v.reason)?v.reason:"unknown";
+      if(Array.isArray(v.splitInto))e.splitInto=v.splitInto.filter(x=>typeof x==="string").slice(0,50);orphans[id]=e}
+    return {kind:"v2",progress,orphans,meta:{lastExportAt:isoOK(o.lastExportAt)?o.lastExportAt:null,createdAt:isoOK(o.createdAt)?o.createdAt:null,seen:isObj(o.seen)&&Array.isArray(o.seen.ids)?{dataVersion:str(o.seen.dataVersion,80)||"",ids:o.seen.ids.filter(x=>typeof x==="string")}:null,firstRunDismissed:o.firstRunDismissed===true}}}
+  if(isObj(o.status)){const progress={};   // v1: {status,notes,evidence,updated}, one map per field
+    const ids=new Set();for(const k of ["status","notes","evidence","updated"])if(isObj(o[k]))Object.keys(o[k]).forEach(id=>ids.add(id));
+    for(const id of ids){const e=cleanEntry({status:(o.status||{})[id],notes:isObj(o.notes)?o.notes[id]:undefined,evidence:isObj(o.evidence)?o.evidence[id]:undefined,updated:isObj(o.updated)?o.updated[id]:undefined});if(e)progress[id]=e}
+    return {kind:"v1",progress,orphans:{},meta:{}}}
+  return null}
+/* Follow D.migrations from an old ID. Returns {to:id} | {split:[ids]} | {gone:true}. */
+function resolveId(id){
+  let cur=id;for(let i=0;i<25;i++){
+    if(has(byId,cur))return {to:cur};
+    if(!has(D.migrations,cur))return {gone:true};
+    const n=D.migrations[cur];if(Array.isArray(n))return {split:n.filter(x=>has(byId,x))};cur=n}
+  return {gone:true}}
+/* Merge two entries for one ID: the newer `updated` wins per field; differing notes are kept, joined. */
+function mergeEntry(a,b){if(!a)return b;if(!b)return a;
+  const [older,newer]=(Date.parse(a.updated||0)||0)<=(Date.parse(b.updated||0)||0)?[a,b]:[b,a];
+  const m=Object.assign({},older,newer);
+  if(a.notes&&b.notes&&a.notes!==b.notes)m.notes=older.notes+"\n---\n"+newer.notes;
+  if(a.evidence&&b.evidence&&a.evidence!==b.evidence)m.evidence=older.evidence+"\n---\n"+newer.evidence;
+  return m}
+/* Map progress keyed by any (possibly old) IDs onto the current data. Splits and unknown IDs become orphans. */
+function normalize(progress,orphans){
+  const out={},orph=Object.assign({},orphans||{}),renamed=[];
+  for(const [id,e] of Object.entries(progress)){const r=resolveId(id);
+    if(r.to){if(r.to!==id)renamed.push([id,r.to]);out[r.to]=mergeEntry(out[r.to],e)}
+    else if(r.split)orph[id]=Object.assign(mergeEntry(orph[id],e),{reason:"split",splitInto:r.split});
+    else orph[id]=Object.assign(mergeEntry(orph[id],e),{reason:orph[id]&&orph[id].reason||"removed"})}
+  for(const id of Object.keys(orph))if(has(byId,id)){out[id]=mergeEntry(out[id],stripOrphan(orph[id]));delete orph[id]}
+  return {progress:out,orphans:orph,renamed}}
+function stripOrphan(e){const c=Object.assign({},e);delete c.reason;delete c.splitInto;return c}
+const readKey = k => {try{return localStorage.getItem(k)}catch(e){storageOK=false;return null}};
+const writeKey = (k,v) => {try{localStorage.setItem(k,v);return true}catch(e){storageOK=false;return false}};
+let LOADINFO={fresh:false,fromV1:false,renamed:[],dataChange:null};
+function load(){
+  const env=blankEnv();let parsed=null;
+  const raw2=readKey(KEY2);
+  if(raw2){try{parsed=parseAny(JSON.parse(raw2))}catch(e){parsed=null}}
+  if(!parsed){const raw1=readKey(KEY1);
+    if(raw1){try{parsed=parseAny(JSON.parse(raw1))}catch(e){parsed=null}
+      if(parsed){LOADINFO.fromV1=true;if(!readKey(KEY1_BACKUP))writeKey(KEY1_BACKUP,raw1)}}}
+  if(!parsed){LOADINFO.fresh=!raw2;return env}
+  if(parsed.kind==="v2"){try{const o=JSON.parse(raw2);for(const k of ["createdAt","savedAt","lastChangeAt","lastExportAt"])if(isoOK(o[k]))env[k]=o[k]}catch(e){}
+    env.seen=parsed.meta.seen;env.firstRunDismissed=parsed.meta.firstRunDismissed}
+  const n=normalize(parsed.progress,parsed.orphans);env.progress=n.progress;env.orphans=n.orphans;LOADINFO.renamed=n.renamed;
+  if(env.seen){const before=new Set(env.seen.ids),now=new Set(ALL);
+    const renamedFrom=new Set(env.seen.ids.filter(id=>!now.has(id)&&has(D.migrations,id)));
+    const renamedTo=new Set([...renamedFrom].flatMap(id=>{const r=resolveId(id);return r.to?[r.to]:r.split||[]}));
+    const added=ALL.filter(id=>!before.has(id)&&!renamedTo.has(id)),removed=env.seen.ids.filter(id=>!now.has(id)&&!renamedFrom.has(id));
+    if(added.length||removed.length||renamedFrom.size)LOADINFO.dataChange={from:env.seen.dataVersion,added,removed,renamed:[...renamedFrom].map(id=>[id,resolveId(id)])}}
+  return env}
+const ALL = D.comps.map(c=>c.id);
 let S = load();
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storageOK=false}}
-const st = id => S.status[id]||"ns";
+function save(){S.savedAt=nowISO();S.dataVersion=D.version;if(!S.seen)S.seen={dataVersion:D.version,ids:ALL.slice()};writeKey(KEY2,JSON.stringify(S))}
+function touch(){S.lastChangeAt=nowISO();save()}
+if(LOADINFO.fromV1||LOADINFO.renamed.length)save();
+const P = id => S.progress[id]||{};
+const entry = id => S.progress[id]||(S.progress[id]={});
+const st = id => P(id).status||"ns";
 const isBlocked = id => st(id)!=="done" && byId[id].pre.some(p=>st(p)!=="done");
 const missingPre = id => byId[id].pre.filter(p=>st(p)!=="done");
-function setStatus(id,v){S.status[id]=v;S.updated[id]=new Date().toISOString();save();refreshAll()}
+function setStatus(id,v){if(!has(ST_LABEL,v))return;entry(id).status=v;entry(id).updated=nowISO();touch();refreshAll()}
+function setField(id,k,v){const e=entry(id);if(v===""||v==null)delete e[k];else e[k]=v;e.updated=nowISO();if(!Object.keys(e).some(x=>x!=="updated"))delete S.progress[id];touch()}
+/* D-03: "Completed" needs E4 and an evidence link, otherwise it carries a warning. */
+const noEvidence = id => st(id)==="done" && !(P(id).level==="E4" && P(id).link);
+function needsBackup(){if(!S.lastChangeAt)return false;const ref=S.lastExportAt||S.createdAt;
+  return (!S.lastExportAt||S.lastChangeAt>S.lastExportAt)&&(Date.now()-Date.parse(ref))>BACKUP_DAYS*DAY}
+function download(obj,name){const blob=new Blob([JSON.stringify(obj,null,1)],{type:"application/json"});const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+const stamp = () => new Date().toISOString().slice(0,19).replace(/[:T]/g,"-");
+function exportNow(reason){S.lastExportAt=nowISO();save();download(S,`roadmap-progress-${reason?reason+"-":""}${stamp()}.json`)}
+/* Keep the previous state in storage and as a downloaded file before anything replaces it. */
+function backupNow(reason){writeKey(KEY2_PREV,JSON.stringify(S));exportNow("backup-before-"+reason)}
 
 /* ---------- helpers ---------- */
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -221,8 +332,6 @@ function pct(list){if(!list.length)return 0;return Math.round(100*list.filter(id
 function barHTML(list,w){const n=list.length||1,d=list.filter(i=>st(i)==="done").length,p=list.filter(i=>st(i)==="ip").length;
   return `<div class="bar" style="${w?`width:${w}px`:""}"><span style="width:${100*d/n}%;background:var(--done)"></span><span style="width:${100*p/n}%;background:var(--ip)"></span></div>`}
 const compsIn = stg => D.comps.filter(c=>c.stage===stg).map(c=>c.id);
-const ALL = D.comps.map(c=>c.id);
-
 /* ---------- tabs ---------- */
 let curView="flow";
 document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;showView(b.dataset.v)});
@@ -395,7 +504,7 @@ document.addEventListener("click",e=>{if(e.target.classList.contains("edgeTog"))
 
 /* ---------- kanban ---------- */
 let KF={stage:"",path:"",q:""};
-const KCOLS=[{k:"locked",name:"Locked",hint:"Prerequisites not done yet",drop:false},{k:"ns",name:"Ready to start",hint:"Prerequisites met",drop:true},{k:"ip",name:"In progress",hint:"",drop:true},{k:"done",name:"Completed",hint:"Evidence exists",drop:true}];
+const KCOLS=[{k:"locked",name:"Locked",hint:"Prerequisites not done yet",drop:false},{k:"ns",name:"Ready to start",hint:"Prerequisites met",drop:true},{k:"ip",name:"In progress",hint:"",drop:true},{k:"done",name:"Completed",hint:"Counts at E4 with a link; ⚠ marks the rest",drop:true}];
 const kcol=id=>{const s=st(id);return s==="done"?"done":s==="ip"?"ip":isBlocked(id)?"locked":"ns"};
 function renderKanban(){
   const v=document.getElementById("v-kanban");
@@ -412,7 +521,7 @@ function renderKanban(){
       <div class="kmeta">${srcBadge(c.src)}<span class="mini">${esc(STAGE_SHORT[c.stage])} · ${PRI[c.pri]}</span>${c.existing?`<span class="mini">· ${c.existing}</span>`:""}</div>
       ${col.k==="locked"?`<div class="mini" style="margin-top:4px">Waiting on ${missingPre(c.id).length}: ${missingPre(c.id).slice(0,3).map(p=>esc(trunc(byId[p].name,24))).join(", ")}${missingPre(c.id).length>3?"…":""}</div>`:""}
       ${col.k==="ip"&&isBlocked(c.id)?`<div class="mini" style="margin-top:4px;color:var(--ip)">Started before its prerequisites</div>`:""}
-      ${S.evidence[c.id]?`<div class="mini" style="margin-top:4px">📎 evidence noted</div>`:""}</div>`).join("")||`<div class="mini" style="padding:8px">Nothing here</div>`}</div></div>`}).join("")}</div></div>`;
+      ${noEvidence(c.id)?`<div class="mini" style="margin-top:4px;color:#e8d28a">⚠ Completed without evidence</div>`:P(c.id).link?`<div class="mini" style="margin-top:4px">📎 ${esc(P(c.id).level||"")} evidence linked</div>`:""}</div>`).join("")||`<div class="mini" style="padding:8px">Nothing here</div>`}</div></div>`}).join("")}</div></div>`;
   const q=v.querySelector("#kq");q.oninput=e=>{KF.q=e.target.value;const p=e.target.selectionStart;renderKanban();const n=document.getElementById("kq");n.focus();n.setSelectionRange(p,p)};
   v.querySelector("#kst").onchange=e=>{KF.stage=e.target.value;renderKanban()};
   v.querySelector("#kpa").onchange=e=>{KF.path=e.target.value;renderKanban()};
@@ -453,15 +562,29 @@ function openComp(id){
    <div class="sec"><h3>Evidence of mastery</h3><p>${esc(c.ev)}</p></div>
    <div class="sec"><h3>Estimated hours</h3>${c.hours?`<p>${esc(c.hours)}</p>`:`<p class="unk">Not stated in the source material.</p>`}</div>
    <div class="sec"><h3>Career paths</h3><p>${c.paths.includes("core")?"Core: needed on every path":"Specialization: "+c.paths.map(p=>esc(pathById[p].name)).join(", ")}</p></div>
-   <div class="sec"><h3>My notes</h3><textarea id="pnotes" placeholder="Notes">${esc(S.notes[id]||"")}</textarea></div>
-   <div class="sec"><h3>My evidence (links, repo paths, scores)</h3><textarea id="pev" placeholder="e.g. github.com/... commit, exam score">${esc(S.evidence[id]||"")}</textarea>
-   ${S.updated[id]?`<p class="mini" style="margin-top:6px">Last status change: ${new Date(S.updated[id]).toLocaleString()}</p>`:""}</div>
+   <div class="sec" id="evsec"><h3>Evidence (Study Plan levels)</h3>
+    ${noEvidence(id)?`<div class="warn" style="margin-bottom:8px"><b>Completed without evidence.</b> A competency counts as done at E4 (explain, apply and troubleshoot independently) with an evidence link.</div>`:""}
+    <div class="evgrid">
+     <label>Evidence level<select id="elevel"><option value="">Not set</option>${LEVELS.map(l=>`<option value="${l}" ${P(id).level===l?"selected":""}>${l}</option>`).join("")}</select></label>
+     <label>Last verified<input id="ever" type="date" value="${esc(P(id).lastVerified||"")}"></label>
+     ${[["u","Understanding"],["e","Execution"],["d","Diagnosis"]].map(([k,l])=>`<label>${l}<select data-mark="${k}"><option value="">Not set</option>${Object.entries(MARKS).map(([m,t])=>`<option value="${m}" ${P(id)[k]===m?"selected":""}>${t}</option>`).join("")}</select></label>`).join("")}
+     <label class="wide">Evidence link<input id="elink" type="text" inputmode="url" placeholder="https://github.com/… or a repo path" value="${esc(P(id).link||"")}"></label>
+    </div>
+    ${P(id).levelNote?`<p class="mini" style="margin-top:6px">From the records: ${esc(P(id).levelNote)}</p>`:""}
+    <p class="mini" style="margin-top:6px">E0 exposure · E1 can explain · E2 guided · E3 independent · E4 demonstrated. A finished course is E0–E2 at most.</p></div>
+   <div class="sec"><h3>My notes</h3><textarea id="pnotes" placeholder="Notes">${esc(P(id).notes||"")}</textarea></div>
+   <div class="sec"><h3>Evidence notes (repo paths, scores)</h3><textarea id="pev" placeholder="e.g. commit, lab write-up, exam score">${esc(P(id).evidence||"")}</textarea>
+   ${P(id).updated?`<p class="mini" style="margin-top:6px">Last change: ${esc(new Date(P(id).updated).toLocaleString())}</p>`:""}</div>
   </div>`;
   panel.classList.add("on");
   panel.querySelector("#pclose").onclick=closePanel;
   panel.querySelector("#sset").onclick=e=>{const bt=e.target.closest("button");if(bt)setStatus(id,bt.dataset.s)};
-  panel.querySelector("#pnotes").oninput=e=>{S.notes[id]=e.target.value;save()};
-  panel.querySelector("#pev").oninput=e=>{S.evidence[id]=e.target.value;save()};
+  panel.querySelector("#pnotes").oninput=e=>setField(id,"notes",e.target.value);
+  panel.querySelector("#pev").oninput=e=>setField(id,"evidence",e.target.value);
+  panel.querySelector("#elevel").onchange=e=>{setField(id,"level",e.target.value);refreshAll()};
+  panel.querySelector("#ever").onchange=e=>{setField(id,"lastVerified",e.target.value);refreshAll()};
+  panel.querySelectorAll("[data-mark]").forEach(s=>s.onchange=()=>{setField(id,s.dataset.mark,s.value);refreshAll()});
+  const lk=panel.querySelector("#elink");lk.oninput=()=>setField(id,"link",lk.value.trim());lk.onchange=()=>refreshAll();
   panel.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go,{center:true}));
 }
 function openStage(sid){
@@ -469,6 +592,7 @@ function openStage(sid){
   const blocked=L.filter(isBlocked).length;
   panel.innerHTML=`<div class="ph"><div><div class="pid">STAGE ${s.n}</div><h2>${esc(s.name)}</h2><p class="mini" style="margin:4px 0 0">${esc(s.window)}</p></div><button class="btn close" id="pclose">✕</button></div>
   <div class="pb"><div class="sec">${barHTML(L)}<p class="mini" style="margin-top:6px">${L.filter(i=>st(i)==="done").length} completed · ${L.filter(i=>st(i)==="ip").length} in progress · ${blocked} blocked · ${L.length} total</p></div>
+  ${lateStage(s)?`<div class="sec blockmsg">${lateBadge(lateStage(s))} ${esc(LATE_HINT)}</div>`:""}
   <div class="sec"><h3>Gate</h3><p>${esc(s.gate)}</p></div>
   <div class="sec"><h3>Competencies</h3>${L.map(chipFor).join("")}</div></div>`;
   panel.classList.add("on");panel.querySelector("#pclose").onclick=closePanel;
@@ -490,7 +614,7 @@ function renderChecklist(){
    return `<div class="stagehead"><h3>${s.n}. ${esc(s.name)}</h3>${barHTML(L,140)}<span class="mini">${pct(L)}%</span></div>
    <table><thead><tr><th style="width:120px">Status</th><th style="width:90px">ID</th><th>Competency</th><th style="width:90px">Source</th><th style="width:70px">Priority</th><th>Prerequisites</th></tr></thead><tbody>
    ${rows.map(c=>`<tr class="cl"><td><select class="btn" data-sid="${c.id}">${Object.entries(ST_LABEL).map(([k,l])=>`<option value="${k}" ${st(c.id)===k?"selected":""}>${l}</option>`).join("")}</select></td>
-   <td><a href="#" data-open="${c.id}" style="color:var(--${c.src});font-weight:700;text-decoration:none">${c.id}</a></td><td>${esc(c.name)}${isBlocked(c.id)?` <span class="badge">🔒 locked</span>`:""}${S.evidence[c.id]?` <span class="badge">evidence</span>`:""}</td>
+   <td><a href="#" data-open="${c.id}" style="color:var(--${c.src});font-weight:700;text-decoration:none">${c.id}</a></td><td>${esc(c.name)}${isBlocked(c.id)?` <span class="badge">🔒 locked</span>`:""}${noEvidence(c.id)?` <span class="badge noev" title="Completed without E4 evidence and a link">⚠ no evidence</span>`:P(c.id).level?` <span class="badge">${esc(P(c.id).level)}</span>`:""}</td>
    <td>${srcBadge(c.src)}</td><td>${PRI[c.pri]}</td><td class="mini">${c.pre.map(p=>`<span style="color:${st(p)==="done"?"var(--done)":"inherit"}">${p}</span>`).join(", ")||"—"}</td></tr>`).join("")}</tbody></table>`}).join("")}</div>`;
   const q=v.querySelector("#fq");q.oninput=e=>{F.q=e.target.value;const pos=e.target.selectionStart;renderChecklist();const n=document.getElementById("fq");n.focus();n.setSelectionRange(pos,pos)};
   v.querySelector("#fst").onchange=e=>{F.st=e.target.value;renderChecklist()};
@@ -541,7 +665,7 @@ function renderProjects(){
   const v=document.getElementById("v-projects");
   v.innerHTML=`<div class="page"><h2>Project progression</h2><p class="lead">One app (your graduation project), built up in layers. Stages PS-1 to PS-5 follow doc 19 §G. PS-7 is the cloud-security layer added after NTI. Each stage must stand on its own and be CV-ready when it's done.</p>
   <div class="projflow">${D.projects.map((p,i)=>{const L=p.comps;return `${i?`<div class="arrow" style="text-align:center">↓ builds on ${D.projects[i-1].id}</div>`:""}
-   <div class="card proj"><div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap"><b style="font-size:15px">${p.id} · ${esc(p.name)}</b><span class="badge">${esc(p.doc19)}</span><span class="badge">Stage ${stageById[p.stage].n}</span><span class="mini">${esc(p.window)}</span><span style="margin-left:auto" class="mini">${pct(L)}% of its competencies done</span></div>
+   <div class="card proj"><div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap"><b style="font-size:15px">${p.id} · ${esc(p.name)}</b><span class="badge">${esc(p.doc19)}</span><span class="badge">Stage ${stageById[p.stage].n}</span><span class="mini">${esc(p.window)}</span>${lateBadge(lateProject(p))}<span style="margin-left:auto" class="mini">${pct(L)}% of its competencies done</span></div>
    <div style="margin:8px 0">${barHTML(L)}</div>
    <div class="grid g2" style="margin-top:8px"><div><p style="margin:0 0 6px"><b>Architecture.</b> ${esc(p.arch)}</p><p style="margin:0 0 6px"><b>Security goal.</b> ${esc(p.goal)}</p><p style="margin:0 0 6px"><b>Deliverables.</b> ${esc(p.deliv)}</p><p style="margin:0"><b>Why it gets you hired.</b> ${esc(p.value)}</p></div>
    <div><b>Steps</b><ol style="margin:4px 0 8px;padding-left:18px">${p.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol><b>Competencies</b><div style="margin-top:4px">${L.map(chipFor).join("")}</div></div></div></div>`}).join("")}</div></div>`;
@@ -557,7 +681,7 @@ function renderCerts(){
   const col=k=>k.verdict.startsWith("Keep")||k.verdict.startsWith("Target")?"var(--done)":k.verdict.startsWith("Challenge")?"var(--blocked)":"var(--ip)";
   v.innerHTML=`<div class="page"><h2>Certification timeline</h2><p class="lead">Certifications follow the competency gaps, not the other way round. Bars are planned windows (doc 19 §E plus the written roadmap). Readiness = share of the cert's competencies you've completed.</p>
   <div class="card tl"><div class="tlgrid"><div></div><div class="tlmonths">${mn.map((m,i)=>`<div>${m}${i===2||i===0?` ${i?2027:2026}`:""}</div>`).join("")}</div>
-  ${D.certs.map(k=>{const a=mIdx(k.start),b=mIdx(k.end)+1;return `<div class="tlrow"><div class="tllab"><b>${esc(k.id)}</b><div class="mini">${esc(k.status)}</div></div>
+  ${D.certs.map(k=>{const a=mIdx(k.start),b=mIdx(k.end)+1;return `<div class="tlrow"><div class="tllab"><b>${esc(k.id)}</b><div class="mini">${esc(k.status)}</div>${lateBadge(lateCert(k))}</div>
    <div class="tltrack">${nowPos>=0&&nowPos<=100?`<div class="today" style="left:${nowPos}%" title="Today"></div>`:""}<div class="tlbar" style="left:${100*a/months}%;width:${100*(b-a)/months}%;border-color:${col(k)};background:color-mix(in srgb, ${col(k)} 18%, transparent)" title="${esc(k.when)}">${esc(k.when)}</div></div></div>`}).join("")}</div></div>
   <table style="margin-top:16px"><thead><tr><th>Cert</th><th>Gap it fills</th><th>Verdict</th><th>Cost</th><th>Readiness</th><th>Competencies</th></tr></thead><tbody>
   ${D.certs.map(k=>`<tr class="cl"><td><b>${esc(k.name)}</b></td><td>${esc(k.fills)}</td><td style="color:${col(k)}">${esc(k.verdict)}</td><td>${esc(k.cost)}</td><td>${barHTML(k.comps,90)}<span class="mini">${pct(k.comps)}%</span></td><td>${k.comps.map(chipFor).join("")}</td></tr>`).join("")}</tbody></table>
@@ -577,7 +701,9 @@ function renderDash(){
   <div class="grid g4"><div class="card"><div class="kpi">${pct(ALL)}%</div><div class="kpil">Overall (${done.length}/${ALL.length} completed)</div></div>
    <div class="card"><div class="kpi" style="color:var(--ip)">${ip.length}</div><div class="kpil">In progress</div></div>
    <div class="card"><div class="kpi">${ready.length}</div><div class="kpil">Ready to start (prerequisites met)</div></div>
-   <div class="card"><div class="kpi" style="color:var(--muted)">${blk.length}</div><div class="kpil">Locked (prerequisites not done yet)</div></div></div>
+   <div class="card"><div class="kpi" style="color:var(--muted)">${blk.length}</div><div class="kpil">Locked (prerequisites not done yet)</div></div>
+   <div class="card"><div class="kpi" style="color:#e8d28a">${ALL.filter(noEvidence).length}</div><div class="kpil">Completed without evidence (below E4 or no link)</div></div></div>
+  ${lateHTML()}
   <div class="grid g2" style="margin-top:12px"><div class="card"><h3 style="margin:0 0 4px;font-size:14px">Skills radar</h3><p class="mini" style="margin:0 0 6px">Share of each domain completed (solid) and started (dashed). The idea comes from devopsroadmap.io's skills radar.</p>${radarSVG()}</div><div class="card" style=""><h3 style="margin:0 0 10px;font-size:14px">By stage</h3>${D.stages.map(s=>{const L=compsIn(s.id);return `<div style="display:grid;grid-template-columns:240px 1fr 110px;gap:10px;align-items:center;margin:7px 0;cursor:pointer" data-stage="${s.id}"><span>${s.n}. ${esc(s.name)}</span>${barHTML(L)}<span class="mini">${L.filter(i=>st(i)==="done").length}/${L.length} · ${pct(L)}%</span></div>`}).join("")}
    <h3 style="margin:16px 0 10px;font-size:14px">By source</h3>${Object.keys(SRC_LABEL).map(k=>{const L=D.comps.filter(c=>c.src===k).map(c=>c.id);return `<div style="display:grid;grid-template-columns:240px 1fr 110px;gap:10px;align-items:center;margin:7px 0"><span>${srcBadge(k)} ${esc(D.sources[k])}</span>${barHTML(L)}<span class="mini">${L.filter(i=>st(i)==="done").length}/${L.length}</span></div>`}).join("")}</div>
   </div><div class="grid g2" style="margin-top:12px">
@@ -586,17 +712,32 @@ function renderDash(){
    <div class="card"><h3 style="margin:0 0 8px;font-size:14px">Existing or partly existing: claim with evidence</h3>${exist.map(chipFor).join("")||`<p class="mini">All claimed.</p>`}</div>
    <div class="card"><h3 style="margin:0 0 8px;font-size:14px">Locked, and what they wait on</h3><div style="max-height:260px;overflow:auto">${blk.slice(0,40).map(id=>`<div class="mini" style="margin:3px 0"><b style="color:var(--${byId[id].src})">${id}</b> ← ${missingPre(id).join(", ")}</div>`).join("")||`<p class="mini">Nothing locked.</p>`}</div></div>
   </div>
+  ${orphansHTML()}
   <div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px;font-size:14px">Data</h3>
-   <button class="btn" id="exp">Export progress (JSON)</button> <label class="btn" style="display:inline-block">Import progress<input type="file" id="imp" accept="application/json" style="display:none"></label> <button class="btn danger" id="rst">Reset all progress</button>
+   <button class="btn" id="exp">Export progress (JSON)</button> <label class="btn" style="display:inline-block">Import progress or records seed<input type="file" id="imp" accept="application/json,.json" style="display:none"></label> <button class="btn danger" id="rst">Reset all progress</button>
+   <p class="mini" style="margin:8px 0 0">${S.lastExportAt?`Last export: ${esc(new Date(S.lastExportAt).toLocaleString())}.`:"Not exported yet."} Import shows a preview first and downloads a backup before changing anything. Reset downloads a backup first.</p>
    <p class="mini" style="margin:8px 0 0">Version ${esc(D.version)}. Competency IDs match the written roadmap and Study Plan doc 06 (new IDs: IAC, K8S, DSO, VM, NSEC, LOG, IR, TM, CSEC, JOB).</p></div></div>`;
   v.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go));
   v.querySelectorAll("[data-stage]").forEach(r=>r.onclick=()=>openStage(r.dataset.stage));
-  v.querySelector("#exp").onclick=()=>{const blob=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="roadmap-progress-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
-  v.querySelector("#imp").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=sanitize(JSON.parse(t));if(!o)throw 0;S=o;save();refreshAll()}catch(_){alert("That file isn't a progress export.")}finally{e.target.value=""}})};
-  v.querySelector("#rst").onclick=()=>{if(confirm("Reset all statuses, notes and evidence? This can't be undone (export first if unsure).")){S=blank();save();closePanel();refreshAll()}};
+  v.querySelector("#exp").onclick=()=>{exportNow("");renderNotices();renderDash()};
+  v.querySelector("#imp").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)readImport(f)};
+  v.querySelector("#rst").onclick=()=>{if(confirm("Reset all statuses, notes and evidence? A backup file is downloaded first.")){backupNow("reset");const keep=S.lastExportAt;S=blankEnv();S.firstRunDismissed=true;S.lastExportAt=keep;save();closePanel();refreshAll()}};
+  v.querySelectorAll("[data-orph]").forEach(b=>b.onclick=()=>{const id=b.dataset.orph,sel=v.querySelector(`select[data-orphto="${CSS.escape(id)}"]`);
+    if(b.dataset.a==="move"){const to=sel&&sel.value;if(!to||!byId[to])return;S.progress[to]=mergeEntry(S.progress[to],stripOrphan(S.orphans[id]));delete S.orphans[id];touch();refreshAll()}
+    else if(confirm(`Delete the orphaned progress for ${id}? It isn't attached to any competency.`)){delete S.orphans[id];touch();refreshAll()}});
 }
 
 
+function orphansHTML(){const ids=Object.keys(S.orphans);if(!ids.length)return "";
+  return `<div class="card" style="margin-top:12px"><h3 style="margin:0 0 4px;font-size:14px">Orphaned progress (${ids.length})</h3><p class="mini" style="margin:0 0 8px">Progress saved under IDs this roadmap no longer has. Nothing was dropped: move it to a competency or delete it. A split ID's progress is never copied to its parts automatically, because finishing a group doesn't prove each part.</p>
+   <table><thead><tr><th>Old ID</th><th>Why</th><th>What it holds</th><th>Move to</th><th></th></tr></thead><tbody>${ids.map(id=>{const o=S.orphans[id],sug=(o.splitInto||[]).filter(x=>byId[x]);
+    return `<tr><td><b>${esc(id)}</b></td><td class="mini">${o.reason==="split"?`Split into ${esc(sug.join(", "))}`:o.reason==="removed"?"Removed from the roadmap":"Unknown ID"}</td><td class="mini">${esc(entrySummary(o))}${o.notes?`<div>“${esc(trunc(o.notes,80))}”</div>`:""}</td>
+     <td><select class="btn" data-orphto="${esc(id)}"><option value="">Choose…</option>${[...sug,...ALL.filter(x=>!sug.includes(x))].map(x=>`<option value="${esc(x)}">${esc(x)} · ${esc(trunc(byId[x].name,30))}</option>`).join("")}</select></td>
+     <td style="white-space:nowrap"><button class="btn" data-orph="${esc(id)}" data-a="move">Move</button> <button class="btn danger" data-orph="${esc(id)}" data-a="del">Delete</button></td></tr>`}).join("")}</tbody></table></div>`}
+function lateHTML(){const items=[...D.stages.map(s=>[`Stage ${s.n} · ${s.name}`,lateStage(s)]),...D.projects.map(p=>[`${p.id} · ${p.name}`,lateProject(p)]),...D.certs.map(k=>[k.name,lateCert(k)])].filter(x=>x[1]);
+  if(!items.length)return "";
+  return `<div class="card" style="margin-top:12px;border-color:#5a2a2a"><h3 style="margin:0 0 4px;font-size:14px">Past their window (${items.length})</h3><p class="mini" style="margin:0 0 8px">${esc(LATE_HINT)} Decide per item: cut it, move the window, or drop it.</p>
+   ${items.map(([n,l])=>`<div style="margin:4px 0">${esc(n)} ${lateBadge(l)} <span class="mini">${l.days} days ago</span></div>`).join("")}</div>`}
 function radarSVG(){
   const L=D.lanes.filter(l=>D.comps.some(c=>c.lane===l.id)),n=L.length,R=120,cx=170,cy=150;
   const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+r*Math.cos(a),cy+r*Math.sin(a)]};
@@ -608,10 +749,88 @@ function radarSVG(){
   g+=`<polygon points="${poly(id=>st(id)==="done")}" fill="var(--done)" fill-opacity=".25" stroke="var(--done)" stroke-width="1.5"/>`;
   return `<svg viewBox="-130 0 600 300" style="width:100%;max-width:560px;display:block;margin:auto" role="img" aria-label="Skills radar by domain">${g}</svg>`;
 }
+/* ---------- notices: first run, data changes, backup reminder ---------- */
+let backupSnoozed=false, changeDetails=false;
+function renderNotices(){
+  const n=document.getElementById("notice");const parts=[];
+  if(LOADINFO.fresh&&!S.firstRunDismissed&&!Object.keys(S.progress).length)
+    parts.push(`<div class="notice" data-n="first"><b>No saved progress in this browser.</b> The local file and the website keep separate progress. If you've used the other one, export there and import here. <button class="btn" data-act="import">Import progress</button> <button class="btn" data-act="fresh">Start fresh</button></div>`);
+  const dc=LOADINFO.dataChange;
+  if(dc){const ren=dc.renamed.map(([id,r])=>`${esc(id)} → ${r.to?esc(r.to):r.split?("split into "+esc(r.split.join(", "))):"removed"}`);
+    parts.push(`<div class="notice" data-n="change"><b>The roadmap changed since your last visit</b>${dc.from?` (data ${esc(dc.from)} → ${esc(D.version)})`:""}: ${dc.added.length} added · ${dc.removed.length} removed · ${dc.renamed.length} renamed or split. Your progress was carried over${Object.keys(S.orphans).length?`; ${Object.keys(S.orphans).length} entries need a home (Dashboard → Orphaned progress)`:""}.
+      <button class="btn" data-act="details">${changeDetails?"Hide":"Details"}</button> <button class="btn" data-act="seen">Got it</button>
+      ${changeDetails?`<div class="mini" style="margin-top:6px">${dc.added.length?`<div>Added: ${dc.added.map(esc).join(", ")}</div>`:""}${dc.removed.length?`<div>Removed: ${dc.removed.map(esc).join(", ")}</div>`:""}${ren.length?`<div>Renamed or split: ${ren.join(" · ")}</div>`:""}</div>`:""}</div>`)}
+  if(!backupSnoozed&&needsBackup()){const days=Math.floor((Date.now()-Date.parse(S.lastExportAt||S.createdAt))/DAY);
+    parts.push(`<div class="notice" data-n="backup"><b>Back up your progress.</b> ${S.lastExportAt?`Last export ${days} days ago`:"Never exported"}, and there are changes since. Progress lives only in this browser. <button class="btn" data-act="export">Export now</button> <button class="btn" data-act="later">Later</button></div>`)}
+  n.innerHTML=parts.join("");
+}
+document.getElementById("notice").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act;
+  if(a==="import")pickImport();
+  if(a==="fresh"){S.firstRunDismissed=true;save()}
+  if(a==="details")changeDetails=!changeDetails;
+  if(a==="seen"){S.seen={dataVersion:D.version,ids:ALL.slice()};LOADINFO.dataChange=null;save()}
+  if(a==="export")exportNow("");
+  if(a==="later")backupSnoozed=true;
+  renderNotices()});
+
+/* ---------- import with preview ---------- */
+const dlg=document.getElementById("dlg");
+const OWN_BY_RECORDS=["level","levelNote","u","e","d","lastVerified"];
+const FIELD_LABEL={level:"Level",levelNote:"Records note",u:"Understanding",e:"Execution",d:"Diagnosis",lastVerified:"Last verified"};
+function pickImport(){const i=document.createElement("input");i.type="file";i.accept="application/json,.json";i.id="imp-picker";i.style.display="none";
+  i.onchange=()=>{const f=i.files[0];i.remove();if(f)readImport(f)};document.body.appendChild(i);i.click()}
+function readImport(f){f.text().then(t=>{let parsed=null;try{parsed=parseAny(JSON.parse(t))}catch(_){parsed=null}
+  if(!parsed){showDialog(`<h2>Can't import this file</h2><p>It isn't a progress export or a records seed from this app. Nothing was changed.</p><div class="dlgact"><button class="btn" data-dlg="close">Close</button></div>`);return}
+  previewImport(parsed,f.name)})}
+function entrySummary(e){if(!e)return "—";const b=[];if(e.status)b.push(ST_LABEL[e.status]);if(e.level)b.push(e.level);if(e.link)b.push("link");if(e.notes)b.push("notes");if(e.evidence)b.push("evidence notes");return b.join(", ")||"—"}
+function seedPlan(parsed){const changes=[],skipped=[];
+  for(const [id,v] of Object.entries(parsed.progress)){const r=resolveId(id);if(!r.to){skipped.push(id);continue}
+    const cur=P(r.to),diff=OWN_BY_RECORDS.filter(k=>(cur[k]||"")!==(v[k]||""));if(diff.length)changes.push({id:r.to,from:cur,to:v,diff})}
+  return {changes,skipped}}
+function previewImport(parsed,name){
+  if(parsed.kind==="seed"){const {changes,skipped}=seedPlan(parsed);
+    const fmt=(e,k)=>esc(k==="u"||k==="e"||k==="d"?(e[k]?MARKS[e[k]]:"—"):(e[k]||"—"));
+    showDialog(`<h2>Import records seed</h2><p class="mini">${esc(name)}${parsed.meta.snapshotDate?` · records snapshot ${esc(parsed.meta.snapshotDate)}`:""}</p>
+     <p>The records own <b>level, U/E/D and last verified</b>; your statuses, notes and links stay as they are. The seed never marks anything Completed.</p>
+     <p><b>${changes.length}</b> competencies change · ${Object.keys(parsed.progress).length-skipped.length} in the seed match · ${skipped.length} not in this roadmap (skipped${skipped.length?": "+esc(skipped.slice(0,12).join(", "))+(skipped.length>12?"…":""):""})</p>
+     ${changes.length?`<div class="dlgscroll"><table><thead><tr><th>ID</th><th>Field</th><th>Now</th><th>From records</th></tr></thead><tbody>${changes.flatMap(c=>c.diff.map((k,i)=>`<tr><td>${i?"":esc(c.id)}</td><td>${esc(FIELD_LABEL[k]||k)}</td><td>${fmt(c.from,k)}</td><td>${fmt(c.to,k)}</td></tr>`)).join("")}</tbody></table></div>`:""}
+     <p class="mini">A backup of your current progress is downloaded first.</p>
+     <div class="dlgact"><button class="btn" data-dlg="close">Cancel</button>${changes.length?`<button class="btn on" data-dlg="seed">Apply ${changes.length} changes</button>`:""}</div>`,
+     {seed:()=>{backupNow("seed");for(const c of changes){const e=entry(c.id);for(const k of OWN_BY_RECORDS){if(has(c.to,k))e[k]=c.to[k];else delete e[k]}}touch();refreshAll()}});
+    return}
+  const n=normalize(parsed.progress,parsed.orphans);const ids=Object.keys(n.progress);
+  const conflicts=ids.filter(id=>S.progress[id]&&JSON.stringify(S.progress[id])!==JSON.stringify(n.progress[id]));
+  const fresh=ids.filter(id=>!S.progress[id]);const orph=Object.keys(n.orphans);
+  showDialog(`<h2>Import progress</h2><p class="mini">${esc(name)} · ${parsed.kind==="v1"?"older format (converted)":"current format"}</p>
+   <p><b>${ids.length}</b> competencies with progress in the file · ${fresh.length} new here · ${conflicts.length} differ from what this browser has · ${n.renamed.length} under an old ID (carried over) · ${orph.length} orphaned (kept, shown on the dashboard)</p>
+   ${conflicts.length?`<div class="dlgscroll"><table><thead><tr><th>ID</th><th>In this browser</th><th>In the file</th></tr></thead><tbody>${conflicts.map(id=>`<tr><td>${esc(id)}</td><td>${esc(entrySummary(S.progress[id]))}</td><td>${esc(entrySummary(n.progress[id]))}</td></tr>`).join("")}</tbody></table></div>`:""}
+   <p><b>Merge</b> keeps both: for each competency the newer change wins and differing notes are kept together. <b>Replace</b> makes this browser match the file exactly.</p>
+   <p class="mini">A backup of your current progress is downloaded first.</p>
+   <div class="dlgact"><button class="btn" data-dlg="close">Cancel</button><button class="btn danger" data-dlg="replace">Replace</button><button class="btn on" data-dlg="merge">Merge</button></div>`,
+   {merge:()=>{backupNow("import");for(const id of ids)S.progress[id]=mergeEntry(S.progress[id],n.progress[id]);for(const id of orph)S.orphans[id]=Object.assign(mergeEntry(S.orphans[id],n.orphans[id]),{reason:n.orphans[id].reason,splitInto:n.orphans[id].splitInto});finishImport(parsed)},
+    replace:()=>{backupNow("import");S.progress=n.progress;S.orphans=n.orphans;finishImport(parsed)}});
+}
+function finishImport(parsed){for(const id of Object.keys(S.orphans))if(!S.orphans[id].splitInto)delete S.orphans[id].splitInto;
+  S.firstRunDismissed=true;if(parsed.meta&&parsed.meta.lastExportAt&&!S.lastExportAt)S.lastExportAt=parsed.meta.lastExportAt;touch();refreshAll()}
+function showDialog(html,actions){dlg.innerHTML=html;dlg.onclick=e=>{const b=e.target.closest("[data-dlg]");if(!b)return;const a=b.dataset.dlg;dlg.close();if(a!=="close"&&actions&&actions[a])actions[a]()};
+  if(dlg.showModal){if(!dlg.open)dlg.showModal()}else dlg.setAttribute("open","")}
+
+/* ---------- lateness (D-10): a window passed with the work not done ---------- */
+const today = () => (typeof window.ROADMAP_TODAY==="string"&&!isNaN(Date.parse(window.ROADMAP_TODAY)))?Date.parse(window.ROADMAP_TODAY):Date.now();
+const endOfDay = d => Date.parse(d+"T23:59:59");
+const monthEnd = ym => {const [y,m]=ym.split("-").map(Number);return new Date(y,m,0,23,59,59).getTime()};
+const fmtDate = t => new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+function lateness(dueMs,comps){if(dueMs==null||!comps.length||today()<=dueMs||pct(comps)===100)return null;return {due:dueMs,days:Math.floor((today()-dueMs)/DAY)}}
+const lateStage = s => lateness(s.due?endOfDay(s.due):null,compsIn(s.id));
+const lateProject = p => lateness(p.due?endOfDay(p.due):null,p.comps);
+const lateCert = k => lateness(k.end?monthEnd(k.end):null,k.comps);
+const LATE_HINT = "Cut scope or re-plan. Missed time doesn't roll over (doc 18).";
+const lateBadge = l => l?`<span class="badge late" title="${esc(LATE_HINT)}">Late: window ended ${esc(fmtDate(l.due))}</span>`:"";
+
 /* ---------- header + refresh ---------- */
 function renderHeader(){document.getElementById("ver").textContent="v"+D.version;document.getElementById("hpct").textContent=`${pct(ALL)}% · ${ALL.filter(i=>st(i)==="done").length}/${ALL.length}`;document.getElementById("hbar").outerHTML=barHTML(ALL,160).replace('class="bar"','class="bar" id="hbar"')}
-function refreshAll(){renderHeader();renderGraphState();if(!GRAPHS[curView])renderView(curView);if(selId&&panel.classList.contains("on"))openComp(selId)}
-renderGraphState();renderHeader();
+function refreshAll(){renderNotices();renderHeader();renderGraphState();if(!GRAPHS[curView])renderView(curView);if(selId&&panel.classList.contains("on"))openComp(selId)}
+renderGraphState();renderHeader();renderNotices();
 requestAnimationFrame(()=>GRAPHS.flow.fit());
 </script>
 </body>

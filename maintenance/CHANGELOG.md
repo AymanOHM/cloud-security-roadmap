@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## app 2026-11-23 (Stage 3: tracking and persistence; data 1.3 + `due` dates)
+- **Storage v2:** versioned envelope; v1 progress migrates on first load (a copy of v1 is kept); renamed IDs
+  carry their progress; split or removed IDs become orphans shown on the dashboard (move or delete).
+- **Import/export:** import accepts v2, v1 and records seeds, validates every field, shows a preview and lets
+  you merge or replace; a backup downloads before import or reset; reminder after 7 days without export;
+  first-run notice on an empty browser (file:// and the website keep separate progress).
+- **Evidence block (D-03):** level E0–E4, U/E/D, link, last verified; "Completed without evidence" until E4 + link.
+- **Records seed (D-06):** `tools/seed_from_records.py` turns the private records snapshot into a seed; the
+  seed sets level, U/E/D and last verified only.
+- **Data changes notice:** added / removed / renamed since your last visit.
+- **Late (D-10):** stages and projects have `due` dates; a passed window with work not done shows "Late" and
+  a "cut or re-plan" prompt; never a missed-session count.
+
 ## data 1.3 · 2026-11-23 (Stage 2: privacy and approved data changes)
 - **Privacy:** personal and meta docs moved to `private/docs/` (gitignored); learning-record notes removed from
   `ev` fields and ROADMAP.md; ROADMAP Phase 7 generalised (the personal timetable stays private); the owner's name

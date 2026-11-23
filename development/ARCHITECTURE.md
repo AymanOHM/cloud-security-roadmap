@@ -65,7 +65,7 @@ paths · compare · projects · certs · dashboard (incl. skills radar) · heade
 - Weaknesses: no schema version, no data version, no migration, unknown IDs silently kept but invisible, import
   replaces without preview, per-origin storage (AUDIT A-05, A-06, A-07).
 
-## 5. Recommended persistence design (for Stage 3; Claude Code may refine with reasons)
+## 5. Persistence design (implemented in Stage 3, data 1.3)
 1. **Envelope:** `{app: "nti-debi-roadmap", storageVersion: 2, dataVersion, savedAt, progress: {ID: {status,
    notes, evidence, updated, level?, u?, e?, d?, link?}}, orphans: {…}, lastExportAt}`. Keep the same
    localStorage key family; migrate v1 → v2 on first load and keep a one-time copy under `…-v1-backup`.
@@ -85,6 +85,14 @@ paths · compare · projects · certs · dashboard (incl. skills radar) · heade
    from the records snapshot in `private/progress/`. On import, the records own `level`, `u`/`e`/`d` and
    `lastVerified`; the app owns status, notes and link. Always a preview first. The seed never sets "done".
 8. **Never** send progress anywhere. GitHub Pages hosts code only.
+
+**As implemented (Stage 3):** keys `ntidebi-roadmap-v2` (envelope), `ntidebi-roadmap-v1` (left untouched),
+`ntidebi-roadmap-v1-backup` (one-time copy) and `ntidebi-roadmap-v2-prev` (state before the last import or reset).
+Every entry passes `cleanEntry` (allowlisted statuses, levels and marks; strings only, length-capped), so a
+crafted file can't inject markup. The envelope keeps `seen` (data version + ID list) for the change notice.
+Lateness (AUDIT D-10) reads `due` on stages and projects (YYYY-MM-DD, null = no window) and `end` on certs.
+Tests: `tests/e2e_persistence.py` (rename, remove and add survive an update; v1 migration; seed; import on a
+fresh origin) and `tests/upgrade_demo.py` (export from the data 1.2 build, upgrade, import, nothing lost).
 
 ## 6. Known technical debt
 See AUDIT A-08 … A-11. The single-file template is acceptable at this size; split into source modules only with

@@ -17,6 +17,7 @@ Last run 23 Nov 2026: all pass (data v1.2).
 - **Locked/ready logic:** unit-test `isBlocked` on fixtures (cheap to test via the smoke harness with `page.evaluate`).
 - **Keyboard path:** tab to a node, Enter opens the panel, status buttons reachable, Escape closes.
 - **Accessibility scan:** axe-core run in the smoke test (dev-only dependency; pin a version) or a documented manual pass.
+- **Persistence (implemented in `tests/e2e_persistence.py`):** progress survives a data update that renames, removes and adds competencies; v1 → v2 migration; orphans; seed import; export → import on a fresh origin; lateness; backup reminder. `tests/upgrade_demo.py` is the Gate 3 demo against an older git ref.
 - **Privacy lint (implemented in `tools/validate.py`, tested in `tests/test_validate.py`):** record IDs and records notes anywhere in `data/`, evidence levels or status in `ev`, record IDs and private terms (`private/privacy-terms.txt`) in every public file. Guards AUDIT P-01, A-21.
 - **Import sanitizing (implemented in `tests/e2e_smoke.py`):** a crafted import runs no script; unknown IDs, bad statuses and non-string fields are dropped; the same file imports twice (A-12, A-22).
 

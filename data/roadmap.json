@@ -7,35 +7,40 @@
       "n": 1,
       "name": "Foundation",
       "window": "Now to Dec 2026 (NTI Linux block; DEBI start)",
-      "gate": "Gate 1: doc 06 F1 exit checks for NET and LNX pass unaided (URL walkthrough, 5 subnets in ~10 min, 3 broken-connectivity labs, fresh-VM Linux check)."
+      "gate": "Gate 1: doc 06 F1 exit checks for NET and LNX pass unaided (URL walkthrough, 5 subnets in ~10 min, 3 broken-connectivity labs, fresh-VM Linux check).",
+      "due": "2026-12-31"
     },
     {
       "id": "CDE",
       "n": 2,
       "name": "Cloud and DevOps Engineering",
       "window": "Dec 2026 to mid-Feb 2027 (NTI Docker, CI/CD, AWS, Terraform, K8s, monitoring)",
-      "gate": "Gate 2: project stages PS-1 to PS-5 committed and SAA-C03 passed."
+      "gate": "Gate 2: project stages PS-1 to PS-5 committed and SAA-C03 passed.",
+      "due": "2027-02-15"
     },
     {
       "id": "SEN",
       "n": 3,
       "name": "Security Engineering",
       "window": "Mid-Feb to about Jun 2027 (DEBI becomes the main structure)",
-      "gate": "Gate 3: IR runbook + tabletop postmortem written; OWASP self-review of the grad project with 3+ real fixes; SEC exit check (30 questions at 80%+)."
+      "gate": "Gate 3: IR runbook + tabletop postmortem written; OWASP self-review of the grad project with 3+ real fixes; SEC exit check (30 questions at 80%+).",
+      "due": "2027-06-30"
     },
     {
       "id": "CSS",
       "n": 4,
       "name": "Cloud Security Specialization",
       "window": "About Apr to Sep 2027",
-      "gate": "Gate 4: PS-7 detects 5 simulated attacks with tested detections; SCS-C03 booked."
+      "gate": "Gate 4: PS-7 detects 5 simulated attacks with tested detections; SCS-C03 booked.",
+      "due": "2027-09-30"
     },
     {
       "id": "JOB",
       "n": 5,
       "name": "Portfolio and Job Readiness",
       "window": "Runs throughout; shown last because it collects the evidence",
-      "gate": "Gate 5: both CV versions live; every finished project stage has a portfolio README; a full mock interview passed."
+      "gate": "Gate 5: both CV versions live; every finished project stage has a portfolio README; a full mock interview passed.",
+      "due": null
     }
   ],
   "lanes": [

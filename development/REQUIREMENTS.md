@@ -22,27 +22,27 @@ with the owner's decisions (AUDIT D-03 – D-10): ✅ implemented · ◐ partial
 | FR-12 | Search and focus a competency in the graph; deep links `#ID` | ✗ Missing |
 | FR-13 | "Focus chain" mode: show only a competency's prerequisites and what it unlocks | ◐ Partial (highlight only) |
 | FR-14 | Timetable view: the owner's weekly timetable, stored only as an encrypted blob in the repo and unlocked with a password; in-app encrypt panel produces the blob (D-10) | ✗ Missing |
-| FR-15 | "Late" indicator per stage, project and cert: window passed with work not done → "cut or re-plan" prompt; never a missed-session count (D-10) | ✗ Missing |
+| FR-15 | "Late" indicator per stage, project and cert: window passed with work not done → "cut or re-plan" prompt; never a missed-session count (D-10) | ✅ Implemented (stages and projects carry `due`; certs use `end`) |
 
 ### Competency details
 | ID | Requirement | Status |
 |---|---|---|
 | FR-20 | Panel shows name, ID, description, why, objectives, prerequisites, unlocks, NTI material, DEBI material, resources, labs, evidence of mastery, hours, career paths, project stages | ✅ Implemented |
 | FR-21 | Missing source information is shown as such ("not stated in the source material"), never invented | ✅ Implemented |
-| FR-22 | Evidence fields aligned with the Study Plan (level E0–E4, U/E/D, evidence link) | ✗ Missing. Decided (D-03): E-level E0–E4, U/E/D, link, last verified; "Completed without evidence" warning until E4 + link |
+| FR-22 | Evidence fields aligned with the Study Plan (level E0–E4, U/E/D, evidence link) | ✅ Implemented: level, U/E/D, link, last verified; "Completed without evidence" until E4 + link (D-03) |
 
 ### Progress
 | ID | Requirement | Status |
 |---|---|---|
 | FR-30 | Status per competency: Not started / In progress / Completed | ✅ Implemented |
 | FR-31 | Locked state when prerequisites aren't completed; show the blockers | ✅ Implemented |
-| FR-32 | Notes and evidence text per competency | ✅ Implemented |
+| FR-32 | Notes and evidence text per competency | ✅ Implemented (notes, evidence notes, evidence block) |
 | FR-33 | Progress by stage, source, domain | ✅ Implemented |
-| FR-34 | Persist in localStorage; export, import, reset | ◐ Partial: import unsafe (A-12) |
-| FR-35 | Survive data updates: versioned storage, ID migrations, orphans | ✗ Missing (A-06) |
-| FR-36 | Import with validation, preview and merge; auto-backup before import/reset; backup reminders | ✗ Missing (A-07) |
-| FR-37 | First-run import on a new origin (file:// ↔ Pages) | ✗ Missing (A-05) |
-| FR-38 | Optional progress-seed import from the Study Plan records | ✗ Missing. Decided (D-06): re-importable seed from `tools/seed_from_records.py`; records own evidence fields, app owns status/notes/link; preview first |
+| FR-34 | Persist in localStorage; export, import, reset | ✅ Implemented: v2 envelope; export, import with validation, reset with backup |
+| FR-35 | Survive data updates: versioned storage, ID migrations, orphans | ✅ Implemented: v1 → v2 migration, renames merged, splits and removed IDs kept as orphans |
+| FR-36 | Import with validation, preview and merge; auto-backup before import/reset; backup reminders | ✅ Implemented: preview, merge or replace, backup download before import/reset, 7-day reminder |
+| FR-37 | First-run import on a new origin (file:// ↔ Pages) | ✅ Implemented: first-run notice on an empty origin |
+| FR-38 | Optional progress-seed import from the Study Plan records | ✅ Implemented: `tools/seed_from_records.py` + seed import with preview (D-06) |
 
 ### Maintenance
 | ID | Requirement | Status |
@@ -50,7 +50,7 @@ with the owner's decisions (AUDIT D-03 – D-10): ✅ implemented · ◐ partial
 | FR-40 | Roadmap content editable as data without touching app code | ✅ Implemented |
 | FR-41 | Validation of data before build (IDs, references, stage order, cycles) | ◐ Partial: no privacy lint or core-exclusivity rule (A-21) |
 | FR-42 | Written-roadmap tables regenerated from the same data | ✅ Implemented (output still pasted into ROADMAP.md by hand) |
-| FR-43 | App shows a summary of data changes since the last visit | ✗ Missing |
+| FR-43 | App shows a summary of data changes since the last visit | ✅ Implemented: "changed since your last visit" notice |
 
 ## Non-functional
 | ID | Requirement | Status |

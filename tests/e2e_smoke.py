@@ -19,7 +19,7 @@ from playwright.async_api import async_playwright
 ROOT = Path(__file__).resolve().parent.parent
 URL = (ROOT / "dist" / "index.html").as_uri()
 SHOTS = ROOT / "build" / "screens"
-KEY = "ntidebi-roadmap-v1"
+KEY = "ntidebi-roadmap-v2"
 VIEWS = ["flow", "roadmap", "kanban", "checklist", "paths", "compare", "projects", "certs", "dash"]
 fails = []
 
@@ -58,7 +58,7 @@ async def main():
         await pg.reload()
         await pg.wait_for_timeout(300)
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
-        check(saved and saved["status"].get(pid.strip()) == "ip", "status persists across reload")
+        check(saved and saved["progress"].get(pid.strip(), {}).get("status") == "ip", "status persists across reload")
         await pg.click("#tabs button[data-v=kanban]")
         await pg.wait_for_timeout(200)
         card = pg.locator('.kcol[data-col="ns"] .kcard').first
@@ -66,37 +66,45 @@ async def main():
         await card.drag_to(pg.locator('.kcol[data-col="done"]'))
         await pg.wait_for_timeout(200)
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
-        check(saved["status"].get(cid) == "done", f"kanban drag sets {cid} to done")
+        check(saved["progress"].get(cid, {}).get("status") == "done", f"kanban drag sets {cid} to done")
         await pg.click("#tabs button[data-v=dash]")
         async with pg.expect_download() as dl:
             await pg.click("#exp")
         path = await (await dl.value).path()
         exported = json.loads(Path(path).read_text())
-        check(exported["status"].get(cid) == "done", "export contains progress")
+        check(exported["progress"][cid]["status"] == "done" and exported["storageVersion"] == 2, "export contains progress")
         pg.once("dialog", lambda d: asyncio.ensure_future(d.accept()))
-        await pg.click("#rst")
+        async with pg.expect_download() as dl:
+            await pg.click("#rst")
+        backup = json.loads(Path(await (await dl.value).path()).read_text())
+        check(backup["progress"][cid]["status"] == "done", "reset downloads a backup first")
         await pg.wait_for_timeout(200)
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
-        check(saved["status"] == {}, "reset clears progress")
+        check(saved["progress"] == {}, "reset clears progress")
         evil = {"status": {"NET-1": 'done"><img src=x onerror="window.__x=1">', "NET-2": "banana",
                            "NOPE-1": "done", "NET-3": "ip"},
                 "notes": "not an object", "evidence": {"NET-3": 5, "NET-4": "repo link"}}
         for _ in range(2):  # the same file twice must import twice (A-22)
             await pg.set_input_files("#imp", files=[{"name": "evil.json", "mimeType": "application/json",
                                                        "buffer": json.dumps(evil).encode()}])
-            await pg.wait_for_timeout(200)
+            await pg.wait_for_selector("dialog#dlg[open] [data-dlg=replace]")
+            async with pg.expect_download():
+                await pg.click("dialog#dlg [data-dlg=replace]")
+            await pg.wait_for_timeout(150)
         for v in VIEWS:
             await pg.click(f"#tabs button[data-v={v}]")
             await pg.wait_for_timeout(60)
         check(await pg.evaluate("window.__x") is None, "crafted import runs no script")
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
-        check(saved["status"] == {"NET-3": "ip"}, f"import keeps only known IDs and valid statuses ({saved['status']})")
-        check(saved["notes"] == {} and saved["evidence"] == {"NET-4": "repo link"}, "import drops malformed fields")
+        prog = {k: {f: v for f, v in e.items() if f != "updated"} for k, e in saved["progress"].items()}
+        check(prog == {"NET-3": {"status": "ip"}, "NET-4": {"evidence": "repo link"}},
+              f"import keeps only valid statuses and string fields ({prog})")
+        check(list(saved["orphans"]) == ["NOPE-1"], "an unknown ID is kept as an orphan, not dropped")
         await pg.click("#tabs button[data-v=flow]")
         await pg.locator("#cv-flow g.node[aria-label]").first.click()
         await pg.fill("#pnotes", "a note")
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
-        check("a note" in saved["notes"].values(), "notes still editable after a malformed import")
+        check(any(e.get("notes") == "a note" for e in saved["progress"].values()), "notes still editable after a malformed import")
         m = await b.new_page(viewport={"width": 390, "height": 844})
         m.on("pageerror", lambda e: errs.append("mobile: " + str(e)))
         await m.goto(URL)

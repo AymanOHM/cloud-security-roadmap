@@ -4,8 +4,10 @@
 The output is one self-contained file that works from file:// (offline) and on
 GitHub Pages. Nothing is fetched at runtime.
 
-Usage: python3 tools/build.py
+Usage: python3 tools/build.py [--data DIR] [--out FILE]
+  --data / --out build another dataset to another file (used by the upgrade tests).
 """
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -15,7 +17,11 @@ from validate import load_all, validate, private_terms, privacy_scan_files, ROOT
 
 
 def main():
-    d = load_all()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--data", default=None)
+    ap.add_argument("--out", default=None)
+    args = ap.parse_args()
+    d = load_all(args.data)
     terms = private_terms()
     errs = validate(d, terms) + privacy_scan_files(ROOT, terms)
     if errs:
@@ -36,10 +42,10 @@ def main():
         print("app/template.html has no /*DATA*/null placeholder")
         sys.exit(1)
     blob = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
-    out = ROOT / "dist" / "index.html"
-    out.parent.mkdir(exist_ok=True)
+    out = Path(args.out).resolve() if args.out else ROOT / "dist" / "index.html"
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(tpl.replace("/*DATA*/null", blob), encoding="utf-8")
-    print(f"built {out.relative_to(ROOT)} ({out.stat().st_size // 1024} KB), data version {m['dataVersion']}")
+    print(f"built {out} ({out.stat().st_size // 1024} KB), data version {m['dataVersion']}")
 
 
 if __name__ == "__main__":

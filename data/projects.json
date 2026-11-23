@@ -18,7 +18,8 @@
     ],
     "goal": "Minimal attack surface in what you ship.",
     "deliv": "Dockerfile + Trivy triage in README.",
-    "value": "Shows you can harden, not only containerize."
+    "value": "Shows you can harden, not only containerize.",
+    "due": "2026-12-20"
   },
   {
     "id": "PS-2",
@@ -52,7 +53,8 @@
     ],
     "goal": "Nothing reaches a deploy unscanned.",
     "deliv": "One red and one green run; README explains each gate's trade-off.",
-    "value": "The DevSecOps job description in one repo."
+    "value": "The DevSecOps job description in one repo.",
+    "due": "2026-12-31"
   },
   {
     "id": "PS-3",
@@ -80,7 +82,8 @@
     ],
     "goal": "Private data tier, no long-lived keys, controlled cost.",
     "deliv": "Running app + architecture diagram + teardown doc.",
-    "value": "Matches the AWS skills most Egyptian DevOps postings name."
+    "value": "Matches the AWS skills most Egyptian DevOps postings name.",
+    "due": "2027-01-31"
   },
   {
     "id": "PS-4",
@@ -104,7 +107,8 @@
     ],
     "goal": "Reproducible infra with guardrails before deploy.",
     "deliv": "Terraform repo; a PR blocked by Checkov.",
-    "value": "IaC is in nearly every DevOps posting."
+    "value": "IaC is in nearly every DevOps posting.",
+    "due": "2027-02-28"
   },
   {
     "id": "PS-5",
@@ -127,7 +131,8 @@
     ],
     "goal": "Know when it breaks before users do.",
     "deliv": "Dashboard screenshot, alert evidence.",
-    "value": "Closes the ops loop interviewers ask about."
+    "value": "Closes the ops loop interviewers ask about.",
+    "due": "2027-02-15"
   },
   {
     "id": "PS-6",
@@ -149,7 +154,8 @@
     ],
     "goal": "A cluster you can defend.",
     "deliv": "Hardened cluster repo + kube-bench results.",
-    "value": "Opens K8s-heavy roles; first thing to drop otherwise."
+    "value": "Opens K8s-heavy roles; first thing to drop otherwise.",
+    "due": null
   },
   {
     "id": "PS-7",
@@ -179,7 +185,8 @@
     ],
     "goal": "Detect within minutes; contain with a written procedure.",
     "deliv": "Detection repo with tests, runbook, postmortem, CIS before/after.",
-    "value": "The bridge from DevSecOps to cloud security / SecOps roles."
+    "value": "The bridge from DevSecOps to cloud security / SecOps roles.",
+    "due": "2027-09-30"
   },
   {
     "id": "PS-8",
@@ -200,6 +207,7 @@
     ],
     "goal": "One app, three uses: NTI capstone, DEBI project, CV (doc 19 §C).",
     "deliv": "DEBI submission.",
-    "value": "Turns a program requirement into portfolio evidence."
+    "value": "Turns a program requirement into portfolio evidence.",
+    "due": "2027-12-31"
   }
 ]

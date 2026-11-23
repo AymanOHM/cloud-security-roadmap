@@ -24,13 +24,15 @@ fields"). It must show you the data diff before committing.
 | **Change objectives, resources, labs, evidence, NTI/DEBI text** | Edit the fields in place | None |
 | **Change prerequisites** | Edit `pre`. The validator blocks later-stage prerequisites and cycles | Some items may become locked or unlocked; statuses are kept |
 | **Move a competency to another stage or lane** | Edit `stage`/`lane`; keep the ID | None |
-| **Rename an ID** (avoid if you can) | Change the ID everywhere it's referenced, then add `"OLD": "NEW"` to `id-migrations.json` | Carried over once the app supports migrations (AUDIT A-06); until then, export first and re-mark by hand |
-| **Retire a competency** | Remove it and its references; add `"OLD": "REPLACEMENT"` if something replaces it | Without a replacement its progress becomes an orphan (kept, shown on the dashboard, after A-06) |
+| **Rename an ID** (avoid if you can) | Change the ID everywhere it's referenced, then add `"OLD": "NEW"` to `id-migrations.json` | Carried over automatically on the next load |
+| **Retire a competency** | Remove it and its references; add `"OLD": "REPLACEMENT"` if something replaces it, or `"OLD": ["NEW-1", …]` if it splits | Without a replacement (or on a split) its progress becomes an orphan: kept and shown on the dashboard to move or delete |
 | **Add or remove a project** | Edit `projects.json` (`comps` must exist) | None |
 | **Update certifications** | Edit `certifications.json` (`start`/`end` as `YYYY-MM`) | None |
 | **Update the NTI vs DEBI matrix** | Edit `comparison.json`; keep `cls` starting with Duplicate / Complementary / NTI exclusive / DEBI exclusive / Missing (the app colours by prefix) | None |
 | **Reconcile a curriculum change** (e.g. DEBI publishes its course list, NTI changes a module) | Update `curriculum/NTI.md` or `DEBI.md` with the fact and its source; update the `nti`/`debi` fields of affected competencies, changing "(unverified)" to "(verified, <source>)"; update `comparison.json` and `ntiHours`; re-check `src` (lead source) for affected competencies | None |
 | **Record your progress** | In the app. Export after meaningful changes | — |
+| **Refresh evidence levels from the records** | Update the snapshot in `private/progress/`, run `python3 tools/seed_from_records.py`, then Dashboard → Import → the seed file. Preview first; statuses, notes and links are untouched | Records own level, U/E/D, last verified |
+| **Change a window (stage, project, cert)** | Edit `window` (text) and `due` (YYYY-MM-DD) in `roadmap.json`/`projects.json`, or `start`/`end` in `certifications.json` | The "late" badges follow |
 | **Record a decision** | Study Plan Project first; then mirror it in `private/docs/STUDY_PLAN.md` §5 and, if it changes content, in `data/` | — |
 
 ## Rules that keep progress safe

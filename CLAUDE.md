@@ -31,5 +31,8 @@ python3 tools/build.py           # validate + inline data into dist/index.html
 python3 tools/docgen.py --write # regenerate ROADMAP.md Phase 2/4/5 from data (--check in CI)
 python3 -m pytest tests/         # unit tests (validator)
 python3 tests/e2e_smoke.py       # browser smoke test of dist/index.html (needs Playwright + Chromium)
+python3 tests/e2e_persistence.py # progress survives renames/removals/additions, imports, seed
+python3 tests/upgrade_demo.py    # export from an older build (git ref), upgrade, import: nothing lost
+python3 tools/seed_from_records.py  # records snapshot (private/) -> progress seed (private/)
 ```
 Open `dist/index.html` directly in a browser to use the app.

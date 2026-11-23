@@ -15,6 +15,7 @@ Usage: python3 tools/validate.py
 import json
 import re
 import sys
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -35,20 +36,20 @@ PUBLIC_SKIP = {"private", "archive", "dist", "build", ".git", ".venv", "__pycach
 PUBLIC_EXT = {".md", ".json", ".html", ".py", ".yml", ".yaml", ".draft", ".txt", ".js", ".css"}
 
 
-def load(name):
-    with open(DATA / name, encoding="utf-8") as f:
+def load(name, data_dir=None):
+    with open(Path(data_dir or DATA) / name, encoding="utf-8") as f:
         return json.load(f)
 
 
-def load_all():
-    meta = load("roadmap.json")
+def load_all(data_dir=None):
+    meta = load("roadmap.json", data_dir)
     return {
         "meta": meta,
-        "comps": load("competencies.json"),
-        "projects": load("projects.json"),
-        "certs": load("certifications.json"),
-        "compare": load("comparison.json"),
-        "migrations": load("id-migrations.json").get("migrations", {}),
+        "comps": load("competencies.json", data_dir),
+        "projects": load("projects.json", data_dir),
+        "certs": load("certifications.json", data_dir),
+        "compare": load("comparison.json", data_dir),
+        "migrations": load("id-migrations.json", data_dir).get("migrations", {}),
     }
 
 
@@ -108,6 +109,16 @@ def privacy_scan_files(root=ROOT, terms=()):
             if any(r.search(line) for r in term_res):
                 errors.append(f"privacy: private term in {p.relative_to(root)}:{n}")
     return errors
+
+
+def _date_ok(v):
+    """`due` is optional: null, or an ISO date (the last day of the planned window, used for 'late')."""
+    if v is None:
+        return True
+    try:
+        return isinstance(v, str) and len(v) == 10 and bool(date.fromisoformat(v))
+    except ValueError:
+        return False
 
 
 def validate(d, terms=()):
@@ -175,13 +186,21 @@ def validate(d, terms=()):
     for n in by:
         visit(n, [])
 
+    for s in meta["stages"]:
+        if not _date_ok(s.get("due")):
+            errors.append(f"stage {s['id']}: 'due' must be null or YYYY-MM-DD")
     for p in d["projects"]:
+        if not _date_ok(p.get("due")):
+            errors.append(f"project {p['id']}: 'due' must be null or YYYY-MM-DD")
         for cid in p.get("comps", []):
             if cid not in by:
                 errors.append(f"project {p['id']}: unknown competency {cid}")
         if p.get("stage") not in stage_order:
             errors.append(f"project {p['id']}: unknown stage {p.get('stage')}")
     for k in d["certs"]:
+        for f in ("start", "end"):
+            if not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", str(k.get(f, ""))):
+                errors.append(f"cert {k['id']}: '{f}' must be YYYY-MM")
         for cid in k.get("comps", []):
             if cid not in by:
                 errors.append(f"cert {k['id']}: unknown competency {cid}")
