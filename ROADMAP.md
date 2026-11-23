@@ -9,7 +9,7 @@ Nov 23, 2026
 Doc 19 (G8) sets the entry role: junior DevOps/cloud engineer or Python backend. My first draft's **DevSecOps engineer on AWS as the first job is too early**: DevSecOps titles in Egyptian postings ask for 3–6 years (doc 19 §H). Specialize toward DevSecOps, with cloud security engineer as the destination after 1–2 years.
 
 - **Use NTI for building, DEBI for security fundamentals.** NTI's 420 h are a DevOps curriculum (doc 19 §C). DEBI supplies the security core NTI lacks. AWS security services (CloudTrail, GuardDuty, Config, SCPs) are in neither, so they're the independent part of the plan, built in project PS-7.
-- **86 competencies, one ID scheme.** IDs reuse doc 06 (NET, LNX, CTR, CI, CLD and so on), so the records keep working. New IDs cover the cloud-security part. The interactive HTML companion (Phase 8) uses the same IDs and order.
+- **107 competencies, one ID scheme.** IDs reuse doc 06 (NET, LNX, CTR, CI, CLD and so on), so the records keep working. New IDs cover the cloud-security part. The interactive HTML companion (Phase 8) uses the same IDs and order.
 - **Projects follow doc 19 §G.** PS-1 to PS-5 harden, pipeline, deploy, Terraform and monitor the graduation project. PS-7 adds the cloud-security baseline and detection after NTI.
 - **Certs:** SAA-C03 now (decided). SCS-C03 after PS-7, about Q4 2027. NSE 4 only if DEBI funds the exam (G15 amended), and Security+ stays deferred (G14).
 - **Remaining uncertainty:** DEBI's assigned course list. Every DEBI course reference is marked unverified until it's published.
@@ -117,7 +117,7 @@ The roadmap below keeps both of those open. The core stages are the same for all
 
 There are five stages, each closed by a gate that needs evidence. Finishing a course doesn't pass a gate. **Every competency has an ID.** The IDs reuse the Study Plan's doc 06 scheme (NET, LNX, PY, DB, WEB, GIT, TST, CI, CTR, SEC, APPSEC, WIN, CLD, OPS, COMM, DSA), so your records (doc 15) track the same rows. New IDs cover the cloud-security part: IAC, K8S, DSO, VM, NSEC, LOG, IR, TM, CSEC, JOB. The HTML dashboard uses exactly these IDs, in this order.
 
-The split, counted by competencies: core (Stages 1–3) about 80%, specialization (Stage 4) about 12%, job readiness and revision about 8%. Core is above your 60–70% target because NTI's 420 h *is* the core while it runs. Doc 19 §F already replaced the old split for that reason.
+The split, counted by competencies: core (Stages 1–3) about 84%, specialization (Stage 4) about 9%, job readiness and revision about 7%. Core is above your 60–70% target because NTI's 420 h *is* the core while it runs. Doc 19 §F already replaced the old split for that reason.
 
 Source legend: **NTI** leads · **DEBI** leads · **Independent** · **Shared** (both cover it; the Lead column in Phase 2 decides) · **Existing** (you already have it; claim it with evidence instead of re-studying). "Refresh" in the Competency column means partly existing, per doc 19 and the records.
 
@@ -142,10 +142,31 @@ Now to Dec 2026 (NTI Linux block; DEBI start). **Gate 1: doc 06 F1 exit checks f
 | LNX-6 | SSH hardening | NTI | LNX-2 | Key-only SSH on a fresh VM | Harden your UTM VM | Key-only SSH set up in the exit check. | High |
 | LNX-7 | Linux networking and firewall (refresh) | NTI | LNX-1, NET-3 | Open and close ports deliberately | ufw on your VM | Exit check: open, verify (`ss`) and close a port with `ufw` on a fresh VM without lookup. | Medium |
 | LNX-8 | Bash scripting | NTI | LNX-1 | Write a 20-line shellcheck-clean script | Automate a backup of the grad project DB | Script passes shellcheck and runs from cron. | High |
-| PY-1–7 | Python core (group) (have) | Existing | — | Pass the doc 06 PY exit check | boto3 scripts inside PS-7 | Doc 06 PY exit check (log-parser CLI + 3 tests). | Low |
-| DB-1–6 | Databases (group) (have) | Existing | — | Keep the CV defensible | — | Doc 06 DB exit check when a backend interview is booked (G11). | Low |
-| WEB-1–8 | Django / Celery backend (group) (have) | Existing | — | Defend the grad project's backend through the project | Kill a Celery worker mid-task | Doc 06 WEB exit check; whiteboard the capstone. | Medium |
-| GIT-1–4 | Git model, workflows and recovery (group) (refresh) | NTI | — | Recover from 5 Git disasters; Remove a committed secret properly | Git disaster drills | Doc 06 GIT exit check (5 disasters, ~45 min). | High |
+| PY-1 | Python data model (have) | Existing | — | Explain mutability, references and copies with a REPL demo | — | Explain mutability, copies and `==` vs `is` cold, with a REPL demo. | Low |
+| PY-2 | Built-in structures and their complexity (have) | Existing | — | Pick the right structure for a problem and state its complexity | — | State the complexity of list, dict and set operations and pick a structure for a given problem, cold. | Low |
+| PY-3 | Iterators, generators, decorators, context managers (have) | Existing | — | Write a generator, a decorator and a context manager from memory | Log-parser CLI (doc 06 PY exit check) | The log-parser CLI uses a generator pipeline, a decorator and a context manager, and each choice is explained (doc 06). | Low |
+| PY-4 | OOP in Python (have) | Existing | — | Choose inheritance or composition and justify it in your own code | — | Explain inheritance vs composition with your own code; write a dataclass with a custom dunder method. | Low |
+| PY-5 | Exceptions and logging (have) | Existing | — | Handle and log errors deliberately | — | The log-parser CLI handles bad input with specific exceptions and logs through the `logging` module. | Low |
+| PY-6 | Python concurrency model (have) | Existing | — | Explain the GIL and choose a concurrency model for a workload | — | Explain the GIL cold and justify threads, processes or asyncio for three given workloads. | Low |
+| PY-7 | Environments and packaging (have) | Existing | — | Package a tool with pyproject and install it in a fresh venv | boto3 scripts inside PS-7 | The log-parser installs from its pyproject into a fresh venv and its 3 pytest tests pass (doc 06). | Low |
+| DB-1 | Hand-written SQL (have) | Existing | — | Write joins, aggregates, CTEs and window functions by hand | — | 8 of 10 SQL problems on your own schema, unaided (doc 06 DB exit check). | Low |
+| DB-2 | Schema design and normalization (have) | Existing | — | Justify the grad project's schema: keys, constraints, 3NF | — | Explain the grad project's schema choices and normalization cold. | Low |
+| DB-3 | Indexes and query plans (have) | Existing | — | Speed up a slow query and explain the plan | — | A slow query sped up with an index, with `EXPLAIN ANALYZE` before and after explained (doc 06). | Low |
+| DB-4 | Transactions and isolation (have) | Existing | — | Explain isolation anomalies with an example from the grad project | — | Explain isolation levels and their anomalies cold, with an example from the grad project. | Low |
+| DB-5 | SQL vs NoSQL (have) | Existing | — | Explain when to pick SQL or NoSQL | — | A 3-minute SQL vs NoSQL answer using Redis as the example (doc 06). | Low |
+| DB-6 | Redis (have) | Existing | — | Explain Redis's roles in the grad project and what survives a restart | — | Explain what happens to the grad project's Redis data on restart, and why. | Low |
+| WEB-1 | HTTP in practice (have) | Existing | — | Explain idempotency, cookies, sessions and CORS | — | Explain idempotency, cookies and CORS cold, using requests from the grad project. | Medium |
+| WEB-2 | Django request lifecycle (have) | Existing | — | Trace a request from URLconf to response | — | Trace one request through the grad project's code (doc 06 WEB exit check). | Medium |
+| WEB-3 | Django ORM and N+1 (have) | Existing | — | Find and fix an N+1 query | — | An N+1 query found and fixed with `select_related`/`prefetch_related`, with query counts before and after. | Medium |
+| WEB-4 | Django authentication (have) | Existing | — | Explain sessions vs tokens, CSRF and password hashing | — | Explain the grad project's authentication and CSRF protection cold. | Medium |
+| WEB-5 | REST API design (have) | Existing | — | Design an endpoint's resources, status codes, pagination and versioning | — | Defend one grad-project endpoint's design: status codes, pagination, versioning. | Medium |
+| WEB-6 | Python web deployment model (have) | Existing | — | Explain how a Django app is served in production | — | Explain how the grad project is served in production: workers, reverse proxy, static files. | Medium |
+| WEB-7 | Reliable async tasks (Celery) (have) | Existing | — | Make a task idempotent with retries and backoff | Kill a Celery worker mid-task | Kill a worker mid-task and explain the outcome; implement an idempotent retry (doc 06). | Medium |
+| WEB-8 | Capstone architecture (have) | Existing | — | Whiteboard the capstone with ownership boundaries | — | A 3-minute whiteboard of the capstone, including failure handling at the AI boundary (doc 06). | Medium |
+| GIT-1 | Git's model (refresh) | NTI | — | Explain commits, branches, HEAD and the staging area | — | Draw the commit graph and HEAD for a given sequence of commands, cold. | High |
+| GIT-2 | Branching, merge vs rebase, conflicts (refresh) | NTI | — | Resolve merge and rebase conflicts | Git disaster drills | Resolve a staged merge conflict and a rebase conflict, explaining each step. | High |
+| GIT-3 | Undo and recover (refresh) | NTI | — | Recover from 5 Git disasters | Git disaster drills | Recover from 5 staged Git disasters and explain what each command did to the commit graph (about 45 min, doc 06). | High |
+| GIT-4 | PR workflow and secrets hygiene (refresh) | NTI | — | Remove a committed secret properly | Git disaster drills | A committed fake secret removed from history and rotated; `.gitignore` and PR hygiene explained. | High |
 | SEC-1 | Security principles | Shared | — | Explain each principle with an example from your project | TryHackMe Cyber Security 101 rooms | Part of the SEC exit check (30 questions at 80%+). | High |
 | SEC-2 | Cryptography and PKI | Shared | SEC-1 | Explain which primitive fits which job | THM cryptography rooms | Explain TLS certificate validation cold. | Medium |
 | SEC-3 | Attack types | DEBI | SEC-1 | Explain 10 attacks with detection and mitigation | THM rooms as assigned | 5 attacks explained with detection + mitigation (doc 06). | Medium |
@@ -166,7 +187,7 @@ Dec 2026 to mid-Feb 2027 (NTI Docker, CI/CD, AWS, Terraform, K8s, monitoring). *
 | K8S-1 | Kubernetes fundamentals | NTI | CTR-5 | Deploy the grad project to a local cluster | kind or k3s locally | The grad project runs on a local kind/k3s cluster with readiness and liveness probes and a Secret; torn down and redeployed unaided. | Medium |
 | K8S-3 | Kubernetes delivery: Helm, Kustomize, GitOps | Independent | K8S-1, CI-3 | Argo CD keeps the local cluster in sync with Git | PS-6 | Argo CD syncs the grad project from Git into kind/k3s. | Low |
 | TST-1 | Testing with pytest (refresh) | Independent | PY-1–7, WEB-1–8 | Add tests that a pipeline can gate on | PS-2 | Tests run in PS-2's pipeline. | Medium |
-| TST-2 | Integration testing | Independent | TST-1 | Run integration tests against service containers in CI | PS-2 | PS-2's integration job catches a deliberately broken migration. | Medium |
+| TST-2 | Integration testing | Independent | TST-1, DB-2 | Run integration tests against service containers in CI | PS-2 | PS-2's integration job catches a deliberately broken migration. | Medium |
 | CI-1 | CI/CD concepts | NTI | GIT-1–4 | Explain each stage's purpose | — | 2-minute explanation. | High |
 | CI-2 | GitHub Actions workflow | NTI | CI-1, TST-1 | Run the grad project's tests in CI | PS-2 | Green pipeline on the grad project. | High |
 | CI-3 | Build and publish images in CI | NTI | CI-2, CTR-2 | Tagged image on every merge | PS-2 | Merge produces a tagged image. | High |
@@ -178,7 +199,7 @@ Dec 2026 to mid-Feb 2027 (NTI Docker, CI/CD, AWS, Terraform, K8s, monitoring). *
 | CLD-3 | VPC networking | NTI | CLD-1, NET-2, NET-3 | Build a two-tier VPC by hand once, then in Terraform | PS-3 | Explain the packet path private subnet → NAT → internet (doc 19 'can explain cold'). | High |
 | NET-8 | Multi-tier network design | NTI | CLD-3 | Subnet a /16 for public/private/DB tiers and justify each rule | PS-3 network design | Doc 06 F3 check: /16 design with every rule justified. | High |
 | CLD-4 | Deploy to compute | NTI | CLD-3, CTR-2, LNX-6 | Deploy and reach it securely | PS-3 | App running on AWS with a documented teardown. | High |
-| CLD-5 | S3 and managed data | NTI | CLD-2, CLD-3 | Keep data private by design | PS-3 | DB not reachable from the internet; S3 public access blocked. | High |
+| CLD-5 | S3 and managed data | NTI | CLD-2, CLD-3, DB-1, DB-2 | Keep data private by design | PS-3 | DB not reachable from the internet; S3 public access blocked. | High |
 | CLD-6 | CloudWatch logs, metrics, alarms | NTI | CLD-4 | Alarm on something you can trigger | PS-5 | An alarm you triggered on purpose. | Medium |
 | CLD-7 | Explain architecture and cost | NTI | CLD-4, CLD-5 | 5-minute walkthrough | — | 5-minute architecture and cost walkthrough (doc 06 M3 check). | Medium |
 | IAC-1 | Terraform core | NTI | CLD-3 | Describe PS-3 in Terraform | PS-4 | Whole PS-3 environment in Terraform. | High |
@@ -265,7 +286,7 @@ _Doc 19 project stage 1 · 21 Nov – ~20 Dec 2026_
 
 _Doc 19 project stage 2 · Dec 2026_
 
-- **Competencies:** GIT-1–4, TST-1, TST-2, CI-1, CI-2, CI-3, CI-4, CI-5, DSO-1, DSO-2
+- **Competencies:** GIT-1–4, TST-1, TST-2, CI-1–5, DSO-1, DSO-2
 - **Architecture:** GitHub Actions on push: tests, pip-audit, Bandit, gitleaks, Trivy; fail on high; SBOM added later (DSO-2).
 - **Steps:** Tests in CI with Postgres/Redis service containers → Integration job → Add each gate → Protect main → Release automation (SemVer, changelog) → Plant a vulnerable dependency and a fake secret; show both blocked
 - **Security goal:** Nothing reaches a deploy unscanned.
@@ -276,7 +297,7 @@ _Doc 19 project stage 2 · Dec 2026_
 
 _Doc 19 project stage 3 · Jan 2027, during NTI's AWS block_
 
-- **Competencies:** CLD-1, CLD-2, CLD-3, NET-8, CLD-4, CLD-5, CSEC-5
+- **Competencies:** CLD-1–3, NET-8, CLD-4, CLD-5, CSEC-5
 - **Architecture:** VPC with public/private subnets; app on EC2 or ECS; Postgres private; least-privilege security groups; secrets in SSM/Secrets Manager; budget alarm; documented teardown.
 - **Steps:** Budget alarm → VPC by hand once → Twelve-Factor config review → Deploy the app → Move secrets to SSM → Write the teardown
 - **Security goal:** Private data tier, no long-lived keys, controlled cost.
@@ -298,7 +319,7 @@ _Doc 19 project stage 4 · Jan – Feb 2027_
 
 _Doc 19 project stage 5 · by mid-Feb 2027_
 
-- **Competencies:** OPS-1, OPS-2, OPS-3, CLD-6
+- **Competencies:** OPS-1–3, CLD-6
 - **Architecture:** Structured logs + metrics + one alert (CloudWatch or Prometheus/Grafana), triggered on purpose.
 - **Steps:** Structured logging → Dashboard → Alert → Inject a failure and find it from telemetry
 - **Security goal:** Know when it breaks before users do.
@@ -320,7 +341,7 @@ _Doc 19 project stage 6, optional · only if target postings ask_
 
 _New, after NTI · about Apr – Sep 2027_
 
-- **Competencies:** CSEC-1, CSEC-2, CSEC-3, CSEC-4, CSEC-6, CSEC-7, IR-1, LOG-1, SEC-8
+- **Competencies:** CSEC-1–4, CSEC-6, CSEC-7, IR-1, LOG-1, SEC-8
 - **Architecture:** On top of PS-3/PS-4: CloudTrail to a locked bucket, Config, Security Hub (CIS), GuardDuty → EventBridge → alerts; 5 detections; leaked-key playbook.
 - **Steps:** OIDC deploy role → Logging + posture → 5 detections as code → Simulate with Stratus Red Team → Tabletop + postmortem → One review by someone more experienced
 - **Security goal:** Detect within minutes; contain with a written procedure.

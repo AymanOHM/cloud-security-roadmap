@@ -23,6 +23,20 @@ SRC = {"NTI": "NTI", "DEBI": "DEBI", "IND": "Independent", "SHARED": "Shared", "
 PRI = {"H": "High", "M": "Medium", "L": "Low"}
 
 
+def ids(lst):
+    """Join IDs, compressing runs like PY-1, PY-2, PY-3 into PY-1–3."""
+    out, i = [], 0
+    while i < len(lst):
+        pre, _, n = lst[i].rpartition("-")
+        j = i
+        while (n.isdigit() and j + 1 < len(lst) and lst[j + 1].rpartition("-")[0] == pre
+               and lst[j + 1].rpartition("-")[2] == str(int(n) + (j + 1 - i))):
+            j += 1
+        out.append(f"{lst[i]}–{lst[j].rpartition('-')[2]}" if j - i >= 2 else ", ".join(lst[i:j + 1]))
+        i = j + 1
+    return ", ".join(out)
+
+
 def cell(s):
     return str(s).replace("|", "/").replace("\n", " ")
 
@@ -59,7 +73,7 @@ for s in d["stages"]:
     rows = []
     for c in L:
         name = c["name"] + (f" ({c['existing']})" if c["existing"] else "")
-        pre = ", ".join(c["pre"]) or "—"
+        pre = ids(c["pre"]) or "—"
         obj = "; ".join(c["obj"])
         labs = "; ".join(c["labs"]) or "—"
         rows.append(f"| {c['id']} | {cell(name)} | {SRC[c['src']]} | {pre} | {cell(obj)} | {cell(labs)} | {cell(c['ev'])} | {PRI[c['pri']]} |")
@@ -84,7 +98,7 @@ for p in d["projects"]:
 
 _{p['doc19'][0].upper()+p['doc19'][1:]} · {p['window']}_
 
-- **Competencies:** {', '.join(p['comps'])}
+- **Competencies:** {ids(p['comps'])}
 - **Architecture:** {p['arch']}
 - **Steps:** {' → '.join(p['steps'])}
 - **Security goal:** {p['goal']}

@@ -1,4 +1,38 @@
 {
-  "_comment": "Map retired or renamed competency IDs to their replacement so saved progress can follow them. Example: {\"OLD-1\": \"NEW-1\"}. Never reuse a retired ID for a different competency.",
-  "migrations": {}
+  "_comment": "Map retired or renamed competency IDs to their replacement so saved progress can follow them. A rename is \"OLD\": \"NEW\"; a split is \"OLD\": [\"NEW-1\", \"NEW-2\", ...]. A split never copies a status to its parts (that would invent progress): the old entry becomes an orphan pointing at the new IDs. Never reuse a retired ID for a different competency.",
+  "migrations": {
+    "PY-1–7": [
+      "PY-1",
+      "PY-2",
+      "PY-3",
+      "PY-4",
+      "PY-5",
+      "PY-6",
+      "PY-7"
+    ],
+    "DB-1–6": [
+      "DB-1",
+      "DB-2",
+      "DB-3",
+      "DB-4",
+      "DB-5",
+      "DB-6"
+    ],
+    "WEB-1–8": [
+      "WEB-1",
+      "WEB-2",
+      "WEB-3",
+      "WEB-4",
+      "WEB-5",
+      "WEB-6",
+      "WEB-7",
+      "WEB-8"
+    ],
+    "GIT-1–4": [
+      "GIT-1",
+      "GIT-2",
+      "GIT-3",
+      "GIT-4"
+    ]
+  }
 }

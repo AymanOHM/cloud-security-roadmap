@@ -27,7 +27,10 @@
     "doc19": "doc 19 project stage 2",
     "window": "Dec 2026",
     "comps": [
-      "GIT-1–4",
+      "GIT-1",
+      "GIT-2",
+      "GIT-3",
+      "GIT-4",
       "TST-1",
       "TST-2",
       "CI-1",

@@ -458,15 +458,173 @@
     ]
   },
   {
-    "id": "PY-1–7",
-    "name": "Python core (group)",
+    "id": "PY-1",
+    "name": "Python data model",
     "stage": "FND",
     "lane": "code",
     "src": "EXIST",
-    "desc": "Data model, structures, generators/decorators, OOP, exceptions, concurrency, packaging.",
+    "desc": "Mutability, references, shallow vs deep copy, `==` vs `is`.",
     "why": "Your differentiator; used for automation (boto3) and reading the apps you deploy.",
     "obj": [
-      "Pass the doc 06 PY exit check"
+      "Explain mutability, references and copies with a REPL demo"
+    ],
+    "pre": [],
+    "nti": "NTI Python module (22 h): revision only; you already know Python.",
+    "debi": "Google course 7 'Automate Cybersecurity Tasks with Python' (unverified): do fast, for the security use cases.",
+    "res": [
+      "Real Python on failed items only"
+    ],
+    "labs": [],
+    "ev": "Explain mutability, copies and `==` vs `is` cold, with a REPL demo.",
+    "hours": "NTI Python module: 22 h (whole module, shared by PY-1–7)",
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "PY-2",
+    "name": "Built-in structures and their complexity",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Lists, tuples, dicts, sets and their complexity; comprehensions.",
+    "why": "Your differentiator; used for automation (boto3) and reading the apps you deploy.",
+    "obj": [
+      "Pick the right structure for a problem and state its complexity"
+    ],
+    "pre": [],
+    "nti": "NTI Python module (22 h): revision only; you already know Python.",
+    "debi": "Google course 7 'Automate Cybersecurity Tasks with Python' (unverified): do fast, for the security use cases.",
+    "res": [
+      "Real Python on failed items only"
+    ],
+    "labs": [],
+    "ev": "State the complexity of list, dict and set operations and pick a structure for a given problem, cold.",
+    "hours": "NTI Python module: 22 h (whole module, shared by PY-1–7)",
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "PY-3",
+    "name": "Iterators, generators, decorators, context managers",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Iterators and generators, decorators, context managers.",
+    "why": "Your differentiator; used for automation (boto3) and reading the apps you deploy.",
+    "obj": [
+      "Write a generator, a decorator and a context manager from memory"
+    ],
+    "pre": [],
+    "nti": "NTI Python module (22 h): revision only; you already know Python.",
+    "debi": "Google course 7 'Automate Cybersecurity Tasks with Python' (unverified): do fast, for the security use cases.",
+    "res": [
+      "Real Python on failed items only"
+    ],
+    "labs": [
+      "Log-parser CLI (doc 06 PY exit check)"
+    ],
+    "ev": "The log-parser CLI uses a generator pipeline, a decorator and a context manager, and each choice is explained (doc 06).",
+    "hours": "NTI Python module: 22 h (whole module, shared by PY-1–7)",
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "PY-4",
+    "name": "OOP in Python",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Dunder methods, inheritance vs composition, dataclasses.",
+    "why": "Your differentiator; used for automation (boto3) and reading the apps you deploy.",
+    "obj": [
+      "Choose inheritance or composition and justify it in your own code"
+    ],
+    "pre": [],
+    "nti": "NTI Python module (22 h): revision only; you already know Python.",
+    "debi": "Google course 7 'Automate Cybersecurity Tasks with Python' (unverified): do fast, for the security use cases.",
+    "res": [
+      "Real Python on failed items only"
+    ],
+    "labs": [],
+    "ev": "Explain inheritance vs composition with your own code; write a dataclass with a custom dunder method.",
+    "hours": "NTI Python module: 22 h (whole module, shared by PY-1–7)",
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "PY-5",
+    "name": "Exceptions and logging",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Exceptions (try/except/else/finally) and the `logging` module.",
+    "why": "Your differentiator; used for automation (boto3) and reading the apps you deploy.",
+    "obj": [
+      "Handle and log errors deliberately"
+    ],
+    "pre": [],
+    "nti": "NTI Python module (22 h): revision only; you already know Python.",
+    "debi": "Google course 7 'Automate Cybersecurity Tasks with Python' (unverified): do fast, for the security use cases.",
+    "res": [
+      "Real Python on failed items only"
+    ],
+    "labs": [],
+    "ev": "The log-parser CLI handles bad input with specific exceptions and logs through the `logging` module.",
+    "hours": "NTI Python module: 22 h (whole module, shared by PY-1–7)",
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "PY-6",
+    "name": "Python concurrency model",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "The GIL; threads vs processes vs asyncio, and when to use each.",
+    "why": "Your differentiator; used for automation (boto3) and reading the apps you deploy.",
+    "obj": [
+      "Explain the GIL and choose a concurrency model for a workload"
+    ],
+    "pre": [],
+    "nti": "NTI Python module (22 h): revision only; you already know Python.",
+    "debi": "Google course 7 'Automate Cybersecurity Tasks with Python' (unverified): do fast, for the security use cases.",
+    "res": [
+      "Real Python on failed items only"
+    ],
+    "labs": [],
+    "ev": "Explain the GIL cold and justify threads, processes or asyncio for three given workloads.",
+    "hours": "NTI Python module: 22 h (whole module, shared by PY-1–7)",
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "PY-7",
+    "name": "Environments and packaging",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "venv, pip/uv, pyproject.",
+    "why": "Your differentiator; used for automation (boto3) and reading the apps you deploy.",
+    "obj": [
+      "Package a tool with pyproject and install it in a fresh venv"
     ],
     "pre": [],
     "nti": "NTI Python module (22 h): revision only; you already know Python.",
@@ -477,8 +635,8 @@
     "labs": [
       "boto3 scripts inside PS-7"
     ],
-    "ev": "Doc 06 PY exit check (log-parser CLI + 3 tests).",
-    "hours": "NTI Python module: 22 h",
+    "ev": "The log-parser installs from its pyproject into a fresh venv and its 3 pytest tests pass (doc 06).",
+    "hours": "NTI Python module: 22 h (whole module, shared by PY-1–7)",
     "pri": "L",
     "existing": "have",
     "paths": [
@@ -486,42 +644,325 @@
     ]
   },
   {
-    "id": "DB-1–6",
-    "name": "Databases (group)",
+    "id": "DB-1",
+    "name": "Hand-written SQL",
     "stage": "FND",
     "lane": "code",
     "src": "EXIST",
-    "desc": "SQL, schema design, indexes, transactions, SQL vs NoSQL, Redis.",
-    "why": "Maintain only; needed to defend the grad project.",
+    "desc": "Joins (inner and outer), GROUP BY/HAVING, subqueries, CTEs, window functions.",
+    "why": "Needed to defend the grad project and to run its database on RDS and in integration tests (doc 19 G8, G11).",
     "obj": [
-      "Keep the CV defensible"
+      "Write joins, aggregates, CTEs and window functions by hand"
     ],
     "pre": [],
     "nti": null,
     "debi": "Google course 4 includes SQL (unverified).",
     "res": [
-      "pgexercises",
-      "Use The Index, Luke"
+      "pgexercises"
     ],
     "labs": [],
-    "ev": "Doc 06 DB exit check when a backend interview is booked (G11).",
+    "ev": "8 of 10 SQL problems on your own schema, unaided (doc 06 DB exit check).",
     "hours": null,
     "pri": "L",
     "existing": "have",
     "paths": [
-      "ASE"
+      "core"
     ]
   },
   {
-    "id": "WEB-1–8",
-    "name": "Django / Celery backend (group)",
+    "id": "DB-2",
+    "name": "Schema design and normalization",
     "stage": "FND",
     "lane": "code",
     "src": "EXIST",
-    "desc": "HTTP, request lifecycle, ORM, auth, REST, WSGI/ASGI, Celery reliability, architecture.",
+    "desc": "Keys, constraints, normalization to 3NF; justify your own capstone schema.",
+    "why": "Needed to defend the grad project and to run its database on RDS and in integration tests (doc 19 G8, G11).",
+    "obj": [
+      "Justify the grad project's schema: keys, constraints, 3NF"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [],
+    "labs": [],
+    "ev": "Explain the grad project's schema choices and normalization cold.",
+    "hours": null,
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "DB-3",
+    "name": "Indexes and query plans",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "B-tree intuition, when indexes help or hurt, composite column order; read `EXPLAIN ANALYZE`.",
+    "why": "Needed to defend the grad project and to run its database on RDS and in integration tests (doc 19 G8, G11).",
+    "obj": [
+      "Speed up a slow query and explain the plan"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Use The Index, Luke"
+    ],
+    "labs": [],
+    "ev": "A slow query sped up with an index, with `EXPLAIN ANALYZE` before and after explained (doc 06).",
+    "hours": null,
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "DB-4",
+    "name": "Transactions and isolation",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "ACID, isolation levels and their anomalies, locking basics; how Django wraps transactions.",
+    "why": "Needed to defend the grad project and to run its database on RDS and in integration tests (doc 19 G8, G11).",
+    "obj": [
+      "Explain isolation anomalies with an example from the grad project"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [],
+    "labs": [],
+    "ev": "Explain isolation levels and their anomalies cold, with an example from the grad project.",
+    "hours": null,
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "DB-5",
+    "name": "SQL vs NoSQL",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Data-model families and their consistency and scaling trade-offs; when to pick each.",
+    "why": "Needed to defend the grad project and to run its database on RDS and in integration tests (doc 19 G8, G11).",
+    "obj": [
+      "Explain when to pick SQL or NoSQL"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [],
+    "labs": [],
+    "ev": "A 3-minute SQL vs NoSQL answer using Redis as the example (doc 06).",
+    "hours": null,
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "DB-6",
+    "name": "Redis",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Data types, persistence (RDB/AOF), eviction; cache vs broker vs store; what happens on restart.",
+    "why": "Needed to defend the grad project and to run its database on RDS and in integration tests (doc 19 G8, G11).",
+    "obj": [
+      "Explain Redis's roles in the grad project and what survives a restart"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [],
+    "labs": [],
+    "ev": "Explain what happens to the grad project's Redis data on restart, and why.",
+    "hours": null,
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "WEB-1",
+    "name": "HTTP in practice",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Method idempotency, status codes, cookies, sessions, CORS.",
     "why": "The grad project is the one app deployed securely (G12); you must be able to defend it.",
     "obj": [
-      "Defend the grad project's backend through the project"
+      "Explain idempotency, cookies, sessions and CORS"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Django and Celery docs",
+      "TestDriven.io course if bought"
+    ],
+    "labs": [],
+    "ev": "Explain idempotency, cookies and CORS cold, using requests from the grad project.",
+    "hours": null,
+    "pri": "M",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "WEB-2",
+    "name": "Django request lifecycle",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "URLconf → middleware → view → ORM → response.",
+    "why": "The grad project is the one app deployed securely (G12); you must be able to defend it.",
+    "obj": [
+      "Trace a request from URLconf to response"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Django and Celery docs",
+      "TestDriven.io course if bought"
+    ],
+    "labs": [],
+    "ev": "Trace one request through the grad project's code (doc 06 WEB exit check).",
+    "hours": null,
+    "pri": "M",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "WEB-3",
+    "name": "Django ORM and N+1",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Lazy querysets, N+1 and `select_related`/`prefetch_related`, migrations.",
+    "why": "The grad project is the one app deployed securely (G12); you must be able to defend it.",
+    "obj": [
+      "Find and fix an N+1 query"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Django and Celery docs",
+      "TestDriven.io course if bought"
+    ],
+    "labs": [],
+    "ev": "An N+1 query found and fixed with `select_related`/`prefetch_related`, with query counts before and after.",
+    "hours": null,
+    "pri": "M",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "WEB-4",
+    "name": "Django authentication",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Sessions vs tokens, CSRF protection, password hashing.",
+    "why": "The grad project is the one app deployed securely (G12); you must be able to defend it.",
+    "obj": [
+      "Explain sessions vs tokens, CSRF and password hashing"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Django and Celery docs",
+      "TestDriven.io course if bought"
+    ],
+    "labs": [],
+    "ev": "Explain the grad project's authentication and CSRF protection cold.",
+    "hours": null,
+    "pri": "M",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "WEB-5",
+    "name": "REST API design",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Resources, status codes, pagination, versioning.",
+    "why": "The grad project is the one app deployed securely (G12); you must be able to defend it.",
+    "obj": [
+      "Design an endpoint's resources, status codes, pagination and versioning"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Django and Celery docs",
+      "TestDriven.io course if bought"
+    ],
+    "labs": [],
+    "ev": "Defend one grad-project endpoint's design: status codes, pagination, versioning.",
+    "hours": null,
+    "pri": "M",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "WEB-6",
+    "name": "Python web deployment model",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "WSGI vs ASGI, Gunicorn workers, what the reverse proxy does, static files.",
+    "why": "The grad project is the one app deployed securely (G12); you must be able to defend it.",
+    "obj": [
+      "Explain how a Django app is served in production"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Django and Celery docs",
+      "TestDriven.io course if bought"
+    ],
+    "labs": [],
+    "ev": "Explain how the grad project is served in production: workers, reverse proxy, static files.",
+    "hours": null,
+    "pri": "M",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "WEB-7",
+    "name": "Reliable async tasks (Celery)",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Broker vs result backend, acks, retries with backoff, idempotency, `transaction.on_commit`, surfacing failures.",
+    "why": "The grad project is the one app deployed securely (G12); you must be able to defend it.",
+    "obj": [
+      "Make a task idempotent with retries and backoff"
     ],
     "pre": [],
     "nti": null,
@@ -533,7 +974,7 @@
     "labs": [
       "Kill a Celery worker mid-task"
     ],
-    "ev": "Doc 06 WEB exit check; whiteboard the capstone.",
+    "ev": "Kill a worker mid-task and explain the outcome; implement an idempotent retry (doc 06).",
     "hours": null,
     "pri": "M",
     "existing": "have",
@@ -542,15 +983,126 @@
     ]
   },
   {
-    "id": "GIT-1–4",
-    "name": "Git model, workflows and recovery (group)",
+    "id": "WEB-8",
+    "name": "Capstone architecture",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Whiteboard the capstone with ownership boundaries and the AI-integration contract (timeouts, failures).",
+    "why": "The grad project is the one app deployed securely (G12); you must be able to defend it.",
+    "obj": [
+      "Whiteboard the capstone with ownership boundaries"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Django and Celery docs",
+      "TestDriven.io course if bought"
+    ],
+    "labs": [],
+    "ev": "A 3-minute whiteboard of the capstone, including failure handling at the AI boundary (doc 06).",
+    "hours": null,
+    "pri": "M",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "GIT-1",
+    "name": "Git's model",
     "stage": "FND",
     "lane": "code",
     "src": "NTI",
-    "desc": "Commits and branches, merge vs rebase, reset/revert/reflog, PR hygiene, removing a secret from history.",
+    "desc": "Commits, branches as pointers, HEAD, the staging area.",
     "why": "Every pipeline starts at a commit; leaked secrets in history are a real incident type.",
     "obj": [
-      "Recover from 5 Git disasters",
+      "Explain commits, branches, HEAD and the staging area"
+    ],
+    "pre": [],
+    "nti": "NTI Git module (7 h, doc 17 §1). Not on the NTI roadmap.sh map.",
+    "debi": "Absent from the DEBI map.",
+    "res": [
+      "Learn Git Branching",
+      "Pro Git ch. 2, 3, 7"
+    ],
+    "labs": [],
+    "ev": "Draw the commit graph and HEAD for a given sequence of commands, cold.",
+    "hours": "NTI Git module: 7 h (whole module, shared by GIT-1–4)",
+    "pri": "H",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "GIT-2",
+    "name": "Branching, merge vs rebase, conflicts",
+    "stage": "FND",
+    "lane": "code",
+    "src": "NTI",
+    "desc": "Branching workflows; merge vs rebase; resolving conflicts.",
+    "why": "Every pipeline starts at a commit; leaked secrets in history are a real incident type.",
+    "obj": [
+      "Resolve merge and rebase conflicts"
+    ],
+    "pre": [],
+    "nti": "NTI Git module (7 h, doc 17 §1). Not on the NTI roadmap.sh map.",
+    "debi": "Absent from the DEBI map.",
+    "res": [
+      "Learn Git Branching",
+      "Pro Git ch. 2, 3, 7"
+    ],
+    "labs": [
+      "Git disaster drills"
+    ],
+    "ev": "Resolve a staged merge conflict and a rebase conflict, explaining each step.",
+    "hours": "NTI Git module: 7 h (whole module, shared by GIT-1–4)",
+    "pri": "H",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "GIT-3",
+    "name": "Undo and recover",
+    "stage": "FND",
+    "lane": "code",
+    "src": "NTI",
+    "desc": "`restore`, `reset` (soft/mixed/hard), `revert`, `reflog`, `cherry-pick`.",
+    "why": "Every pipeline starts at a commit; leaked secrets in history are a real incident type.",
+    "obj": [
+      "Recover from 5 Git disasters"
+    ],
+    "pre": [],
+    "nti": "NTI Git module (7 h, doc 17 §1). Not on the NTI roadmap.sh map.",
+    "debi": "Absent from the DEBI map.",
+    "res": [
+      "Learn Git Branching",
+      "Pro Git ch. 2, 3, 7"
+    ],
+    "labs": [
+      "Git disaster drills"
+    ],
+    "ev": "Recover from 5 staged Git disasters and explain what each command did to the commit graph (about 45 min, doc 06).",
+    "hours": "NTI Git module: 7 h (whole module, shared by GIT-1–4)",
+    "pri": "H",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "GIT-4",
+    "name": "PR workflow and secrets hygiene",
+    "stage": "FND",
+    "lane": "code",
+    "src": "NTI",
+    "desc": "PR workflow, commit hygiene, `.gitignore`; keep secrets out of history and remove one that got in.",
+    "why": "Every pipeline starts at a commit; leaked secrets in history are a real incident type.",
+    "obj": [
       "Remove a committed secret properly"
     ],
     "pre": [],
@@ -563,8 +1115,8 @@
     "labs": [
       "Git disaster drills"
     ],
-    "ev": "Doc 06 GIT exit check (5 disasters, ~45 min).",
-    "hours": "NTI Git module: 7 h",
+    "ev": "A committed fake secret removed from history and rotated; `.gitignore` and PR hygiene explained.",
+    "hours": "NTI Git module: 7 h (whole module, shared by GIT-1–4)",
     "pri": "H",
     "existing": "refresh",
     "paths": [
@@ -944,8 +1496,21 @@
       "Add tests that a pipeline can gate on"
     ],
     "pre": [
-      "PY-1–7",
-      "WEB-1–8"
+      "PY-1",
+      "PY-2",
+      "PY-3",
+      "PY-4",
+      "PY-5",
+      "PY-6",
+      "PY-7",
+      "WEB-1",
+      "WEB-2",
+      "WEB-3",
+      "WEB-4",
+      "WEB-5",
+      "WEB-6",
+      "WEB-7",
+      "WEB-8"
     ],
     "nti": null,
     "debi": null,
@@ -975,7 +1540,8 @@
       "Run integration tests against service containers in CI"
     ],
     "pre": [
-      "TST-1"
+      "TST-1",
+      "DB-2"
     ],
     "nti": null,
     "debi": null,
@@ -1006,7 +1572,10 @@
       "Explain each stage's purpose"
     ],
     "pre": [
-      "GIT-1–4"
+      "GIT-1",
+      "GIT-2",
+      "GIT-3",
+      "GIT-4"
     ],
     "nti": "NTI CI/CD + DevSecOps practice project (28 h).",
     "debi": "Absent from the DEBI map.",
@@ -1127,7 +1696,10 @@
     ],
     "pre": [
       "CI-3",
-      "GIT-1–4"
+      "GIT-1",
+      "GIT-2",
+      "GIT-3",
+      "GIT-4"
     ],
     "nti": "NTI CI/CD module may cover it (unverified).",
     "debi": null,
@@ -1347,7 +1919,9 @@
     ],
     "pre": [
       "CLD-2",
-      "CLD-3"
+      "CLD-3",
+      "DB-1",
+      "DB-2"
     ],
     "nti": "NTI AWS module.",
     "debi": "DEBI map: common cloud storage, S3 (verified, names only).",
@@ -1981,7 +2555,14 @@
     ],
     "pre": [
       "SEC-3",
-      "WEB-1–8"
+      "WEB-1",
+      "WEB-2",
+      "WEB-3",
+      "WEB-4",
+      "WEB-5",
+      "WEB-6",
+      "WEB-7",
+      "WEB-8"
     ],
     "nti": "NTI map: STRIDE, PASTA, attack-surface mapping (verified).",
     "debi": "DEBI map: kill chain, Diamond model (complementary).",
@@ -2012,7 +2593,14 @@
     ],
     "pre": [
       "SEC-3",
-      "WEB-1–8"
+      "WEB-1",
+      "WEB-2",
+      "WEB-3",
+      "WEB-4",
+      "WEB-5",
+      "WEB-6",
+      "WEB-7",
+      "WEB-8"
     ],
     "nti": "NTI map: OWASP Top 10, SQLi/XSS prevention, input validation, Burp (verified).",
     "debi": "DEBI map: web-based attacks and OWASP Top 10 (verified).",
@@ -2553,7 +3141,14 @@
     ],
     "pre": [
       "CLD-7",
-      "WEB-1–8"
+      "WEB-1",
+      "WEB-2",
+      "WEB-3",
+      "WEB-4",
+      "WEB-5",
+      "WEB-6",
+      "WEB-7",
+      "WEB-8"
     ],
     "nti": null,
     "debi": null,
