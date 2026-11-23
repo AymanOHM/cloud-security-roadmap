@@ -124,6 +124,12 @@ def test_public_file_scan(tmp_path):
     assert not any("private/" in e or "ok.md" in e for e in errs)
 
 
+def test_allowed_handle_does_not_hide_the_name(tmp_path):
+    (tmp_path / "a.md").write_text("site: https://testnamexyz.github.io/repo\nwritten by Testname\n", encoding="utf-8")
+    errs = privacy_scan_files(tmp_path, ["testname"], ["testnameXYZ"])
+    assert errs == ["privacy: private term in a.md:2"]
+
+
 GOOD_TT = {"v": 1, "kdf": "PBKDF2-SHA256", "iter": 600000, "cipher": "AES-256-GCM",
            "salt": "AAAAAAAAAAAAAAAAAAAAAA==", "iv": "AAAAAAAAAAAAAAAA", "ct": "AAAAAAAAAAAAAAAAAAAAAAAA"}
 

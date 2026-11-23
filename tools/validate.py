@@ -8,7 +8,9 @@ of career-path tags, and the privacy lint (no learning-record notes, evidence-le
 status or private terms in data/ or the public docs).
 
 Private terms (e.g. the owner's name) are read from private/privacy-terms.txt, one per
-line, when that file exists, so the terms themselves never enter the public repo.
+line, when that file exists, so the terms themselves never enter the public repo. A line
+starting with "!" is an allowed exact string (e.g. the public GitHub handle in the site URL),
+removed from the text before the terms are matched.
 
 Usage: python3 tools/validate.py
 """
@@ -89,11 +91,24 @@ def timetable_errors(tt):
     return errs
 
 
-def private_terms(path=TERMS_FILE):
+def _terms_lines(path):
     if not path.exists():
         return []
-    return [ln.strip() for ln in path.read_text(encoding="utf-8").splitlines()
-            if ln.strip() and not ln.startswith("#")]
+    return [ln.strip() for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip() and not ln.startswith("#")]
+
+
+def private_terms(path=TERMS_FILE):
+    return [ln for ln in _terms_lines(path) if not ln.startswith("!")]
+
+
+def private_allow(path=TERMS_FILE):
+    return [ln[1:] for ln in _terms_lines(path) if ln.startswith("!") and len(ln) > 1]
+
+
+def _strip_allowed(s, allow):
+    for a in allow:
+        s = re.sub(re.escape(a), "", s, flags=re.I)
+    return s
 
 
 def _strings(obj, where):
@@ -107,9 +122,10 @@ def _strings(obj, where):
             yield from _strings(v, f"{where}.{k}")
 
 
-def privacy_errors(d, terms=()):
+def privacy_errors(d, terms=(), allow=None):
     """Lint every string in the data for personal record notes and private terms."""
     errors = []
+    allow = private_allow() if allow is None else allow
     term_res = [re.compile(re.escape(t), re.I) for t in terms]
     for key in ("meta", "comps", "projects", "certs", "compare", "migrations"):
         for where, s in _strings(d[key], key):
@@ -117,7 +133,7 @@ def privacy_errors(d, terms=()):
                 errors.append(f"privacy: record ID in {where}")
             if RECORDS_NOTE.search(s):
                 errors.append(f"privacy: records note in {where}")
-            if any(r.search(s) for r in term_res):
+            if term_res and any(r.search(_strip_allowed(s, allow)) for r in term_res):
                 errors.append(f"privacy: private term in {where}")
     for c in d["comps"]:
         if isinstance(c.get("ev"), str) and EV_STATUS.search(c["ev"]):
@@ -133,16 +149,17 @@ def public_files(root=ROOT):
         yield p
 
 
-def privacy_scan_files(root=ROOT, terms=()):
+def privacy_scan_files(root=ROOT, terms=(), allow=None):
     """Scan the files that would be published for record IDs and private terms."""
     errors = []
+    allow = private_allow() if allow is None else allow
     term_res = [re.compile(re.escape(t), re.I) for t in terms]
     for p in public_files(root):
         text = p.read_text(encoding="utf-8", errors="replace")
         for n, line in enumerate(text.splitlines(), 1):
             if RECORD_ID.search(line):
                 errors.append(f"privacy: record ID in {p.relative_to(root)}:{n}")
-            if any(r.search(line) for r in term_res):
+            if term_res and any(r.search(_strip_allowed(line, allow)) for r in term_res):
                 errors.append(f"privacy: private term in {p.relative_to(root)}:{n}")
     return errors
 
