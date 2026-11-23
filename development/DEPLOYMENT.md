@@ -3,19 +3,13 @@
 **Nothing in this file has been executed.** Steps marked 🛑 need the owner's explicit approval in the Claude Code
 session (`private/docs/CLAUDE_CODE_HANDOFF.md` Gate 5).
 
-## Decisions needed first (AUDIT D-05)
-- Repo name (suggestion: `cloud-security-roadmap`) and owner account.
-- Visibility. GitHub Pages from a **private** repo needs a paid plan (as far as known; **verify on GitHub's docs at
-  deploy time**). On a free account the repo must be public, so every committed file is public.
-- What is public: recommended = app, `data/`, `tools/`, `tests/`, `development/`, `maintenance/`, `curriculum/`,
-  README; personal docs (`STUDY_PLAN.md` §5 details, ROADMAP.md Phase 7 schedule) generalised or moved to `private/`.
-
-## Local repository (allowed after Gate 1)
-```bash
-git init -b main
-git status --ignored        # private/, archive/, dist/, build/ must show as ignored
-git add -A && git commit -m "Initial import of the NTI + DEBI roadmap (data v1.2)"
-```
+## Decisions (AUDIT D-05, D-10; Gate 1 and Stage 5)
+- Repo: **`cloud-security-roadmap`**, **public**, under the owner's account (GitHub Free serves Pages only from public
+  repos; the Pages site is public on any plan). Every committed file is public.
+- Public: app, `data/` (incl. the encrypted timetable), `tools/`, `tests/`, `development/`, `maintenance/`,
+  `curriculum/`, `ROADMAP.md`, `README.md`, `CLAUDE.md`. Personal and meta docs live in `private/` (gitignored).
+- Commit author email: the owner's GitHub no-reply address (history rewritten 23 Nov 2026 before any push).
+- Workflow: `.github/workflows/deploy-pages.yml` (activated in Stage 5; action versions checked 23 Nov 2026).
 
 ## Pre-publish checklist (all must pass before 🛑 Gate 5)
 - [ ] `git check-ignore -v private/ archive/ dist/ build/` lists all four
@@ -31,8 +25,7 @@ git add -A && git commit -m "Initial import of the NTI + DEBI roadmap (data v1.2
 ## GitHub setup (🛑 each step needs approval)
 1. 🛑 Create the repo (`gh repo create <name> --public|--private --source . --remote origin`), or the owner creates it
    in the web UI.
-2. 🛑 Move `development/github-pages-workflow.yml.draft` to `.github/workflows/deploy-pages.yml`; check the action
-   versions are current.
+2. ✅ Workflow moved to `.github/workflows/deploy-pages.yml` (Stage 5, approved); action versions current on 23 Nov 2026.
 3. 🛑 First push: `git push -u origin main`.
 4. 🛑 Repo Settings → Pages → Source: **GitHub Actions**.
 5. Confirm the workflow run passes and the site loads at `https://<user>.github.io/<repo>/`.

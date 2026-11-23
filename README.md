@@ -1,51 +1,69 @@
-# Cloud Security Study Plan — NTI + DEBI unified roadmap
+# Cloud Security Roadmap — NTI + DEBI unified
 
-A competency-based learning roadmap that merges two training programs (NTI's DevSecOps track and DEBI's
-Cybersecurity track) with independent learning, aimed at a DevOps/cloud entry role that grows into
-DevSecOps and cloud security. It comes with an interactive, offline tracker: a flowchart, stage map,
-Kanban board, checklist, career-path view, NTI vs DEBI comparison, project progression, certification
-timeline and progress dashboard.
+A competency-based learning roadmap that merges two Egyptian training programs (NTI's DevSecOps track and
+DEBI's Cybersecurity track) with independent learning. It aims at a junior DevOps/cloud role that grows into
+DevSecOps and cloud security, with 107 competencies in five stages, eight project stages and a certification
+plan.
 
-**Status (23 Nov 2026):** data v1.2, app working locally, not yet published. Prepared for Claude Code to
-audit, improve and deploy to GitHub Pages. Claude Code starts with `CLAUDE.md`.
+It comes with an **offline, single-file tracker**: flowchart, stage map, Kanban board, checklist, career
+paths, NTI vs DEBI comparison, projects, certification timeline, timetable and a progress dashboard.
 
-## Use the app now
-Open `dist/index.html` in any browser. It works offline. Progress is saved in that browser only; use
-Dashboard → Export to back it up.
+- **Live site:** `https://<user>.github.io/cloud-security-roadmap/` (after the first deploy)
+- **Written roadmap:** [`ROADMAP.md`](ROADMAP.md)
 
-To rebuild after changing data: `python3 tools/build.py`.
+## Use it
+Open the site, or open `dist/index.html` from a local build. Everything works offline; nothing is sent anywhere.
+
+- **Progress stays in your browser** (localStorage). The local file and the website keep **separate** progress:
+  export on one (Dashboard → Export) and import on the other. Import shows a preview and downloads a backup first.
+- **Evidence, not completion.** A competency counts as done at evidence level E4 with a link; a finished course
+  is E0–E2 at most. "Completed" without that shows a warning.
+- **Find things:** the search box (`/`), links like `#NET-3`, and "Focus chain" for one competency's
+  prerequisites and what it unlocks. Keyboard: arrow keys between tabs, Enter or Space to open, Escape to close.
+- **Timetable:** published only as encrypted data and unlocked with the owner's password.
+
+## Change the roadmap
+All content is data in `data/*.json`; the app is generated from it.
+
+```bash
+python3 tools/validate.py          # IDs, references, stage order, cycles, privacy lint
+python3 tools/build.py             # validate + inline the data into dist/index.html
+python3 tools/docgen.py --write    # regenerate the ROADMAP.md tables from the data
+```
+
+Renamed or retired IDs go in `data/id-migrations.json` so saved progress follows them. The step-by-step guide is
+[`maintenance/UPDATE_GUIDE.md`](maintenance/UPDATE_GUIDE.md); the history is in
+[`maintenance/CHANGELOG.md`](maintenance/CHANGELOG.md).
+
+## Tests
+Python 3.12+. `pip install -r requirements-dev.txt && python3 -m playwright install chromium`, then:
+
+```bash
+python3 -m pytest tests/           # validator and seed-parser unit tests
+python3 tests/e2e_smoke.py         # every view renders; status, export, import safety
+python3 tests/e2e_persistence.py   # progress survives renames, removals and additions; import/export
+python3 tests/e2e_ui.py            # keyboard, search, deep links, phone layout, encrypted timetable
+```
+
+GitHub Actions runs all of them on every push and pull request, and deploys `dist/` to GitHub Pages from `main`
+(`.github/workflows/deploy-pages.yml`).
 
 ## What's where
+| Path | Purpose |
+|---|---|
+| `ROADMAP.md` | The written roadmap: curriculum analysis, overlap matrix, career analysis, staged roadmap, projects, certifications, weekly execution (master copy) |
+| `data/` | Roadmap content: competencies, stages, groups, projects, certifications, comparison, ID migrations, the encrypted timetable (master for the app) |
+| `app/template.html` | The app (HTML/CSS/JS) with a data placeholder; no frameworks, no runtime requests |
+| `tools/` | `validate.py`, `build.py`, `docgen.py`, `seed_from_records.py` |
+| `tests/` | Unit and browser tests; `upgrade_demo.py` proves an upgrade from an older build loses nothing |
+| `curriculum/` | Verified facts and unknowns per program, and external benchmarks |
+| `development/` | Requirements and design spec, architecture, testing plan, deployment plan |
+| `maintenance/` | Update guide and changelog |
 
-| Path | Purpose | Authority |
-|---|---|---|
-| `CLAUDE.md` | Rules Claude Code loads automatically | — |
-| `ROADMAP.md` | The written roadmap: curriculum analysis, overlap matrix, career analysis, staged roadmap, projects, certifications, weekly execution | **Master for roadmap analysis** |
-| `curriculum/` | Verified facts and unknowns per program (`NTI.md`, `DEBI.md`) and external benchmarks | Facts with sources |
-| `data/` | Roadmap content as JSON: competencies, stages, projects, certifications, comparison, ID migrations | **Master for app content** |
-| `app/template.html` | The app (HTML/CSS/JS) with a data placeholder | Source |
-| `tools/` | `validate.py`, `build.py`, `docgen.py` | Source |
-| `tests/` | Validator unit tests and a browser smoke test | Source |
-| `dist/` | Built app (`index.html`); gitignored, rebuilt by CI | Generated |
-| `development/` | Requirements (incl. design spec), architecture, testing plan, deployment plan, draft Pages workflow | Plans |
-| `maintenance/` | How to update the roadmap without rebuilding the app; changelog | Process |
-| `private/` | Personal and meta docs (`docs/`: handoff, audit, study plan, project context), original PDFs, briefs, study-plan copies, progress snapshot, timetable. **Gitignored, never published**; its own local git repo | Sources |
-| `archive/` | Backups of earlier versions. Gitignored | Backup |
+`private/` (personal notes, records and sources), `archive/`, `dist/` and `build/` are gitignored and never published.
 
-**Layout notes:** career direction is `ROADMAP.md` Phase 3; the learning methodology summary and the audit
-log are personal and live in `private/docs/` (references like "AUDIT A-06" in these docs point there). The curriculum comparison is
-`ROADMAP.md` Phase 2 plus `data/comparison.json`, so it isn't repeated in `curriculum/`. The design spec is
-part of `development/REQUIREMENTS.md`. Resources live inside each competency in `data/competencies.json`
-rather than in a separate `resources.json`, so a resource can't drift from the competency it serves.
-
-## Privacy model
-- The public repo will hold the app, the roadmap data and the docs. GitHub Pages hosts the app only.
-- Personal learning progress lives in the browser (localStorage) and in exported JSON files, never in the repo.
-- `private/` holds personal and third-party material and is gitignored.
-- Personal data is private by default: `tools/validate.py` fails on record IDs, evidence-level status text or
-  the owner's name in `data/` and the public docs. The only personal item planned for the repo is the weekly
-  timetable, as an encrypted blob unlocked in the app (not yet implemented).
-
-## Requirements
-Python 3.10+ for the tools. For tests: `pip install -r requirements-dev.txt` and
-`python3 -m playwright install chromium`. The app itself needs only a browser.
+## Privacy
+The repository and site hold the roadmap, never learning progress. `tools/validate.py` fails the build if record
+IDs, evidence-level status text or private terms appear in the data or any published file, and if the timetable
+file is anything other than ciphertext. NTI course material is never included (NTI's terms forbid publishing it);
+only module names and hours are.

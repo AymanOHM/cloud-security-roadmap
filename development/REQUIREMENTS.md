@@ -56,7 +56,7 @@ with the owner's decisions (AUDIT D-03 – D-10): ✅ implemented · ◐ partial
 | ID | Requirement | Status |
 |---|---|---|
 | NFR-1 | One self-contained HTML file; no external dependencies; works offline and from `file://` | ✅ Implemented (no requests; only SVG namespace strings) |
-| NFR-2 | Hostable on GitHub Pages; deployed by GitHub Actions | ◐ Partial: draft workflow only |
+| NFR-2 | Hostable on GitHub Pages; deployed by GitHub Actions | ◐ Workflow active and dry-run locally; not deployed until Gate 5 |
 | NFR-3 | Responsive: usable at 390 px width (panel becomes full-screen) | ✅ Implemented at 390 px: no page overflow in any view, compact toolbar, stacked Kanban, checklist cards, pinch-zoom (A-15 – A-17) |
 | NFR-4 | Accessibility toward WCAG 2.1 AA: keyboard access to every action (incl. status changes), visible focus, contrast ≥ 4.5:1 for text, names for SVG controls, no colour-only meaning | ◐ Mostly: keyboard paths, focus management, tabs pattern, names with status, contrast fixed; no automated axe scan yet |
 | NFR-5 | Performance: first render < 1 s on a mid-range laptop; interactions instant at ~150 nodes | ✅ Implemented at 86 nodes |

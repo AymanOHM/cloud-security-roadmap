@@ -1,0 +1,11 @@
+# Proposes updates for the workflow's actions and the test dependencies (pull requests only; nothing auto-merges).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: monthly

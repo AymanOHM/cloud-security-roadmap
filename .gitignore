@@ -1,13 +1,17 @@
 # Personal material: never commit (see private/README.md)
 private/
-# Local backups of earlier versions (contain the same personal notes as pre-scrub data; see AUDIT.md P-01)
+# Local backups of earlier versions (contain personal notes and pre-rewrite git history)
 archive/
 # Build output: GitHub Actions builds dist/ from data/ + app/
 dist/
 build/
-# Progress exports from the app (personal learning data)
+# Progress exports, backups and seeds from the app (personal learning data)
 roadmap-progress-*.json
 *.progress.json
+# A stray downloaded copy of the timetable outside data/ (the committed one lives in data/)
+/timetable.enc.json
+# Test screenshots
+tests/screens/
 # Python / OS / editor noise
 __pycache__/
 *.pyc
