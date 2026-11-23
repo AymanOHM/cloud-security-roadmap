@@ -22,6 +22,19 @@ session (`private/docs/CLAUDE_CODE_HANDOFF.md` Gate 5).
 - [ ] validate, unit tests, build and smoke test pass locally
 - [ ] The owner has read the final file list (`git ls-files`)
 
+### Results, 23 Nov 2026 (Stage 5)
+| Check | Result |
+|---|---|
+| `private/`, `archive/`, `dist/`, `build/` ignored | ✅ all four |
+| No tracked private, archive, PDF or progress files | ✅ 0 of 34 tracked files |
+| `validate.py` with private terms | ✅ passes (data, 34 public files, timetable is ciphertext) |
+| NTI course material | ✅ none: module names, hours, terms and the owner's own rating only |
+| Personal data in the tree | ✅ none besides the encrypted timetable; owner name appears only as the GitHub handle |
+| History (every commit): record IDs, private terms, timetable text, personal email | ✅ 0 hits; author email rewritten to the GitHub no-reply address |
+| Secrets | ✅ none (`id-token: write` is a workflow permission) |
+| CI dry run in a clean clone without `private/` | ✅ validate, docgen check, 24 unit tests, build, smoke, persistence and UI tests |
+| Owner has read the file list | ⏳ at Gate 5 |
+
 ## GitHub setup (🛑 each step needs approval)
 1. 🛑 Create the repo (`gh repo create <name> --public|--private --source . --remote origin`), or the owner creates it
    in the web UI.

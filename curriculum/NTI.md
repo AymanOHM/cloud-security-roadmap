@@ -17,7 +17,7 @@ forbid publishing it): names, hours and the owner's own words only.
 | Percentage-discount exam vouchers for several certifications incl. AWS and Kubernetes (% and expiry unknown) | Study Plan doc 17 §1 (19 Oct 2026) |
 | The NTI page names SAA-C02 (retired); the current exam is SAA-C03 | doc 17 §1 |
 | Linux Administration 1 material reviewed: 5.5/10, study selectively (guide in a Google Doc) | Study Plan doc 20 |
-| Soft-skills phase ran first; Linux block started ~mid-Nov 2026 (not confirmed by a handoff) | records, doc 20 |
+| Soft-skills phase ran first; Linux block started ~mid-Nov 2026 | Study Plan doc 20 |
 
 Machine-readable hours: `../data/roadmap.json` → `ntiHours`, `ntiPart2Hours`.
 
