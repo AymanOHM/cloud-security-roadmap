@@ -11,12 +11,13 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from validate import load_all, validate, ROOT  # noqa: E402
+from validate import load_all, validate, private_terms, privacy_scan_files, ROOT  # noqa: E402
 
 
 def main():
     d = load_all()
-    errs = validate(d)
+    terms = private_terms()
+    errs = validate(d, terms) + privacy_scan_files(ROOT, terms)
     if errs:
         print("Data validation failed; nothing built:")
         for e in errs:

@@ -1176,10 +1176,7 @@
     "pri": "H",
     "existing": null,
     "paths": [
-      "core",
-      "DSO",
-      "ASE",
-      "CSE"
+      "core"
     ]
   },
   {
@@ -1882,9 +1879,7 @@
     "pri": "H",
     "existing": null,
     "paths": [
-      "core",
-      "CSO",
-      "CSE"
+      "core"
     ]
   },
   {
@@ -1914,9 +1909,7 @@
     "pri": "H",
     "existing": null,
     "paths": [
-      "core",
-      "CSO",
-      "CSE"
+      "core"
     ]
   },
   {
@@ -2003,10 +1996,7 @@
     "pri": "M",
     "existing": null,
     "paths": [
-      "core",
-      "DSO",
-      "CSE",
-      "ASE"
+      "core"
     ]
   },
   {
@@ -2037,9 +2027,7 @@
     "pri": "M",
     "existing": null,
     "paths": [
-      "core",
-      "ASE",
-      "DSO"
+      "core"
     ]
   },
   {
@@ -2601,7 +2589,6 @@
     "pri": "L",
     "existing": "have",
     "paths": [
-      "ASE",
       "core"
     ]
   }

@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
-from validate import load_all, validate  # noqa: E402
+from validate import load_all, validate, privacy_scan_files  # noqa: E402
 
 BASE = load_all()
 
@@ -52,8 +52,86 @@ def test_migration_to_missing_id_rejected():
     assert any("does not exist" in e for e in errs_after(lambda d: d["migrations"].update({"OLD-1": "NOPE-2"})))
 
 
+# Record IDs are assembled at runtime so this file never contains one literally.
+REC = "H-" + "20261012" + "-2"
+
+
+def test_split_migration_accepted():
+    def m(d):
+        d["migrations"]["OLD-1–2"] = ["NET-1", "NET-2"]
+    assert errs_after(m) == []
+
+
+def test_split_migration_to_missing_id_rejected():
+    assert any("does not exist" in e for e in errs_after(lambda d: d["migrations"].update({"OLD-1–2": ["NET-1", "NOPE-3"]})))
+
+
+def test_empty_split_rejected():
+    assert any("non-empty list" in e for e in errs_after(lambda d: d["migrations"].update({"OLD-1": []})))
+
+
+def test_core_is_exclusive():
+    def m(d):
+        d["comps"][0]["paths"] = ["core", "DSO"]
+    assert any("'core' is exclusive" in e for e in errs_after(m))
+
+
+def test_missing_path_tag_rejected():
+    def m(d):
+        d["comps"][0]["paths"] = []
+    assert any("at least one path tag" in e for e in errs_after(m))
+
+
+def test_record_id_anywhere_in_data_rejected():
+    def m(d):
+        d["projects"][0]["arch"] += f" ({REC})"
+    assert any("record ID" in e for e in errs_after(m))
+
+
+def test_records_note_rejected():
+    def m(d):
+        d["comps"][3]["res"].append("Records show a gap here")
+    assert any("records note" in e for e in errs_after(m))
+
+
+def test_ev_reporting_a_level_rejected():
+    for bad in ("E2 partial.", "Below \U0001f7e1, fix it", "Partial: pass the exit check"):
+        def m(d, bad=bad):
+            d["comps"][0]["ev"] = bad
+        assert any("'ev' must define evidence" in e for e in errs_after(m)), bad
+
+
+def test_private_term_in_data_rejected():
+    def m(d):
+        d["comps"][0]["why"] = "Because Testname said so"
+    assert any("private term" in e for e in validate_with_terms(m, ["testname"]))
+
+
+def validate_with_terms(mutate, terms):
+    d = copy.deepcopy(BASE)
+    mutate(d)
+    return validate(d, terms)
+
+
+def test_public_file_scan(tmp_path):
+    (tmp_path / "ok.md").write_text("Nothing personal here.\n", encoding="utf-8")
+    (tmp_path / "leak.md").write_text(f"line one\nsee {REC}\nby Testname\n", encoding="utf-8")
+    (tmp_path / "private").mkdir()
+    (tmp_path / "private" / "notes.md").write_text(f"{REC} Testname\n", encoding="utf-8")
+    errs = privacy_scan_files(tmp_path, ["testname"])
+    assert "privacy: record ID in leak.md:2" in errs
+    assert "privacy: private term in leak.md:3" in errs
+    assert not any("private/" in e or "ok.md" in e for e in errs)
+
+
 if __name__ == "__main__":
+    import inspect
+    import tempfile
     for name, fn in list(globals().items()):
         if name.startswith("test_"):
-            fn()
+            if "tmp_path" in inspect.signature(fn).parameters:
+                with tempfile.TemporaryDirectory() as tmp:
+                    fn(Path(tmp))
+            else:
+                fn()
             print("ok", name)
