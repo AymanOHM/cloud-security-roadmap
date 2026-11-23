@@ -197,7 +197,13 @@ const projByComp = {}; D.projects.forEach(p=>p.comps.forEach(id=>(projByComp[id]
 /* ---------- storage ---------- */
 let storageOK = true;
 function blank(){return {status:{},notes:{},evidence:{},updated:{}}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");return s&&s.status?Object.assign(blank(),s):blank()}catch(e){storageOK=false;return blank()}}
+/* Keep only known IDs, allowlisted statuses and string fields (AUDIT A-12). */
+function sanitize(o){const out=blank();if(!o||typeof o!=="object"||typeof o.status!=="object"||!o.status)return null;
+  for(const k of ["status","notes","evidence","updated"]){const src=o[k];if(!src||typeof src!=="object")continue;
+    for(const [id,v] of Object.entries(src)){if(!Object.prototype.hasOwnProperty.call(byId,id)||typeof v!=="string")continue;
+      if(k==="status"&&!Object.prototype.hasOwnProperty.call(ST_LABEL,v))continue;out[k][id]=v}}
+  return out}
+function load(){try{const s=sanitize(JSON.parse(localStorage.getItem(KEY)||"null"));return s||blank()}catch(e){storageOK=false;return blank()}}
 let S = load();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storageOK=false}}
 const st = id => S.status[id]||"ns";
@@ -208,8 +214,9 @@ function setStatus(id,v){S.status[id]=v;S.updated[id]=new Date().toISOString();s
 /* ---------- helpers ---------- */
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const el = (h)=>{const t=document.createElement("template");t.innerHTML=h.trim();return t.content.firstElementChild};
-const srcBadge = s => `<span class="srcb" style="color:var(--${s});border-color:var(--${s})">${SRC_LABEL[s]}</span>`;
-const dotFor = id => {const s=st(id),lk=isBlocked(id)&&s==="ns";const style=lk?"background:#3a4350":s==="ns"?"border:1.5px solid #e6edf3":`background:var(--${s})`;return `<span class="dot" style="${style}" title="${lk?"Locked: prerequisites not done":ST_LABEL[s]}"></span>`};
+const cssTok = s => String(s).replace(/[^A-Za-z0-9_-]/g,"");
+const srcBadge = s => `<span class="srcb" style="color:var(--${cssTok(s)});border-color:var(--${cssTok(s)})">${esc(SRC_LABEL[s])}</span>`;
+const dotFor = id => {const s=st(id),lk=isBlocked(id)&&s==="ns";const style=lk?"background:#3a4350":s==="ns"?"border:1.5px solid #e6edf3":`background:var(--${cssTok(s)})`;return `<span class="dot" style="${style}" title="${lk?"Locked: prerequisites not done":esc(ST_LABEL[s])}"></span>`};
 function pct(list){if(!list.length)return 0;return Math.round(100*list.filter(id=>st(id)==="done").length/list.length)}
 function barHTML(list,w){const n=list.length||1,d=list.filter(i=>st(i)==="done").length,p=list.filter(i=>st(i)==="ip").length;
   return `<div class="bar" style="${w?`width:${w}px`:""}"><span style="width:${100*d/n}%;background:var(--done)"></span><span style="width:${100*p/n}%;background:var(--ip)"></span></div>`}
@@ -498,12 +505,12 @@ function renderChecklist(){
 let curPath="DSO";
 function renderPaths(){
   const v=document.getElementById("v-paths");const core=D.comps.filter(c=>c.paths.includes("core")).map(c=>c.id);
-  const p=pathById[curPath];const spec=D.comps.filter(c=>c.paths.includes(curPath)).map(c=>c.id);
+  const p=pathById[curPath];const spec=D.comps.filter(c=>c.paths.includes(curPath)&&!c.paths.includes("core")).map(c=>c.id);
   const sharedWith=id=>byId[id].paths.filter(x=>x!==curPath&&x!=="core").map(x=>pathById[x].name);
   v.innerHTML=`<div class="page"><h2>Career specialization decision point</h2>
   <p class="lead">Most of Stages 1–3, plus job readiness, form a shared core for every path. The branch happens at Stage 4. The recommendation keeps doc 19's decision: enter as a junior DevOps/cloud engineer (or backend), grow into DevSecOps, with cloud security as the destination.</p>
   <div class="trunk"><div class="seg">Core: ${core.length} competencies · ${pct(core)}% done</div><span class="arrow">→</span><div class="seg" style="border-color:var(--ip)">◆ Decision point (Stage 4)</div><span class="arrow">→</span><span class="mini">choose a branch below</span></div>
-  <div class="grid g2" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">${D.paths.map(x=>{const L=D.comps.filter(c=>c.paths.includes(x.id)).map(c=>c.id);
+  <div class="grid g2" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">${D.paths.map(x=>{const L=D.comps.filter(c=>c.paths.includes(x.id)&&!c.paths.includes("core")).map(c=>c.id);
     return `<div class="card pathcard ${x.rec?"rec":""} ${x.id===curPath?"on":""}" data-p="${x.id}"><div style="display:flex;justify-content:space-between;gap:6px"><b>${esc(x.name)}</b>${x.rec?`<span class="badge" style="color:var(--rec);border-color:var(--rec)">Recommended</span>`:""}</div>
     <p class="mini" style="margin:6px 0">${esc(x.entry)}</p>${barHTML([...core,...L])}<p class="mini" style="margin:6px 0 0">${L.length} specific · ${pct([...core,...L])}% of path done</p></div>`}).join("")}</div>
   <div class="grid g2" style="margin-top:16px">
@@ -585,7 +592,7 @@ function renderDash(){
   v.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go));
   v.querySelectorAll("[data-stage]").forEach(r=>r.onclick=()=>openStage(r.dataset.stage));
   v.querySelector("#exp").onclick=()=>{const blob=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="roadmap-progress-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
-  v.querySelector("#imp").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=JSON.parse(t);if(!o.status)throw 0;S=Object.assign(blank(),o);save();refreshAll()}catch(_){alert("That file isn't a progress export.")}})};
+  v.querySelector("#imp").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=sanitize(JSON.parse(t));if(!o)throw 0;S=o;save();refreshAll()}catch(_){alert("That file isn't a progress export.")}finally{e.target.value=""}})};
   v.querySelector("#rst").onclick=()=>{if(confirm("Reset all statuses, notes and evidence? This can't be undone (export first if unsure).")){S=blank();save();closePanel();refreshAll()}};
 }
 
