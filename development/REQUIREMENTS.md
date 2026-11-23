@@ -12,16 +12,16 @@ with the owner's decisions (AUDIT D-03 – D-10): ✅ implemented · ◐ partial
 | FR-2 | Stage map: the five stages (Foundation; Cloud and DevOps Engineering; Security Engineering; Cloud Security Specialization; Portfolio and Job Readiness) × domains, with stage gates | ✅ Implemented |
 | FR-3 | Distinct visual identifiers for NTI, DEBI, independent, shared and existing competencies, with a legend | ✅ Implemented |
 | FR-4 | Node headline is the competency **name**; the ID appears in details, chips and checklist | ✅ Implemented |
-| FR-5 | Kanban: Locked / Ready / In progress / Completed; drag to change status; filters by stage, path, search | ◐ Partial: mouse-only drag; Locked → Ready snaps back (A-13); unusable at 390 px (A-17) |
+| FR-5 | Kanban: Locked / Ready / In progress / Completed; drag to change status; filters by stage, path, search | ✅ Implemented: drag, plus keyboard-focusable cards that open the status buttons; locked cards can't drop on Ready (A-13); stacks at 390 px |
 | FR-6 | Competency checklist with filters (status, source, stage, locked) | ✅ Implemented |
-| FR-7 | Career specialization decision point: five paths, shared vs path-specific competencies, recommended path highlighted, highlight on graph | ◐ Partial: core + path double counting (A-18) |
+| FR-7 | Career specialization decision point: five paths, shared vs path-specific competencies, recommended path highlighted, highlight on graph | ✅ Implemented (core excluded from path counts) |
 | FR-8 | NTI vs DEBI comparison with NTI module hours and verified/unverified notice | ✅ Implemented |
 | FR-9 | Project progression PS-1 … PS-8 with competencies and progress | ✅ Implemented |
-| FR-10 | Certification timeline with readiness from competencies | ◐ Partial: hard-coded timeline window (A-20) |
+| FR-10 | Certification timeline with readiness from competencies | ✅ Implemented: window derived from the data (A-20) |
 | FR-11 | Dashboard: overall and per-stage/per-source progress, skills radar, next up, in progress, locked with blockers, existing to claim | ✅ Implemented |
-| FR-12 | Search and focus a competency in the graph; deep links `#ID` | ✗ Missing |
-| FR-13 | "Focus chain" mode: show only a competency's prerequisites and what it unlocks | ◐ Partial (highlight only) |
-| FR-14 | Timetable view: the owner's weekly timetable, stored only as an encrypted blob in the repo and unlocked with a password; in-app encrypt panel produces the blob (D-10) | ✗ Missing |
+| FR-12 | Search and focus a competency in the graph; deep links `#ID` | ✅ Implemented: search box (ID or name, `/` shortcut) and `#ID` deep links |
+| FR-13 | "Focus chain" mode: show only a competency's prerequisites and what it unlocks | ✅ Implemented: Focus chain toggle |
+| FR-14 | Timetable view: the owner's weekly timetable, stored only as an encrypted blob in the repo and unlocked with a password; in-app encrypt panel produces the blob (D-10) | ✅ Implemented: encrypted blob `data/timetable.enc.json` (optional), unlock view, in-app encrypt panel |
 | FR-15 | "Late" indicator per stage, project and cert: window passed with work not done → "cut or re-plan" prompt; never a missed-session count (D-10) | ✅ Implemented (stages and projects carry `due`; certs use `end`) |
 
 ### Competency details
@@ -57,8 +57,8 @@ with the owner's decisions (AUDIT D-03 – D-10): ✅ implemented · ◐ partial
 |---|---|---|
 | NFR-1 | One self-contained HTML file; no external dependencies; works offline and from `file://` | ✅ Implemented (no requests; only SVG namespace strings) |
 | NFR-2 | Hostable on GitHub Pages; deployed by GitHub Actions | ◐ Partial: draft workflow only |
-| NFR-3 | Responsive: usable at 390 px width (panel becomes full-screen) | ◐ Partial, close to failing (A-15 – A-17) |
-| NFR-4 | Accessibility toward WCAG 2.1 AA: keyboard access to every action (incl. status changes), visible focus, contrast ≥ 4.5:1 for text, names for SVG controls, no colour-only meaning | ◐ Partial (AUDIT_REPORT §3) |
+| NFR-3 | Responsive: usable at 390 px width (panel becomes full-screen) | ✅ Implemented at 390 px: no page overflow in any view, compact toolbar, stacked Kanban, checklist cards, pinch-zoom (A-15 – A-17) |
+| NFR-4 | Accessibility toward WCAG 2.1 AA: keyboard access to every action (incl. status changes), visible focus, contrast ≥ 4.5:1 for text, names for SVG controls, no colour-only meaning | ◐ Mostly: keyboard paths, focus management, tabs pattern, names with status, contrast fixed; no automated axe scan yet |
 | NFR-5 | Performance: first render < 1 s on a mid-range laptop; interactions instant at ~150 nodes | ✅ Implemented at 86 nodes |
 | NFR-6 | Privacy: no personal data in the repo or the deployed site; progress never leaves the browser except by explicit export | ◐ Partial (P-01, P-02) |
 | NFR-7 | No analytics, trackers, cookies or third-party requests | ✅ Implemented (verified) |

@@ -12,6 +12,8 @@ line, when that file exists, so the terms themselves never enter the public repo
 
 Usage: python3 tools/validate.py
 """
+import base64
+import binascii
 import json
 import re
 import sys
@@ -50,7 +52,41 @@ def load_all(data_dir=None):
         "certs": load("certifications.json", data_dir),
         "compare": load("comparison.json", data_dir),
         "migrations": load("id-migrations.json", data_dir).get("migrations", {}),
+        "timetable": load_timetable(data_dir),
     }
+
+
+TIMETABLE = "timetable.enc.json"
+
+
+def load_timetable(data_dir=None):
+    """The encrypted timetable (AUDIT D-10) is optional; None when the file doesn't exist."""
+    p = Path(data_dir or DATA) / TIMETABLE
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else None
+
+
+def _b64len(s):
+    try:
+        return len(base64.b64decode(s, validate=True))
+    except (binascii.Error, ValueError, TypeError):
+        return -1
+
+
+def timetable_errors(tt):
+    """The committed timetable must be ciphertext in the exact shape the app writes, never plain text."""
+    if tt is None:
+        return []
+    keys = {"v", "kdf", "iter", "cipher", "salt", "iv", "ct"}
+    if not isinstance(tt, dict) or set(tt) != keys:
+        return [f"{TIMETABLE}: must have exactly the keys {sorted(keys)} (is it plain text?)"]
+    errs = []
+    if tt["v"] != 1 or tt["kdf"] != "PBKDF2-SHA256" or tt["cipher"] != "AES-256-GCM":
+        errs.append(f"{TIMETABLE}: unsupported format (v 1, PBKDF2-SHA256, AES-256-GCM expected)")
+    if not isinstance(tt["iter"], int) or tt["iter"] < 600000:
+        errs.append(f"{TIMETABLE}: 'iter' must be an integer >= 600000")
+    if _b64len(tt["salt"]) < 16 or _b64len(tt["iv"]) != 12 or _b64len(tt["ct"]) < 17:
+        errs.append(f"{TIMETABLE}: salt (>=16 bytes), iv (12 bytes) and ct must be base64 ciphertext")
+    return errs
 
 
 def private_terms(path=TERMS_FILE):
@@ -186,6 +222,20 @@ def validate(d, terms=()):
     for n in by:
         visit(n, [])
 
+    gids, members = set(), {}
+    for g in meta.get("groups", []):
+        if g.get("id") in by or g.get("id") in gids:
+            errors.append(f"group {g.get('id')}: id must be unique and not a competency id")
+        gids.add(g.get("id"))
+        if not isinstance(g.get("name"), str) or not g.get("members"):
+            errors.append(f"group {g.get('id')}: needs a name and members")
+        for m in g.get("members", []):
+            if m not in by:
+                errors.append(f"group {g.get('id')}: unknown member {m}")
+            elif m in members:
+                errors.append(f"group {g.get('id')}: {m} is already in group {members[m]}")
+            members[m] = g.get("id")
+    errors += timetable_errors(d.get("timetable"))
     for s in meta["stages"]:
         if not _date_ok(s.get("due")):
             errors.append(f"stage {s['id']}: 'due' must be null or YYYY-MM-DD")

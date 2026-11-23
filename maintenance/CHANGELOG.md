@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## app 2026-11-23 (Stage 4: UX, flowchart, accessibility, timetable)
+- **Find things:** search box (ID or name; `/` to focus), `#ID` deep links that update as you select, Focus chain mode.
+- **Flowchart:** PY, DB, WEB and GIT drawn as collapsed group boxes (open to expand, D-04); job-readiness items with
+  no prerequisites in an "ongoing" band instead of "Start here" (A-19); stage-map nodes name their source.
+- **Keyboard and screen readers:** tabs pattern with arrow keys; Enter and Space activate nodes, stage headers,
+  gates and Kanban cards; Escape closes the panel and returns focus; node names include ID and status; visible
+  focus ring; `--faint` contrast raised (A-08).
+- **Phone:** no page overflow at 390 px, compact toolbar with a folding legend, stacked Kanban, checklist as cards,
+  readable flowchart scale, pinch-zoom and touch pan; a resize no longer resets your zoom (A-15 – A-17).
+- **Fixes:** background click closes the panel (A-14); locked Kanban cards can't drop on Ready (A-13); cert timeline
+  derived from the data (A-20).
+- **Timetable (D-10):** optional `data/timetable.enc.json` (AES-256-GCM, PBKDF2 600k), unlocked in the Timetable
+  view next to the "past their window" list; the in-app panel creates the file. `validate.py` rejects plain text.
+
 ## app 2026-11-23 (Stage 3: tracking and persistence; data 1.3 + `due` dates)
 - **Storage v2:** versioned envelope; v1 progress migrates on first load (a copy of v1 is kept); renamed IDs
   carry their progress; split or removed IDs become orphans shown on the dashboard (move or delete).

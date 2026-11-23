@@ -35,7 +35,8 @@ def main():
         "stages": m["stages"], "lanes": m["lanes"], "sources": m["sources"], "paths": m["paths"],
         "ntiHours": m["ntiHours"], "ntiPart2Hours": m.get("ntiPart2Hours", {}),
         "comps": d["comps"], "projects": d["projects"], "certs": d["certs"], "compare": d["compare"],
-        "migrations": d["migrations"],
+        "migrations": d["migrations"], "groups": m.get("groups", []),
+        "timetable": d["timetable"],
     }
     tpl = (ROOT / "app" / "template.html").read_text(encoding="utf-8")
     if "/*DATA*/null" not in tpl:

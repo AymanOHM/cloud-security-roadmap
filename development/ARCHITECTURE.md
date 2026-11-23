@@ -17,11 +17,12 @@ data/*.json ──► tools/docgen.py ──► build/docgen/*.md  (tables for R
 ## 2. Data model (`data/`)
 | File | Content |
 |---|---|
-| `roadmap.json` | `schemaVersion` (data schema, int), `dataVersion` (content version string), `stages[]` {id, n, name, window, gate}, `lanes[]` {id, name}, `sources` {NTI, DEBI, IND, SHARED, EXIST → label}, `paths[]` {id, name, rec, entry, why}, `ntiHours`, `ntiPart2Hours` |
+| `roadmap.json` | `schemaVersion` (data schema, int), `dataVersion` (content version string), `stages[]` {id, n, name, window, gate, due}, `groups[]` {id, name, members[]} (flowchart clusters, D-04), `lanes[]` {id, name}, `sources` {NTI, DEBI, IND, SHARED, EXIST → label}, `paths[]` {id, name, rec, entry, why}, `ntiHours`, `ntiPart2Hours` |
 | `competencies.json` | Array, **in roadmap order** (this order is the learning sequence shown in the checklist and in ROADMAP.md) |
 | `projects.json` | PS-1 … PS-8 {id, name, stage, doc19, window, comps[], arch, steps[], goal, deliv, value} |
 | `certifications.json` | {id, name, when, start "YYYY-MM", end, status, cost, fills, verdict, comps[]} |
 | `comparison.json` | NTI vs DEBI rows {area, nti, debi, cls, lead, action} |
+| `timetable.enc.json` | Optional. The owner's timetable as AES-256-GCM ciphertext {v, kdf, iter, cipher, salt, iv, ct}; written by the app's encrypt panel, validated as ciphertext by `validate.py` (AUDIT D-10) |
 | `id-migrations.json` | {"migrations": {"OLD-ID": "NEW-ID" \| ["NEW-1", …]}}: a string is a rename, a list is a split (e.g. `PY-1–7` → PY-1 … PY-7, data 1.3). App support pending (AUDIT A-06) |
 
 **Competency fields** (all required; validated by `tools/validate.py`):

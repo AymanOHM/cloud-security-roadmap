@@ -7,7 +7,7 @@
 <style>
 :root{
   --bg:#0d1117;--panel:#161b22;--panel2:#1c222b;--line:#2a313c;--line2:#3a4350;
-  --text:#e6edf3;--muted:#8b949e;--faint:#6e7681;
+  --text:#e6edf3;--muted:#9da7b3;--faint:#8b949e;
   --NTI:#4c8dff;--DEBI:#c27bff;--IND:#f0a83a;--SHARED:#2fbfa8;--EXIST:#9aabbd;
   --ns:#6e7681;--ip:#e3b341;--done:#3fb950;--blocked:#f85149;--rec:#3fb950;
   --radius:8px;
@@ -42,6 +42,19 @@ select.btn{padding:5px 8px}
 .canvas{flex:1;position:relative;overflow:hidden;cursor:grab;background:
   radial-gradient(circle,#1b212a 1px,transparent 1px) 0 0/22px 22px}
 .canvas.drag{cursor:grabbing}
+.canvas{touch-action:none}
+.node:focus{outline:none}
+.node:focus-visible .box{stroke:#fff;stroke-width:3}
+.node.stagehd:focus-visible text{text-decoration:underline}
+.cluster .box{stroke-width:2}
+.has-sel.chain .edge.flow,.chain .edge.off{opacity:.04}
+:focus-visible{outline:2px solid #58a6ff;outline-offset:2px}
+.gsearch{background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:5px 10px;width:220px;max-width:100%}
+.gsearch.nomatch{border-color:var(--blocked)}
+.legwrap{display:contents}
+.legwrap>summary{display:none}
+.kcol.nodrop{border-color:var(--blocked);cursor:not-allowed}
+button.chip{font:inherit;color:inherit}
 .canvas svg{position:absolute;inset:0;width:100%;height:100%;user-select:none}
 .node{cursor:pointer}
 .node .box{fill:var(--panel);stroke-width:1.5}
@@ -152,6 +165,31 @@ footer.note{color:var(--faint);font-size:12px;padding:16px 20px;border-top:1px s
   #panel{position:absolute;inset:0;width:100%;z-index:5}
   header .ver{display:none}
 }
+/* phones (A-17): toolbar and legend fold away, Kanban stacks, the checklist becomes cards, tables scroll inside themselves */
+@media (max-width:700px){
+  header{padding:8px 12px;gap:8px}
+  header h1{font-size:14px}
+  .hprog .bar{width:90px!important}
+  .toolbar{padding:6px 8px;gap:6px}
+  .gsearch{width:100%;order:-1}
+  .legwrap{display:block;width:100%}
+  .legwrap>summary{display:inline-block;list-style:none}
+  .legwrap .legend{margin-top:6px}
+  .page{padding:14px 12px 60px}
+  .kanban{grid-template-columns:1fr}
+  .kcol{max-height:none}
+  .g2{grid-template-columns:1fr}
+  .page table{display:block;overflow-x:auto}
+  #v-checklist table{display:block;overflow:visible}
+  #v-checklist thead{display:none}
+  #v-checklist tbody{display:block}
+  #v-checklist tr.cl{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}
+  #v-checklist td{border:0;padding:0}
+  #v-checklist td:nth-child(3){order:-1;flex-basis:100%;font-weight:600}
+  #v-checklist td:nth-child(6){flex-basis:100%}
+  .tlgrid{grid-template-columns:90px 1fr}
+  .notice{padding:8px 12px}
+}
 </style>
 </head>
 <body>
@@ -160,41 +198,43 @@ footer.note{color:var(--faint);font-size:12px;padding:16px 20px;border-top:1px s
   <h1>NTI + DEBI Unified Roadmap</h1><span class="ver" id="ver"></span>
   <div class="hprog"><span id="hpct"></span><div class="bar" style="width:160px" id="hbar"></div></div>
 </header>
-<nav id="tabs">
-  <button data-v="flow" class="on">Flowchart</button>
-  <button data-v="roadmap">Stage map</button>
-  <button data-v="kanban">Kanban</button>
-  <button data-v="checklist">Checklist</button>
-  <button data-v="paths">Career paths</button>
-  <button data-v="compare">NTI vs DEBI</button>
-  <button data-v="projects">Projects</button>
-  <button data-v="certs">Certifications</button>
-  <button data-v="dash">Dashboard</button>
+<nav id="tabs" role="tablist" aria-label="Views">
+  <button role="tab" id="tab-flow" aria-controls="v-flow" aria-selected="true" data-v="flow" class="on">Flowchart</button>
+  <button role="tab" id="tab-roadmap" aria-controls="v-roadmap" aria-selected="false" tabindex="-1" data-v="roadmap">Stage map</button>
+  <button role="tab" id="tab-kanban" aria-controls="v-kanban" aria-selected="false" tabindex="-1" data-v="kanban">Kanban</button>
+  <button role="tab" id="tab-checklist" aria-controls="v-checklist" aria-selected="false" tabindex="-1" data-v="checklist">Checklist</button>
+  <button role="tab" id="tab-paths" aria-controls="v-paths" aria-selected="false" tabindex="-1" data-v="paths">Career paths</button>
+  <button role="tab" id="tab-compare" aria-controls="v-compare" aria-selected="false" tabindex="-1" data-v="compare">NTI vs DEBI</button>
+  <button role="tab" id="tab-projects" aria-controls="v-projects" aria-selected="false" tabindex="-1" data-v="projects">Projects</button>
+  <button role="tab" id="tab-certs" aria-controls="v-certs" aria-selected="false" tabindex="-1" data-v="certs">Certifications</button>
+  <button role="tab" id="tab-time" aria-controls="v-time" aria-selected="false" tabindex="-1" data-v="time">Timetable</button>
+  <button role="tab" id="tab-dash" aria-controls="v-dash" aria-selected="false" tabindex="-1" data-v="dash">Dashboard</button>
 </nav>
 <div id="notice" role="status"></div>
 <main>
-  <section class="view gview on" id="v-flow">
+  <section class="view gview on" id="v-flow" role="tabpanel" aria-labelledby="tab-flow">
     <div class="toolbar gtool"></div>
     <div class="canvas" id="cv-flow">
       <svg xmlns="http://www.w3.org/2000/svg"><g class="vp"></g></svg>
-      <div class="zoombox"><button class="btn zin" title="Zoom in">+</button><button class="btn zout" title="Zoom out">−</button><button class="btn zfit" title="Toggle: whole map / fit width">⤢</button></div>
+      <div class="zoombox"><button class="btn zin" title="Zoom in" aria-label="Zoom in">+</button><button class="btn zout" title="Zoom out" aria-label="Zoom out">−</button><button class="btn zfit" title="Toggle: whole map / fit width" aria-label="Toggle whole map or fit width">⤢</button></div>
     </div>
   </section>
-  <section class="view gview" id="v-roadmap">
+  <section class="view gview" id="v-roadmap" role="tabpanel" aria-labelledby="tab-roadmap">
     <div class="toolbar gtool" data-edges="1"></div>
     <div class="canvas" id="cv-roadmap">
       <svg xmlns="http://www.w3.org/2000/svg"><g class="vp"></g></svg>
-      <div class="zoombox"><button class="btn zin" title="Zoom in">+</button><button class="btn zout" title="Zoom out">−</button><button class="btn zfit" title="Toggle: whole map / fit width">⤢</button></div>
+      <div class="zoombox"><button class="btn zin" title="Zoom in" aria-label="Zoom in">+</button><button class="btn zout" title="Zoom out" aria-label="Zoom out">−</button><button class="btn zfit" title="Toggle: whole map / fit width" aria-label="Toggle whole map or fit width">⤢</button></div>
     </div>
   </section>
-  <section class="view" id="v-kanban"></section>
-  <section class="view" id="v-checklist"></section>
-  <section class="view" id="v-paths"></section>
-  <section class="view" id="v-compare"></section>
-  <section class="view" id="v-projects"></section>
-  <section class="view" id="v-certs"></section>
-  <section class="view" id="v-dash"></section>
-  <aside id="panel"></aside>
+  <section class="view" id="v-kanban" role="tabpanel" aria-labelledby="tab-kanban"></section>
+  <section class="view" id="v-checklist" role="tabpanel" aria-labelledby="tab-checklist"></section>
+  <section class="view" id="v-paths" role="tabpanel" aria-labelledby="tab-paths"></section>
+  <section class="view" id="v-compare" role="tabpanel" aria-labelledby="tab-compare"></section>
+  <section class="view" id="v-projects" role="tabpanel" aria-labelledby="tab-projects"></section>
+  <section class="view" id="v-certs" role="tabpanel" aria-labelledby="tab-certs"></section>
+  <section class="view" id="v-time" role="tabpanel" aria-labelledby="tab-time"></section>
+  <section class="view" id="v-dash" role="tabpanel" aria-labelledby="tab-dash"></section>
+  <aside id="panel" aria-label="Details"></aside>
 </main>
 </div>
 <dialog id="dlg" aria-label="Import"></dialog>
@@ -332,13 +372,17 @@ function pct(list){if(!list.length)return 0;return Math.round(100*list.filter(id
 function barHTML(list,w){const n=list.length||1,d=list.filter(i=>st(i)==="done").length,p=list.filter(i=>st(i)==="ip").length;
   return `<div class="bar" style="${w?`width:${w}px`:""}"><span style="width:${100*d/n}%;background:var(--done)"></span><span style="width:${100*p/n}%;background:var(--ip)"></span></div>`}
 const compsIn = stg => D.comps.filter(c=>c.stage===stg).map(c=>c.id);
-/* ---------- tabs ---------- */
+/* ---------- tabs (WAI-ARIA tabs: arrow keys move between views) ---------- */
 let curView="flow";
-document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;showView(b.dataset.v)});
-function showView(v){curView=v;document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+const tabsEl=document.getElementById("tabs");
+tabsEl.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;showView(b.dataset.v)});
+tabsEl.addEventListener("keydown",e=>{const bs=[...tabsEl.querySelectorAll("button")],i=bs.indexOf(document.activeElement);if(i<0)return;
+  const j={ArrowRight:(i+1)%bs.length,ArrowLeft:(i-1+bs.length)%bs.length,Home:0,End:bs.length-1}[e.key];
+  if(j!=null){e.preventDefault();bs[j].focus();showView(bs[j].dataset.v)}});
+function showView(v){curView=v;document.querySelectorAll("#tabs button").forEach(b=>{const on=b.dataset.v===v;b.classList.toggle("on",on);b.setAttribute("aria-selected",on);b.tabIndex=on?0:-1});
   document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));renderView(v);
   const g=GRAPHS[v]; if(g) requestAnimationFrame(()=>{if(!g.fitted)g.fit()})}
-function renderView(v){({flow:renderGraphState,roadmap:renderGraphState,kanban:renderKanban,checklist:renderChecklist,paths:renderPaths,compare:renderCompare,projects:renderProjects,certs:renderCerts,dash:renderDash})[v]()}
+function renderView(v){({flow:renderGraphState,roadmap:renderGraphState,kanban:renderKanban,checklist:renderChecklist,paths:renderPaths,compare:renderCompare,projects:renderProjects,certs:renderCerts,dash:renderDash,time:renderTimetable})[v]()}
 
 /* ---------- shared graph helpers ---------- */
 const svgNS="http://www.w3.org/2000/svg";
@@ -350,53 +394,73 @@ function wrap(s,n,maxLines){const words=s.split(" ");const lines=[];let cur="";
   if(lines.length>maxLines){const keep=lines.slice(0,maxLines);keep[maxLines-1]=trunc(keep[maxLines-1]+" "+lines.slice(maxLines).join(" "),n);return keep}
   return lines}
 const STAGE_SHORT={FND:"Foundation",CDE:"Cloud & DevOps",SEN:"Security eng.",CSS:"Cloud security",JOB:"Job readiness"};
-let selId=null, pathFilter="", showAllEdges=false, blockedOnly=false;
+let selId=null, pathFilter="", showAllEdges=false, blockedOnly=false, chainMode=false;
 
-/* A zoomable, pannable SVG viewer bound to one canvas */
+/* Groups (D-04): shown as one collapsed, expandable cluster in the flowchart only. */
+const GROUPS=(D.groups||[]).filter(g=>g.members.length&&g.members.every(m=>byId[m]));
+const groupById=Object.fromEntries(GROUPS.map(g=>[g.id,g]));
+const groupOf={};GROUPS.forEach(g=>g.members.forEach(m=>groupOf[m]=g.id));
+const expanded=new Set();
+const narrow=()=>window.matchMedia("(max-width:700px)").matches;
+
+/* A zoomable, pannable SVG viewer bound to one canvas: mouse wheel, drag, touch pan and pinch. */
 function Viewer(name){
   const canvas=document.getElementById("cv-"+name), svg=canvas.querySelector("svg"), vp=svg.querySelector("g.vp");
-  const V={name,canvas,svg,vp,T:{k:1,x:0,y:0},W:100,H:100,fitted:false,nodes:{},edges:[],stageBars:{}};
+  const V={name,canvas,svg,vp,T:{k:1,x:0,y:0},W:100,H:100,fitted:false,userMoved:false,nodes:{},edges:[],stageBars:{},pre:{},deps:{}};
   V.apply=()=>vp.setAttribute("transform",`translate(${V.T.x},${V.T.y}) scale(${V.T.k})`);
-  V.fit=()=>{const r=canvas.getBoundingClientRect();if(!r.width)return;const k=Math.max(0.45,Math.min(1.1,r.width/V.W*0.98));V.T={k,x:Math.max(8,(r.width-V.W*k)/2),y:8};V.apply();V.fitted=true};
-  V.fitAll=()=>{const r=canvas.getBoundingClientRect();if(!r.width)return;const k=Math.min(r.width/V.W,r.height/V.H)*0.98;V.T={k:Math.max(k,0.12),x:(r.width-V.W*k)/2,y:8};V.apply()};
-  V.zoomAt=(f,cx,cy)=>{const T=V.T,k=Math.min(3,Math.max(0.12,T.k*f));T.x=cx-(cx-T.x)*k/T.k;T.y=cy-(cy-T.y)*k/T.k;T.k=k;V.apply()};
-  V.centerOn=(x,y)=>{const r=canvas.getBoundingClientRect();if(!r.width)return;if(V.T.k<0.7)V.T.k=0.9;V.T.x=r.width/2-x*V.T.k;V.T.y=r.height/2-y*V.T.k;V.apply()};
+  V.fit=()=>{const r=canvas.getBoundingClientRect();if(!r.width)return;const minK=narrow()?0.75:0.45;const k=Math.max(minK,Math.min(1.1,r.width/V.W*0.98));V.T={k,x:Math.max(8,(r.width-V.W*k)/2),y:8};V.apply();V.fitted=true;V.userMoved=false};
+  V.fitAll=()=>{const r=canvas.getBoundingClientRect();if(!r.width)return;const k=Math.min(r.width/V.W,r.height/V.H)*0.98;V.T={k:Math.max(k,0.12),x:(r.width-V.W*k)/2,y:8};V.apply();V.userMoved=false};
+  V.refit=()=>V._all?V.fitAll():V.fit();
+  V.zoomAt=(f,cx,cy)=>{const T=V.T,k=Math.min(3,Math.max(0.12,T.k*f));T.x=cx-(cx-T.x)*k/T.k;T.y=cy-(cy-T.y)*k/T.k;T.k=k;V.apply();V.userMoved=true};
+  V.centerOn=(x,y)=>{const r=canvas.getBoundingClientRect();if(!r.width)return;if(V.T.k<0.7)V.T.k=0.9;V.T.x=r.width/2-x*V.T.k;V.T.y=r.height/2-y*V.T.k;V.apply();V.userMoved=true};
   canvas.addEventListener("wheel",e=>{e.preventDefault();const r=canvas.getBoundingClientRect();V.zoomAt(Math.exp(-e.deltaY*0.0015),e.clientX-r.left,e.clientY-r.top)},{passive:false});
-  let drag=null;
-  canvas.addEventListener("pointerdown",e=>{if(e.target.closest(".zoombox"))return;drag={x:e.clientX,y:e.clientY,tx:V.T.x,ty:V.T.y,moved:false};canvas.classList.add("drag")});
-  window.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>3)drag.moved=true;V.T.x=drag.tx+dx;V.T.y=drag.ty+dy;V.apply()});
-  window.addEventListener("pointerup",()=>{if(drag){canvas.classList.remove("drag");setTimeout(()=>drag=null,0)}});
-  canvas.addEventListener("click",e=>{if(drag&&drag.moved){e.stopPropagation();e.preventDefault()}},true);
-  svg.addEventListener("click",e=>{if(!e.target.closest(".node")){selId=null;renderGraphState()}});
+  const pts=new Map();let drag=null,pinch=null,moved=false;
+  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  canvas.addEventListener("pointerdown",e=>{if(e.target.closest(".zoombox"))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===1){moved=false;drag={x:e.clientX,y:e.clientY,tx:V.T.x,ty:V.T.y}}
+    else if(pts.size===2){const [a,b]=[...pts.values()];pinch={d:dist(a,b)||1,k:V.T.k};drag=null}
+    canvas.classList.add("drag")});
+  window.addEventListener("pointermove",e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pinch&&pts.size===2){const [a,b]=[...pts.values()],r=canvas.getBoundingClientRect();moved=true;
+      V.zoomAt(pinch.k*dist(a,b)/pinch.d/V.T.k,(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top)}
+    else if(drag){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>3){moved=true;V.userMoved=true}
+      if(moved){V.T.x=drag.tx+dx;V.T.y=drag.ty+dy;V.apply()}}});
+  const end=e=>{if(!pts.delete(e.pointerId))return;if(pts.size<2)pinch=null;if(pts.size===1){const [p]=[...pts.values()];drag={x:p.x,y:p.y,tx:V.T.x,ty:V.T.y}}
+    if(!pts.size){canvas.classList.remove("drag");drag=null;setTimeout(()=>moved=false,0)}};
+  window.addEventListener("pointerup",end);window.addEventListener("pointercancel",end);
+  canvas.addEventListener("click",e=>{if(moved){e.stopPropagation();e.preventDefault()}},true);
+  svg.addEventListener("click",e=>{if(!e.target.closest(".node")&&panel.classList.contains("on"))closePanel(false)});
   canvas.querySelector(".zin").onclick=()=>{const r=canvas.getBoundingClientRect();V.zoomAt(1.25,r.width/2,r.height/2)};
   canvas.querySelector(".zout").onclick=()=>{const r=canvas.getBoundingClientRect();V.zoomAt(0.8,r.width/2,r.height/2)};
-  canvas.querySelector(".zfit").onclick=()=>{V._all=!V._all;V._all?V.fitAll():V.fit()};
+  canvas.querySelector(".zfit").onclick=()=>{V._all=!V._all;V.refit()};
   return V;
 }
-/* one node: name as headline (ID lives in the detail panel) */
-function drawNode(V,parent,c,x,y,w,h,sub){
-  const g=sv("g",{class:"node",transform:`translate(${x},${y})`,tabindex:0,role:"button","aria-label":c.name},parent);
-  g.addEventListener("click",ev=>{ev.stopPropagation();select(c.id)});
-  g.addEventListener("keydown",ev=>{if(ev.key==="Enter")select(c.id)});
-  const col=`var(--${c.src})`;
+/* Activate on Enter or Space, as role=button requires. */
+function activate(el,fn){el.addEventListener("click",ev=>{ev.stopPropagation();fn()});
+  el.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();fn()}})}
+/* One node: name as headline (the ID lives in the detail panel). n = a competency or a group cluster. */
+function drawNode(V,parent,n,x,y,w,h,sub){
+  const g=sv("g",{class:"node"+(n.group?" cluster":""),transform:`translate(${x},${y})`,tabindex:0,role:"button","data-id":n.id},parent);
+  activate(g,()=>n.group?openGroup(n.id):select(n.id));
+  const col=`var(--${cssTok(n.src)})`;
+  if(n.group){sv("rect",{x:5,y:-5,width:w,height:h,rx:7,fill:"var(--panel2)",stroke:col,"stroke-opacity":.55},g)}
   const box=sv("rect",{class:"box",width:w,height:h,rx:7,stroke:col},g);
-  if(c.src==="EXIST")box.setAttribute("stroke-dasharray","5 3");
+  if(n.src==="EXIST")box.setAttribute("stroke-dasharray","5 3");
   sv("rect",{width:4,height:h,rx:2,fill:col},g);
-  const chars=Math.floor((w-40)/6.6), lines=wrap(c.name,chars,2);
+  const chars=Math.floor((w-40)/6.6), lines=wrap(n.name,chars,2);
   const top=sub?(lines.length>1?18:24):(lines.length>1?h/2-3:h/2+4);
   lines.forEach((t,i)=>{sv("text",{x:12,y:top+i*15,fill:"#e6edf3","font-size":12,"font-weight":550},g).textContent=t});
-  if(sub){sv("text",{x:12,y:h-9,fill:"#8b949e","font-size":10.5},g).textContent=sub}
-  if(c.existing){sv("text",{x:w-22,y:h-9,fill:"#9aabbd","font-size":9.5,"text-anchor":"end"},g).textContent=c.existing==="have"?"have":"refresh"}
+  if(sub){sv("text",{x:12,y:h-9,fill:"#9da7b3","font-size":10.5},g).textContent=sub}
+  if(n.existing){sv("text",{x:w-22,y:h-9,fill:"#9aabbd","font-size":9.5,"text-anchor":"end"},g).textContent=n.existing==="have"?"have":"refresh"}
   const dot=sv("circle",{cx:w-12,cy:13,r:5.5},g);
-  const lock=sv("g",{transform:`translate(${w-17},6)`,fill:"none",stroke:"#6e7681","stroke-width":1.4},g);
-  sv("rect",{x:1,y:5,width:9,height:7,rx:1.5,fill:"#6e7681",stroke:"none"},lock);sv("path",{d:"M3 5V3.5a2.5 2.5 0 0 1 5 0V5"},lock);
-  const ti=sv("title",{},g);ti.textContent=c.name;
-  V.nodes[c.id]={g,box,dot,lock,x,y,w,h};
+  const lock=sv("g",{transform:`translate(${w-17},6)`,fill:"none",stroke:"#8b949e","stroke-width":1.4},g);
+  sv("rect",{x:1,y:5,width:9,height:7,rx:1.5,fill:"#8b949e",stroke:"none"},lock);sv("path",{d:"M3 5V3.5a2.5 2.5 0 0 1 5 0V5"},lock);
+  V.nodes[n.id]={g,box,dot,lock,x,y,w,h,n};
 }
-function drawEdges(V,parent,mode){
+function drawEdges(V,parent,mode,list){
   const eg=sv("g",{class:"edges"},parent);V.edges.length=0;
-  D.comps.forEach(c=>c.pre.forEach(p=>{
-    const a=V.nodes[p]||V._pos[p],b=V.nodes[c.id]||V._pos[c.id];if(!a||!b)return;
+  list.forEach(c=>c.pre.forEach(p=>{
+    const a=V._pos[p],b=V._pos[c.id];if(!a||!b)return;
     let x1=a.x+a.w,y1=a.y+a.h/2,x2=b.x,y2=b.y+b.h/2,d;
     if(x2<=x1+4){x1=a.x+a.w/2;y1=a.y+a.h;x2=b.x+b.w/2;y2=b.y;
       if(y2<y1){y1=a.y;y2=b.y+b.h;d=`M${x1} ${y1} C${x1} ${y1-30},${x2} ${y2+30},${x2} ${y2}`}
@@ -408,12 +472,15 @@ function drawEdges(V,parent,mode){
   sv("path",{d:"M0 0L10 5L0 10z",fill:"#8b949e"},m);
   return eg;
 }
+function setGraph(V,list){V.pre={};V.deps={};list.forEach(n=>{V.pre[n.id]=n.pre;V.deps[n.id]=V.deps[n.id]||[]});list.forEach(n=>n.pre.forEach(p=>(V.deps[p]=V.deps[p]||[]).push(n.id)))}
+const compNode = c => ({id:c.id,name:c.name,src:c.src,stage:c.stage,lane:c.lane,existing:c.existing,pre:c.pre});
 
-/* ---------- stage map (stages × domains) ---------- */
-const NW=176,NH=46,GX=12,GY=10,PADX=18,PADY=16,LANEW=150,HEADH=86,SUB=2;
+/* ---------- stage map (stages × domains): every competency individually ---------- */
+const NW=176,NH=58,GX=12,GY=10,PADX=18,PADY=16,LANEW=150,HEADH=86,SUB=2;
 const colW=SUB*(NW+GX)-GX+2*PADX;
 function drawStageMap(V){
-  const vp=V.vp;vp.innerHTML="";V.nodes={};V._pos={};
+  const vp=V.vp;vp.innerHTML="";V.nodes={};V._pos={};V.stageBars={};
+  const list=D.comps.map(compNode);setGraph(V,list);
   const laneY={},laneH={};let y=HEADH;
   D.lanes.forEach(l=>{let rows=0;
     D.stages.forEach(s=>{const n=D.comps.filter(c=>c.lane===l.id&&c.stage===s.id).length;rows=Math.max(rows,Math.ceil(n/SUB))});
@@ -422,89 +489,148 @@ function drawStageMap(V){
       V._pos[c.id]={x:LANEW+si*colW+PADX+(i%SUB)*(NW+GX),y:y+PADY+Math.floor(i/SUB)*(NH+GY),w:NW,h:NH}}));
     y+=laneH[l.id]});
   V.W=LANEW+D.stages.length*colW+20;V.H=y+20;
+  const heads=sv("g",{},vp);
   D.stages.forEach((s,si)=>{const x=LANEW+si*colW;
-    sv("rect",{x:x+2,y:4,width:colW-4,height:V.H-8,rx:10,fill:si%2?"#11161d":"#0f141a",stroke:"#1f2630"},vp);
-    const g=sv("g",{class:"node"},vp);g.addEventListener("click",()=>openStage(s.id));
+    sv("rect",{x:x+2,y:4,width:colW-4,height:V.H-8,rx:10,fill:si%2?"#11161d":"#0f141a",stroke:"#1f2630"},heads);
+    const g=sv("g",{class:"node stagehd",tabindex:0,role:"button","aria-label":`Stage ${s.n}: ${s.name}. Open the stage details and gate`},heads);activate(g,()=>openStage(s.id));
     sv("text",{x:x+PADX,y:30,fill:"#e6edf3","font-size":15,"font-weight":650},g).textContent=`${s.n} · ${s.name}`;
-    sv("text",{x:x+PADX,y:50,fill:"#8b949e","font-size":11.5},g).textContent=trunc(s.window,58);
+    sv("text",{x:x+PADX,y:50,fill:"#9da7b3","font-size":11.5},g).textContent=trunc(s.window,58);
     V.stageBars[s.id]={g:sv("g",{},g),x:x+PADX,w:colW-2*PADX-40,y:62};
-    const gx=x+colW-2,gd=sv("g",{class:"node"},vp);gd.addEventListener("click",ev=>{ev.stopPropagation();openStage(s.id)});
+    const gx=x+colW-2,gd=sv("g",{class:"node",tabindex:0,role:"button","aria-label":`Gate after stage ${s.n}: ${s.gate}`},heads);activate(gd,()=>openStage(s.id));
     sv("path",{d:`M${gx} 21l9 9l-9 9l-9 -9z`,fill:"#e6edf3",stroke:"#0d1117","stroke-width":2},gd);sv("title",{},gd).textContent=s.gate;
   });
   D.lanes.forEach(l=>{if(laneY[l.id]==null)return;
     sv("line",{x1:10,x2:V.W-10,y1:laneY[l.id],y2:laneY[l.id],stroke:"#232a34"},vp);
-    sv("text",{x:16,y:laneY[l.id]+24,fill:"#8b949e","font-size":12,"font-weight":650},vp).textContent=l.name});
-  drawEdges(V,vp,"faint");
-  const ng=sv("g",{},vp);D.comps.forEach(c=>{const p=V._pos[c.id];drawNode(V,ng,c,p.x,p.y,p.w,p.h,null)});
+    sv("text",{x:16,y:laneY[l.id]+24,fill:"#9da7b3","font-size":12,"font-weight":650},vp).textContent=l.name});
+  drawEdges(V,vp,"faint",list);
+  // DOM order = visual order (stage column, then lane, then position), so Tab follows the map
+  const ng=sv("g",{},vp),so=Object.fromEntries(D.stages.map((s,i)=>[s.id,i])),lo=Object.fromEntries(D.lanes.map((l,i)=>[l.id,i]));
+  list.slice().sort((a,b)=>so[a.stage]-so[b.stage]||lo[a.lane]-lo[b.lane]||V._pos[a.id].y-V._pos[b.id].y||V._pos[a.id].x-V._pos[b.id].x)
+    .forEach(n=>{const p=V._pos[n.id];drawNode(V,ng,n,p.x,p.y,p.w,p.h,SRC_LABEL[n.src])});
 }
 
 /* ---------- flowchart (dependency order, left to right) ---------- */
 const FW=206,FH=60,FGX=96,FGY=14,FTOP=74;
+/* The flowchart's node list: collapsed groups become one cluster node; edges are rewired to it. */
+function flowNodes(){
+  const rep=id=>groupOf[id]&&!expanded.has(groupOf[id])?groupOf[id]:id;const out=[],seen=new Set();
+  D.comps.forEach(c=>{const r=rep(c.id);if(seen.has(r))return;seen.add(r);
+    if(r===c.id){out.push(Object.assign(compNode(c),{pre:[...new Set(c.pre.map(rep))]}));return}
+    const g=groupById[r],ms=g.members.map(m=>byId[m]);
+    out.push({id:g.id,group:g,name:g.name,src:ms[0].src,stage:ms[0].stage,lane:ms[0].lane,existing:ms[0].existing,
+      pre:[...new Set(ms.flatMap(m=>m.pre).map(rep))].filter(x=>x!==g.id)})});
+  return out}
 function drawFlow(V){
   const vp=V.vp;vp.innerHTML="";V.nodes={};V._pos={};
-  const depth={};const dfs=id=>{if(id in depth)return depth[id];const p=byId[id].pre;return depth[id]=p.length?1+Math.max(...p.map(dfs)):0};
-  D.comps.forEach(c=>dfs(c.id));
-  const maxD=Math.max(...Object.values(depth));
+  const list=flowNodes(),byN=Object.fromEntries(list.map(n=>[n.id,n]));setGraph(V,list);
+  // A-19: job-readiness items with no prerequisites run alongside everything; draw them as a band, not as "Start here"
+  const band=list.filter(n=>n.stage==="JOB"&&!n.pre.length),inBand=new Set(band.map(n=>n.id));
+  const depth={};const dfs=id=>{if(id in depth)return depth[id];const p=byN[id].pre;return depth[id]=p.length?1+Math.max(...p.map(dfs)):0};
+  list.forEach(n=>dfs(n.id));
+  const main=list.filter(n=>!inBand.has(n.id));
+  const maxD=Math.max(...main.map(n=>depth[n.id]));
   const sOrd=Object.fromEntries(D.stages.map((s,i)=>[s.id,i])),lOrd=Object.fromEntries(D.lanes.map((l,i)=>[l.id,i]));
-  const cols=[...Array(maxD+1)].map((_,d)=>D.comps.filter(c=>depth[c.id]===d).sort((a,b)=>sOrd[a.stage]-sOrd[b.stage]||lOrd[a.lane]-lOrd[b.lane]).map(c=>c.id));
-  const idx={};const reindex=()=>cols.forEach(col=>col.forEach((id,i)=>idx[id]=i-(col.length-1)/2));
+  const cols=[...Array(maxD+1)].map((_,d)=>main.filter(n=>depth[n.id]===d).sort((a,b)=>sOrd[a.stage]-sOrd[b.stage]||lOrd[a.lane]-lOrd[b.lane]).map(n=>n.id));
+  const idx={};band.forEach((n,i)=>idx[n.id]=i);const reindex=()=>cols.forEach(col=>col.forEach((id,i)=>idx[id]=i-(col.length-1)/2));
   reindex();
+  const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:0;
   for(let it=0;it<8;it++){ // barycenter sweeps to reduce crossings
-    for(let d=1;d<=maxD;d++){cols[d].sort((a,b)=>{const ba=avg(byId[a].pre.map(p=>idx[p])),bb=avg(byId[b].pre.map(p=>idx[p]));return ba-bb});reindex()}
-    for(let d=maxD-1;d>=0;d--){cols[d].sort((a,b)=>{const da=dependents[a].map(x=>idx[x]),db=dependents[b].map(x=>idx[x]);return (da.length?avg(da):idx[a])-(db.length?avg(db):idx[b])});reindex()}
+    for(let d=1;d<=maxD;d++){cols[d].sort((a,b)=>avg(byN[a].pre.map(p=>idx[p]))-avg(byN[b].pre.map(p=>idx[p])));reindex()}
+    for(let d=maxD-1;d>=0;d--){cols[d].sort((a,b)=>{const da=V.deps[a].map(x=>idx[x]),db=V.deps[b].map(x=>idx[x]);return (da.length?avg(da):idx[a])-(db.length?avg(db):idx[b])});reindex()}
   }
-  function avg(a){return a.length?a.reduce((s,x)=>s+x,0)/a.length:0}
   const maxN=Math.max(...cols.map(c=>c.length)),colH=n=>n*(FH+FGY)-FGY,Hmax=colH(maxN);
   cols.forEach((col,d)=>{const x=30+d*(FW+FGX),y0=FTOP+(Hmax-colH(col.length))/2;
     col.forEach((id,i)=>V._pos[id]={x,y:y0+i*(FH+FGY),w:FW,h:FH})});
-  V.W=30+(maxD+1)*(FW+FGX);V.H=FTOP+Hmax+30;
+  const bandY=FTOP+Hmax+70;band.forEach((n,i)=>V._pos[n.id]={x:30+i*(FW+FGX/2),y:bandY,w:FW,h:FH});
+  V.W=Math.max(30+(maxD+1)*(FW+FGX),30+band.length*(FW+FGX/2));V.H=(band.length?bandY+FH:FTOP+Hmax)+30;
   cols.forEach((col,d)=>{const x=30+d*(FW+FGX);
     sv("text",{x,y:30,fill:"#e6edf3","font-size":13,"font-weight":650},vp).textContent=d===0?"Start here":`Step ${d+1}`;
-    sv("text",{x,y:48,fill:"#8b949e","font-size":11},vp).textContent=d===0?"No prerequisites":`Needs step ${d} or earlier`});
-  drawEdges(V,vp,"flow");
-  const ng=sv("g",{},vp);D.comps.forEach(c=>{const p=V._pos[c.id];drawNode(V,ng,c,p.x,p.y,p.w,p.h,`${STAGE_SHORT[c.stage]} · ${SRC_LABEL[c.src]}`)});
+    sv("text",{x,y:48,fill:"#9da7b3","font-size":11},vp).textContent=d===0?"No prerequisites":`Needs step ${d} or earlier`});
+  if(band.length){sv("line",{x1:20,x2:V.W-20,y1:bandY-40,y2:bandY-40,stroke:"#2a313c","stroke-dasharray":"4 4"},vp);
+    sv("text",{x:30,y:bandY-16,fill:"#e6edf3","font-size":13,"font-weight":650},vp).textContent="Ongoing: portfolio and job readiness";
+    sv("text",{x:300,y:bandY-16,fill:"#9da7b3","font-size":11},vp).textContent="No prerequisites; runs alongside every stage, not first"}
+  drawEdges(V,vp,"flow",list);
+  const ng=sv("g",{},vp);
+  [...cols.flat(),...band.map(n=>n.id)].forEach(id=>{const n=byN[id],p=V._pos[id];
+    drawNode(V,ng,n,p.x,p.y,p.w,p.h,n.group?`${n.group.members.length} competencies · group`:`${STAGE_SHORT[n.stage]} · ${SRC_LABEL[n.src]}`)});
 }
+function redrawFlow(){const V=GRAPHS.flow,T={...V.T},keep=V.fitted;drawFlow(V);if(keep){V.T=T;V.apply()}renderGraphState()}
 
 const GRAPHS={flow:Viewer("flow"),roadmap:Viewer("roadmap")};
 drawFlow(GRAPHS.flow);drawStageMap(GRAPHS.roadmap);
 
+/* Status of a graph node: a cluster aggregates its members. */
+function nodeState(n){
+  const ids=n.group?n.group.members:[n.id];const ss=ids.map(st);
+  const s=ss.every(x=>x==="done")?"done":ss.some(x=>x!=="ns")?"ip":"ns";
+  const blocked=ids.every(i=>isBlocked(i)),locked=blocked&&s==="ns";
+  return {s,blocked,locked,ids}}
+const repKey = (V,id) => id&&!V.nodes[id]&&groupOf[id]&&V.nodes[groupOf[id]]?groupOf[id]:id;
+function chainOf(V,id){const up=new Set([id]),down=new Set([id]);
+  const go=(k,map,seen)=>(map[k]||[]).forEach(x=>{if(!seen.has(x)){seen.add(x);go(x,map,seen)}});
+  go(id,V.pre,up);go(id,V.deps,down);return new Set([...up,...down])}
 function renderGraphState(){
   Object.values(GRAPHS).forEach(V=>{
-    D.comps.forEach(c=>{const n=V.nodes[c.id];if(!n)return;const s=st(c.id),b=isBlocked(c.id),locked=b&&s==="ns";
-      n.lock.style.display=locked?"":"none";n.dot.style.display=locked?"none":"";
-      n.dot.setAttribute("fill",s==="done"?"var(--done)":s==="ip"?"var(--ip)":"none");
-      n.dot.setAttribute("stroke",s==="ns"?"#e6edf3":"none");n.dot.setAttribute("stroke-width",1.5);
-      n.box.style.fill=s==="done"?"#122119":s==="ip"?"#231f10":"";
-      n.g.classList.toggle("blk",b);n.g.classList.toggle("sel",c.id===selId);
-      let dim=false;if(pathFilter)dim=!(c.paths.includes("core")||c.paths.includes(pathFilter));if(blockedOnly)dim=dim||!b;
-      n.g.classList.toggle("dim",dim)});
-    V.svg.classList.toggle("edges-all",showAllEdges);V.svg.classList.toggle("has-sel",!!selId);
-    V.edges.forEach(e=>{e.el.classList.toggle("in",!!selId&&e.to===selId);e.el.classList.toggle("out",!!selId&&e.from===selId)});
+    const sel=repKey(V,selId),chain=chainMode&&sel&&V.nodes[sel]?chainOf(V,sel):null;
+    Object.values(V.nodes).forEach(N=>{const n=N.n,{s,blocked,locked,ids}=nodeState(n);
+      N.lock.style.display=locked?"":"none";N.dot.style.display=locked?"none":"";
+      N.dot.setAttribute("fill",s==="done"?"var(--done)":s==="ip"?"var(--ip)":"none");
+      N.dot.setAttribute("stroke",s==="ns"?"#e6edf3":"none");N.dot.setAttribute("stroke-width",1.5);
+      N.box.style.fill=s==="done"?"#122119":s==="ip"?"#231f10":"";
+      N.g.classList.toggle("blk",blocked);N.g.classList.toggle("sel",n.id===sel);
+      let dim=false;if(pathFilter)dim=!ids.some(i=>byId[i].paths.includes("core")||byId[i].paths.includes(pathFilter));
+      if(blockedOnly)dim=dim||!blocked;if(chain)dim=dim||!chain.has(n.id);
+      N.g.classList.toggle("dim",dim);
+      const done=ids.filter(i=>st(i)==="done").length;
+      N.g.setAttribute("aria-label",n.group?`${n.name}, group of ${ids.length}: ${done} of ${ids.length} completed. Open the group`
+        :`${n.name}, ${n.id}: ${locked?"locked, prerequisites not done":ST_LABEL[s]}${noEvidence(n.id)?", completed without evidence":""}`)});
+    V.svg.classList.toggle("edges-all",showAllEdges);V.svg.classList.toggle("has-sel",!!sel);V.svg.classList.toggle("chain",!!chain);
+    V.edges.forEach(e=>{e.el.classList.toggle("in",!!sel&&e.to===sel);e.el.classList.toggle("out",!!sel&&e.from===sel);
+      e.el.classList.toggle("off",!!chain&&!(chain.has(e.from)&&chain.has(e.to)))});
     Object.entries(V.stageBars).forEach(([sid,b])=>{b.g.innerHTML="";const L=compsIn(sid),done=L.filter(i=>st(i)==="done").length,ip=L.filter(i=>st(i)==="ip").length;
       sv("rect",{x:b.x,y:b.y,width:b.w,height:6,rx:3,fill:"#2a313c"},b.g);
       sv("rect",{x:b.x,y:b.y,width:b.w*done/L.length,height:6,rx:3,fill:"var(--done)"},b.g);
       sv("rect",{x:b.x+b.w*done/L.length,y:b.y,width:b.w*ip/L.length,height:6,fill:"var(--ip)"},b.g);
-      sv("text",{x:b.x+b.w+6,y:b.y+7,fill:"#8b949e","font-size":11},b.g).textContent=`${done}/${L.length}`});
+      sv("text",{x:b.x+b.w+6,y:b.y+7,fill:"#9da7b3","font-size":11},b.g).textContent=`${done}/${L.length}`});
   });
 }
-window.addEventListener("resize",()=>{const g=GRAPHS[curView];if(g)g.fit()});
-function centerOn(id){const V=GRAPHS[curView];if(!V)return;const p=V.nodes[id];if(p)V.centerOn(p.x+p.w/2,p.y+p.h/2)}
+/* A-15: a resize (e.g. the phone URL bar hiding) re-fits only if the user hasn't zoomed or panned. */
+window.addEventListener("resize",()=>{const g=GRAPHS[curView];if(g&&!g.userMoved)g.refit()});
+function centerOn(id){const V=GRAPHS[curView];if(!V)return;const p=V.nodes[repKey(V,id)];if(p)V.centerOn(p.x+p.w/2,p.y+p.h/2)}
+function focusNode(id){const V=GRAPHS[curView];const p=V&&V.nodes[repKey(V,id)];if(p){p.g.focus({preventScroll:true});return true}return false}
 
 /* toolbars (one per graph view, shared state) */
 const LEGEND=Object.keys(SRC_LABEL).map(k=>`<span><span class="sw" style="border-color:var(--${k})${k==="EXIST"?";border-style:dashed":""}"></span>${esc(D.sources[k])}</span>`).join("")+
-  `<span><span class="dot" style="border:1.5px solid #e6edf3"></span>Ready</span><span><span class="dot" style="background:var(--ip)"></span>In progress</span><span><span class="dot" style="background:var(--done)"></span>Completed</span><span>🔒 Locked</span><span style="color:#58a6ff">— needs</span><span style="color:#d2a8ff">— unlocks</span>`;
+  `<span><span class="dot" style="border:1.5px solid #e6edf3"></span>Ready</span><span><span class="dot" style="background:var(--ip)"></span>In progress</span><span><span class="dot" style="background:var(--done)"></span>Completed</span><span>🔒 Locked</span><span style="color:#58a6ff">— needs</span><span style="color:#d2a8ff">— unlocks</span><span>▤ Group (open to expand)</span>`;
+document.body.insertAdjacentHTML("beforeend",`<datalist id="complist">${D.comps.map(c=>`<option value="${esc(c.id)} · ${esc(c.name)}"></option>`).join("")}</datalist>`);
 document.querySelectorAll(".gtool").forEach(tb=>{
-  tb.innerHTML=`<select class="btn pathSel" title="Highlight a career path"><option value="">Path: all competencies</option>${D.paths.map(p=>`<option value="${p.id}">Path: ${esc(p.name)}${p.rec?" (recommended)":""}</option>`).join("")}</select>
-   ${tb.dataset.edges?`<button class="btn edgeTog">All dependencies</button>`:""}<button class="btn blkTog">Locked only</button><div class="legend">${LEGEND}</div>`;
+  tb.innerHTML=`<input class="gsearch" type="search" list="complist" placeholder="Find ID or name  ( / )" aria-label="Find a competency by ID or name">
+   <select class="btn pathSel" aria-label="Highlight a career path"><option value="">Path: all competencies</option>${D.paths.map(p=>`<option value="${p.id}">Path: ${esc(p.name)}${p.rec?" (recommended)":""}</option>`).join("")}</select>
+   <button class="btn chainTog" aria-pressed="false" title="Show only the selected competency's prerequisites and what it unlocks">Focus chain</button>
+   ${tb.dataset.edges?`<button class="btn edgeTog" aria-pressed="false">All dependencies</button>`:""}<button class="btn blkTog" aria-pressed="false">Locked only</button>
+   <details class="legwrap"${narrow()?"":" open"}><summary class="btn">Legend</summary><div class="legend">${LEGEND}</div></details>`;
 });
-function syncToolbars(){document.querySelectorAll(".pathSel").forEach(s=>s.value=pathFilter);document.querySelectorAll(".edgeTog").forEach(b=>b.classList.toggle("on",showAllEdges));document.querySelectorAll(".blkTog").forEach(b=>b.classList.toggle("on",blockedOnly))}
+function syncToolbars(){document.querySelectorAll(".pathSel").forEach(s=>s.value=pathFilter);
+  for(const [cls,on] of [["edgeTog",showAllEdges],["blkTog",blockedOnly],["chainTog",chainMode]])document.querySelectorAll("."+cls).forEach(b=>{b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)})}
 document.addEventListener("change",e=>{if(e.target.classList.contains("pathSel")){pathFilter=e.target.value;syncToolbars();renderGraphState()}});
-document.addEventListener("click",e=>{if(e.target.classList.contains("edgeTog")){showAllEdges=!showAllEdges;syncToolbars();renderGraphState()}
-  if(e.target.classList.contains("blkTog")){blockedOnly=!blockedOnly;syncToolbars();renderGraphState()}});
+document.addEventListener("click",e=>{const t=e.target.closest("button");if(!t)return;
+  if(t.classList.contains("edgeTog")){showAllEdges=!showAllEdges;syncToolbars();renderGraphState()}
+  if(t.classList.contains("blkTog")){blockedOnly=!blockedOnly;syncToolbars();renderGraphState()}
+  if(t.classList.contains("chainTog")){chainMode=!chainMode;syncToolbars();renderGraphState()}});
+/* Search: an exact ID, "ID · name" from the list, or part of a name */
+function findComp(q){q=(q||"").trim();if(!q)return null;const id=q.split(" · ")[0].trim();
+  if(byId[id])return id;if(groupById[id])return id;const low=q.toLowerCase();
+  const hit=D.comps.find(c=>c.id.toLowerCase()===low)||D.comps.find(c=>c.name.toLowerCase().includes(low))||D.comps.find(c=>c.id.toLowerCase().startsWith(low));
+  return hit?hit.id:null}
+function runSearch(inp){const id=findComp(inp.value);inp.classList.toggle("nomatch",!id);if(!id)return;
+  if(groupById[id])openGroup(id,{center:true});else select(id,{center:true});inp.value=""}
+document.addEventListener("keydown",e=>{if(e.target.classList&&e.target.classList.contains("gsearch")&&e.key==="Enter"){e.preventDefault();runSearch(e.target)}});
+document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.contains("gsearch")){e.target.classList.remove("nomatch");
+  if(e.inputType==="insertReplacementText"||(e.target.value.includes(" · ")&&findComp(e.target.value)))runSearch(e.target)}});
 
 /* ---------- kanban ---------- */
 let KF={stage:"",path:"",q:""};
-const KCOLS=[{k:"locked",name:"Locked",hint:"Prerequisites not done yet",drop:false},{k:"ns",name:"Ready to start",hint:"Prerequisites met",drop:true},{k:"ip",name:"In progress",hint:"",drop:true},{k:"done",name:"Completed",hint:"Counts at E4 with a link; ⚠ marks the rest",drop:true}];
+const KCOLS=[{k:"locked",name:"Locked",hint:"Prerequisites not done yet. Drag to In progress to start early",drop:false},{k:"ns",name:"Ready to start",hint:"Prerequisites met",drop:true},{k:"ip",name:"In progress",hint:"",drop:true},{k:"done",name:"Completed",hint:"Counts at E4 with a link; ⚠ marks the rest",drop:true}];
 const kcol=id=>{const s=st(id);return s==="done"?"done":s==="ip"?"ip":isBlocked(id)?"locked":"ns"};
 function renderKanban(){
   const v=document.getElementById("v-kanban");
@@ -516,7 +642,7 @@ function renderKanban(){
    <select class="btn" id="kpa"><option value="">All paths</option>${D.paths.map(p=>`<option value="${p.id}" ${KF.path===p.id?"selected":""}>${esc(p.name)}</option>`).join("")}</select></div>
   <div class="kanban">${KCOLS.map(col=>{const cards=list.filter(c=>kcol(c.id)===col.k).sort((a,b)=>so[a.stage]-so[b.stage]||pr[a.pri]-pr[b.pri]);
     return `<div class="kcol" data-col="${col.k}"><div class="khead"><b>${col.name}</b><span class="badge">${cards.length}</span><div class="mini">${col.hint}</div></div>
-    <div class="kbody">${cards.map(c=>`<div class="kcard" draggable="true" data-id="${c.id}" style="border-left-color:var(--${c.src})">
+    <div class="kbody">${cards.map(c=>`<div class="kcard" draggable="true" tabindex="0" role="button" data-id="${esc(c.id)}" aria-label="${esc(c.name)}, ${esc(c.id)}: ${esc(col.name)}${noEvidence(c.id)?", completed without evidence":""}. Open to change status" style="border-left-color:var(--${cssTok(c.src)})">
       <div class="kname">${esc(c.name)}</div>
       <div class="kmeta">${srcBadge(c.src)}<span class="mini">${esc(STAGE_SHORT[c.stage])} · ${PRI[c.pri]}</span>${c.existing?`<span class="mini">· ${c.existing}</span>`:""}</div>
       ${col.k==="locked"?`<div class="mini" style="margin-top:4px">Waiting on ${missingPre(c.id).length}: ${missingPre(c.id).slice(0,3).map(p=>esc(trunc(byId[p].name,24))).join(", ")}${missingPre(c.id).length>3?"…":""}</div>`:""}
@@ -525,26 +651,50 @@ function renderKanban(){
   const q=v.querySelector("#kq");q.oninput=e=>{KF.q=e.target.value;const p=e.target.selectionStart;renderKanban();const n=document.getElementById("kq");n.focus();n.setSelectionRange(p,p)};
   v.querySelector("#kst").onchange=e=>{KF.stage=e.target.value;renderKanban()};
   v.querySelector("#kpa").onchange=e=>{KF.path=e.target.value;renderKanban()};
-  v.querySelectorAll(".kcard").forEach(card=>{card.onclick=()=>select(card.dataset.id);
-    card.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",card.dataset.id);card.classList.add("dragging")});
-    card.addEventListener("dragend",()=>card.classList.remove("dragging"))});
+  let dragLocked=false;
+  /* A-13: a locked card can't be dropped on "Ready" (it would stay locked and snap back); "In progress" is allowed. */
+  const canDrop=col=>col.drop&&!(dragLocked&&col.k==="ns");
+  v.querySelectorAll(".kcard").forEach(card=>{activate(card,()=>select(card.dataset.id));
+    card.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",card.dataset.id);dragLocked=kcol(card.dataset.id)==="locked";card.classList.add("dragging")});
+    card.addEventListener("dragend",()=>{card.classList.remove("dragging");v.querySelectorAll(".kcol").forEach(c=>c.classList.remove("over","nodrop"))})});
   v.querySelectorAll(".kcol").forEach(colEl=>{const col=KCOLS.find(c=>c.k===colEl.dataset.col);
-    colEl.addEventListener("dragover",e=>{if(col.drop){e.preventDefault();colEl.classList.add("over")}});
-    colEl.addEventListener("dragleave",()=>colEl.classList.remove("over"));
-    colEl.addEventListener("drop",e=>{e.preventDefault();colEl.classList.remove("over");const id=e.dataTransfer.getData("text/plain");if(id&&byId[id])setStatus(id,col.k)})});
+    colEl.addEventListener("dragover",e=>{if(canDrop(col)){e.preventDefault();colEl.classList.add("over")}else colEl.classList.add("nodrop")});
+    colEl.addEventListener("dragleave",()=>colEl.classList.remove("over","nodrop"));
+    colEl.addEventListener("drop",e=>{e.preventDefault();colEl.classList.remove("over","nodrop");const id=e.dataTransfer.getData("text/plain");if(id&&byId[id]&&canDrop(col))setStatus(id,col.k)})});
 }
 
 /* ---------- side panel ---------- */
 const panel=document.getElementById("panel");
-function closePanel(){panel.classList.remove("on");selId=null;renderGraphState()}
-function select(id,opts){selId=id;renderGraphState();openComp(id);if(opts&&opts.center&&GRAPHS[curView])centerOn(id)}
-function chipFor(id){const c=byId[id];return `<span class="chip" data-go="${id}" title="${id}" style="border-left:3px solid var(--${c.src})">${dotFor(id)}${esc(trunc(c.name,34))} <span class="mini">${id}</span></span>`}
+let returnFocus=null;
+function rememberFocus(){const a=document.activeElement;if(a&&a!==document.body&&!panel.contains(a))returnFocus={el:a,id:a.getAttribute&&a.getAttribute("data-id")}}
+function setHash(id){try{history.replaceState(null,"","#"+encodeURIComponent(id))}catch(_){}}
+function clearHash(){if(location.hash)try{history.replaceState(null,"",location.pathname+location.search)}catch(_){}}
+/* Escape or ✕ closes the panel and puts focus back where it came from. */
+function closePanel(restore=true){const wasOpen=panel.classList.contains("on");panel.classList.remove("on");selId=null;renderGraphState();clearHash();
+  if(restore&&wasOpen&&returnFocus){const r=returnFocus;returnFocus=null;if(r.id&&GRAPHS[curView]&&focusNode(r.id))return;if(document.contains(r.el))r.el.focus()}}
+function openPanelFocus(){const h=panel.querySelector("h2");if(h){h.tabIndex=-1;h.focus({preventScroll:true})}}
+function select(id,opts){opts=opts||{};if(!byId[id])return;
+  if(groupOf[id]&&!expanded.has(groupOf[id])&&(opts.center||opts.expand)){expanded.add(groupOf[id]);redrawFlow()}
+  rememberFocus();selId=id;renderGraphState();openComp(id);setHash(id);
+  if(opts.center){if(!GRAPHS[curView])showView("flow");centerOn(id)}
+  if(opts.focus!==false)openPanelFocus()}
+function openGroup(gid,opts){const g=groupById[gid];if(!g)return;rememberFocus();selId=null;renderGraphState();
+  const L=g.members,open=expanded.has(gid);
+  panel.innerHTML=`<div class="ph"><div><div class="pid">GROUP ${esc(gid)}</div><h2>${esc(g.name)}</h2><p class="mini" style="margin:4px 0 0">${L.length} competencies, drawn as one box in the flowchart until expanded</p></div><button class="btn close" id="pclose" aria-label="Close details">✕</button></div>
+  <div class="pb"><div class="sec">${barHTML(L)}<p class="mini" style="margin-top:6px">${L.filter(i=>st(i)==="done").length} completed · ${L.filter(i=>st(i)==="ip").length} in progress · ${L.length} total</p></div>
+  <div class="sec"><button class="btn" id="gtog">${open?"Collapse in the flowchart":"Expand in the flowchart"}</button></div>
+  <div class="sec"><h3>Competencies</h3>${L.map(chipFor).join("")}</div></div>`;
+  panel.classList.add("on");panel.querySelector("#pclose").onclick=()=>closePanel();
+  panel.querySelector("#gtog").onclick=()=>{open?expanded.delete(gid):expanded.add(gid);redrawFlow();openGroup(gid,{center:!!GRAPHS[curView]})};
+  panel.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go,{center:!!GRAPHS[curView],expand:true}));
+  setHash(gid);if(opts&&opts.center){if(!GRAPHS[curView])showView("flow");centerOn(expanded.has(gid)?L[0]:gid)}openPanelFocus()}
+function chipFor(id){const c=byId[id];return `<button type="button" class="chip" data-go="${esc(id)}" title="${esc(c.name)} (${esc(id)})" style="border-left:3px solid var(--${cssTok(c.src)})">${dotFor(id)}${esc(trunc(c.name,34))} <span class="mini">${esc(id)}</span></button>`}
 function matHTML(v,who){return v?`<p>${esc(v)}</p>`:`<p class="unk">No ${who} material identified in the source material for this competency.</p>`}
 function openComp(id){
   const c=byId[id],s=stageById[c.stage],b=isBlocked(id),deps=dependents[id];
   const lanes=Object.fromEntries(D.lanes.map(l=>[l.id,l.name]));
   panel.innerHTML=`
-  <div class="ph"><div><div class="pid" style="color:var(--${c.src})">${c.id}</div><h2>${esc(c.name)}</h2>
+  <div class="ph"><div><div class="pid" style="color:var(--${cssTok(c.src)})">${esc(c.id)}</div><h2>${esc(c.name)}</h2>
    <div class="badges">${srcBadge(c.src)}<span class="badge">Stage ${s.n} · ${esc(s.name)}</span><span class="badge">${esc(lanes[c.lane])}</span><span class="badge">Priority: ${PRI[c.pri]}</span>${c.existing?`<span class="badge">Existing: ${c.existing}</span>`:""}</div></div>
    <button class="btn close" id="pclose" aria-label="Close">✕</button></div>
   <div class="pb">
@@ -577,7 +727,7 @@ function openComp(id){
    ${P(id).updated?`<p class="mini" style="margin-top:6px">Last change: ${esc(new Date(P(id).updated).toLocaleString())}</p>`:""}</div>
   </div>`;
   panel.classList.add("on");
-  panel.querySelector("#pclose").onclick=closePanel;
+  panel.querySelector("#pclose").onclick=()=>closePanel();
   panel.querySelector("#sset").onclick=e=>{const bt=e.target.closest("button");if(bt)setStatus(id,bt.dataset.s)};
   panel.querySelector("#pnotes").oninput=e=>setField(id,"notes",e.target.value);
   panel.querySelector("#pev").oninput=e=>setField(id,"evidence",e.target.value);
@@ -595,7 +745,7 @@ function openStage(sid){
   ${lateStage(s)?`<div class="sec blockmsg">${lateBadge(lateStage(s))} ${esc(LATE_HINT)}</div>`:""}
   <div class="sec"><h3>Gate</h3><p>${esc(s.gate)}</p></div>
   <div class="sec"><h3>Competencies</h3>${L.map(chipFor).join("")}</div></div>`;
-  panel.classList.add("on");panel.querySelector("#pclose").onclick=closePanel;
+  panel.classList.add("on");panel.querySelector("#pclose").onclick=()=>closePanel();
   panel.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go,{center:true}));
 }
 
@@ -675,12 +825,15 @@ function renderProjects(){
 /* ---------- certs ---------- */
 function renderCerts(){
   const v=document.getElementById("v-certs");
-  const start=new Date(2026,10,1), months=14; const mIdx=s=>{const [y,m]=s.split("-").map(Number);return (y-2026)*12+(m-1)-10};
-  const now=new Date();const nowPos=((now.getFullYear()-2026)*12+now.getMonth()-10+now.getDate()/31)/months*100;
-  const mn=["Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  /* A-20: the window spans today and every cert's start/end */
+  const ym=s=>{const [y,m]=s.split("-").map(Number);return y*12+m-1};const now=new Date(today()),nowM=now.getFullYear()*12+now.getMonth();
+  const first=Math.min(nowM,...D.certs.map(k=>ym(k.start))),last=Math.max(nowM,...D.certs.map(k=>ym(k.end))),months=last-first+1;
+  const mIdx=s=>ym(s)-first;const nowPos=(nowM-first+(now.getDate()-1)/31)/months*100;
+  const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const mn=[...Array(months)].map((_,i)=>{const a=first+i,m=a%12;return MON[m]+(i===0||m===0?" "+Math.floor(a/12):"")});
   const col=k=>k.verdict.startsWith("Keep")||k.verdict.startsWith("Target")?"var(--done)":k.verdict.startsWith("Challenge")?"var(--blocked)":"var(--ip)";
   v.innerHTML=`<div class="page"><h2>Certification timeline</h2><p class="lead">Certifications follow the competency gaps, not the other way round. Bars are planned windows (doc 19 §E plus the written roadmap). Readiness = share of the cert's competencies you've completed.</p>
-  <div class="card tl"><div class="tlgrid"><div></div><div class="tlmonths">${mn.map((m,i)=>`<div>${m}${i===2||i===0?` ${i?2027:2026}`:""}</div>`).join("")}</div>
+  <div class="card tl"><div class="tlgrid"><div></div><div class="tlmonths">${mn.map(m=>`<div>${m}</div>`).join("")}</div>
   ${D.certs.map(k=>{const a=mIdx(k.start),b=mIdx(k.end)+1;return `<div class="tlrow"><div class="tllab"><b>${esc(k.id)}</b><div class="mini">${esc(k.status)}</div>${lateBadge(lateCert(k))}</div>
    <div class="tltrack">${nowPos>=0&&nowPos<=100?`<div class="today" style="left:${nowPos}%" title="Today"></div>`:""}<div class="tlbar" style="left:${100*a/months}%;width:${100*(b-a)/months}%;border-color:${col(k)};background:color-mix(in srgb, ${col(k)} 18%, transparent)" title="${esc(k.when)}">${esc(k.when)}</div></div></div>`}).join("")}</div></div>
   <table style="margin-top:16px"><thead><tr><th>Cert</th><th>Gap it fills</th><th>Verdict</th><th>Cost</th><th>Readiness</th><th>Competencies</th></tr></thead><tbody>
@@ -827,11 +980,75 @@ const lateCert = k => lateness(k.end?monthEnd(k.end):null,k.comps);
 const LATE_HINT = "Cut scope or re-plan. Missed time doesn't roll over (doc 18).";
 const lateBadge = l => l?`<span class="badge late" title="${esc(LATE_HINT)}">Late: window ended ${esc(fmtDate(l.due))}</span>`:"";
 
+/* ---------- timetable (D-10): committed only as AES-GCM ciphertext; unlocked in the browser ---------- */
+const TT_ITER=600000, TT_MIN_PW=14;
+let TT=null, ttError="", ttBlobOut=null;
+const te=new TextEncoder(), td=new TextDecoder();
+function b64(u8){let s="";for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s)}
+const unb64 = s => Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const cryptoOK = () => !!(window.crypto&&crypto.subtle);
+async function ttKey(pw,salt,iter){const base=await crypto.subtle.importKey("raw",te.encode(pw),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",hash:"SHA-256",salt,iterations:iter},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function ttEncrypt(obj,pw){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},await ttKey(pw,salt,TT_ITER),te.encode(JSON.stringify(obj))));
+  return {v:1,kdf:"PBKDF2-SHA256",iter:TT_ITER,cipher:"AES-256-GCM",salt:b64(salt),iv:b64(iv),ct:b64(ct)}}
+async function ttDecrypt(blob,pw){const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(blob.iv)},await ttKey(pw,unb64(blob.salt),blob.iter),unb64(blob.ct));
+  return cleanTimetable(JSON.parse(td.decode(pt)))}
+function cleanTimetable(o){if(!isObj(o)||!Array.isArray(o.rows))throw new Error("shape");
+  return {updated:str(o.updated,20)||"",notes:str(o.notes,4000)||"",rows:o.rows.slice(0,200).filter(isObj).map(r=>({when:str(r.when,200)||"",what:str(r.what,1000)||""})).filter(r=>r.when||r.what)}}
+const rowsToText = rows => rows.map(r=>`${r.when} | ${r.what}`).join("\n");
+const textToRows = t => t.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.indexOf("|");return i<0?{when:l,what:""}:{when:l.slice(0,i).trim(),what:l.slice(i+1).trim()}});
+function renderTimetable(){
+  const v=document.getElementById("v-time"),blob=D.timetable;
+  const lock=!TT?(blob?`<form class="card" id="ttunlock" style="max-width:520px"><label class="mini" for="ttpw">Password</label>
+      <div style="display:flex;gap:8px;margin-top:4px"><input class="btn" id="ttpw" type="password" autocomplete="current-password" style="flex:1"><button class="btn on" type="submit">Unlock</button></div>
+      ${ttError?`<p class="mini" role="alert" style="color:#ffb3ae;margin:8px 0 0">${esc(ttError)}</p>`:""}
+      <p class="mini" style="margin:8px 0 0">Decrypted in this tab only; nothing is sent or stored.</p></form>`
+    :`<div class="card" style="max-width:640px"><p style="margin:0">No timetable is published yet. Create one below, save the file as <code>data/timetable.enc.json</code>, rebuild and commit.</p></div>`)
+    :`<div class="card"><div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap"><h3 style="margin:0;font-size:14px">Weekly timetable</h3>${TT.updated?`<span class="mini">updated ${esc(TT.updated)}</span>`:""}<button class="btn" id="ttlock" style="margin-left:auto">Lock</button></div>
+      <table style="margin-top:8px"><thead><tr><th style="width:38%">When</th><th>What</th></tr></thead><tbody>${TT.rows.map(r=>`<tr class="cl"><td><b>${esc(r.when)}</b></td><td>${esc(r.what)}</td></tr>`).join("")}</tbody></table>
+      ${TT.notes?`<p class="mini" style="margin:10px 0 0;white-space:pre-wrap">${esc(TT.notes)}</p>`:""}</div>`;
+  v.innerHTML=`<div class="page"><h2>Timetable</h2><p class="lead">Your week, and whether you're behind. The timetable is published only as encrypted data (AES-256-GCM, key from your password with PBKDF2, ${TT_ITER.toLocaleString()} rounds). Anyone can download the ciphertext, so a weak password can be guessed offline; use a long one.</p>
+   ${cryptoOK()?lock:`<div class="warn">This browser doesn't allow Web Crypto on this page (it needs https or a local file). Open the published site to unlock the timetable.</div>`}
+   ${lateHTML()||`<div class="card" style="margin-top:12px"><p class="mini" style="margin:0">Nothing is past its window. Lateness counts stages, projects and certs whose window ended with work not done; missed sessions never roll over.</p></div>`}
+   ${cryptoOK()?`<details class="card" style="margin-top:12px" ${ttBlobOut?"open":""}><summary style="cursor:pointer"><b>Create or replace the encrypted timetable</b></summary>
+    <p class="mini">One row per line: <code>when | what</code>. ${TT?"Prefilled from the unlocked timetable.":""}</p>
+    <textarea id="ttrows" rows="8" placeholder="Mon 19:00–20:00 | Example: one course item&#10;Sat 10:00–12:00 | Example: project work">${TT?esc(rowsToText(TT.rows)):""}</textarea>
+    <label class="mini" for="ttnotes">Notes (optional)</label><textarea id="ttnotes" rows="2">${TT?esc(TT.notes):""}</textarea>
+    <div class="evgrid" style="margin-top:8px"><label>New password<input id="ttnew" type="password" autocomplete="new-password"></label><label>Repeat it<input id="ttnew2" type="password" autocomplete="new-password"></label></div>
+    <p class="mini" id="ttstrength" style="margin:6px 0"></p>
+    <button class="btn on" id="ttenc">Encrypt</button>
+    ${ttBlobOut?`<div style="margin-top:10px"><p class="mini" style="margin:0 0 4px">Encrypted. Save it as <code>data/timetable.enc.json</code>, run <code>python3 tools/build.py</code>, then commit. The password is not in the file; don't lose it.</p>
+      <textarea id="ttout" rows="4" readonly>${esc(JSON.stringify(ttBlobOut))}</textarea><button class="btn" id="ttdl">Download timetable.enc.json</button></div>`:""}
+   </details>`:""}</div>`;
+  const f=v.querySelector("#ttunlock");
+  if(f)f.onsubmit=async e=>{e.preventDefault();const pw=v.querySelector("#ttpw").value;ttError="";
+    try{TT=await ttDecrypt(blob,pw)}catch(_){TT=null;ttError="That password doesn't open this timetable."}renderTimetable();if(!TT)v.querySelector("#ttpw").focus()};
+  const lk=v.querySelector("#ttlock");if(lk)lk.onclick=()=>{TT=null;ttBlobOut=null;renderTimetable()};
+  const nw=v.querySelector("#ttnew"),strength=v.querySelector("#ttstrength");
+  const judge=()=>{if(!nw)return;const n=nw.value.length;strength.textContent=!n?`Use at least ${TT_MIN_PW} characters; a few random words work well.`:n<TT_MIN_PW?`⚠ ${n} characters: short passwords can be guessed offline. ${TT_MIN_PW}+ recommended.`:`${n} characters.`;strength.style.color=n&&n<TT_MIN_PW?"#e8d28a":""};
+  if(nw){nw.oninput=judge;judge();
+    v.querySelector("#ttenc").onclick=async()=>{const p1=nw.value,p2=v.querySelector("#ttnew2").value;
+      if(!p1){strength.textContent="Enter a password.";return}if(p1!==p2){strength.textContent="The two passwords don't match.";strength.style.color="#ffb3ae";return}
+      const rows=textToRows(v.querySelector("#ttrows").value);if(!rows.length){strength.textContent="Add at least one row.";return}
+      ttBlobOut=await ttEncrypt({kind:"timetable",v:1,updated:new Date().toISOString().slice(0,10),rows,notes:v.querySelector("#ttnotes").value},p1);renderTimetable()};}
+  const dl=v.querySelector("#ttdl");if(dl)dl.onclick=()=>download(ttBlobOut,"timetable.enc.json");
+}
+
+/* ---------- keyboard: Escape closes the panel; "/" focuses search ---------- */
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&panel.classList.contains("on")&&!dlg.open){e.preventDefault();closePanel()}
+  const typing=/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)||e.target.isContentEditable;
+  if(e.key==="/"&&!typing&&GRAPHS[curView]){const s=document.querySelector(`#v-${curView} .gsearch`);if(s){e.preventDefault();s.focus()}}});
+/* ---------- deep links: #NET-3 opens that competency; #PY-1–7 opens the group ---------- */
+function fromHash(){let id="";try{id=decodeURIComponent(location.hash.slice(1))}catch(_){return}if(!id)return;
+  if(byId[id]){if(!GRAPHS[curView])showView("flow");select(id,{center:true,focus:false})}else if(groupById[id]){if(!GRAPHS[curView])showView("flow");openGroup(id,{center:true})}}
+window.addEventListener("hashchange",fromHash);
 /* ---------- header + refresh ---------- */
 function renderHeader(){document.getElementById("ver").textContent="v"+D.version;document.getElementById("hpct").textContent=`${pct(ALL)}% · ${ALL.filter(i=>st(i)==="done").length}/${ALL.length}`;document.getElementById("hbar").outerHTML=barHTML(ALL,160).replace('class="bar"','class="bar" id="hbar"')}
 function refreshAll(){renderNotices();renderHeader();renderGraphState();if(!GRAPHS[curView])renderView(curView);if(selId&&panel.classList.contains("on"))openComp(selId)}
 renderGraphState();renderHeader();renderNotices();
-requestAnimationFrame(()=>GRAPHS.flow.fit());
+requestAnimationFrame(()=>{GRAPHS.flow.fit();fromHash()});
 </script>
 </body>
 </html>

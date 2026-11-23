@@ -140,5 +140,56 @@
     "Soft skills": 42,
     "Project management": 14,
     "Essential workplace skills": 35
-  }
+  },
+  "groups": [
+    {
+      "id": "PY-1–7",
+      "name": "Python core",
+      "members": [
+        "PY-1",
+        "PY-2",
+        "PY-3",
+        "PY-4",
+        "PY-5",
+        "PY-6",
+        "PY-7"
+      ]
+    },
+    {
+      "id": "DB-1–6",
+      "name": "Databases",
+      "members": [
+        "DB-1",
+        "DB-2",
+        "DB-3",
+        "DB-4",
+        "DB-5",
+        "DB-6"
+      ]
+    },
+    {
+      "id": "WEB-1–8",
+      "name": "Django / Celery backend",
+      "members": [
+        "WEB-1",
+        "WEB-2",
+        "WEB-3",
+        "WEB-4",
+        "WEB-5",
+        "WEB-6",
+        "WEB-7",
+        "WEB-8"
+      ]
+    },
+    {
+      "id": "GIT-1–4",
+      "name": "Git model, workflows and recovery",
+      "members": [
+        "GIT-1",
+        "GIT-2",
+        "GIT-3",
+        "GIT-4"
+      ]
+    }
+  ]
 }

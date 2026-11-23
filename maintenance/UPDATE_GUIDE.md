@@ -32,6 +32,8 @@ fields"). It must show you the data diff before committing.
 | **Reconcile a curriculum change** (e.g. DEBI publishes its course list, NTI changes a module) | Update `curriculum/NTI.md` or `DEBI.md` with the fact and its source; update the `nti`/`debi` fields of affected competencies, changing "(unverified)" to "(verified, <source>)"; update `comparison.json` and `ntiHours`; re-check `src` (lead source) for affected competencies | None |
 | **Record your progress** | In the app. Export after meaningful changes | — |
 | **Refresh evidence levels from the records** | Update the snapshot in `private/progress/`, run `python3 tools/seed_from_records.py`, then Dashboard → Import → the seed file. Preview first; statuses, notes and links are untouched | Records own level, U/E/D, last verified |
+| **Update your timetable** | App → Timetable → unlock → "Create or replace" (prefilled) → Encrypt → save as `data/timetable.enc.json`, rebuild, commit. Plain text never goes in the repo | None |
+| **Group or ungroup competencies in the flowchart** | Edit `groups` in `roadmap.json` (members must exist, one group each) | None |
 | **Change a window (stage, project, cert)** | Edit `window` (text) and `due` (YYYY-MM-DD) in `roadmap.json`/`projects.json`, or `start`/`end` in `certifications.json` | The "late" badges follow |
 | **Record a decision** | Study Plan Project first; then mirror it in `private/docs/STUDY_PLAN.md` §5 and, if it changes content, in `data/` | — |
 

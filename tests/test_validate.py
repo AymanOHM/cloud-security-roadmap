@@ -124,6 +124,28 @@ def test_public_file_scan(tmp_path):
     assert not any("private/" in e or "ok.md" in e for e in errs)
 
 
+GOOD_TT = {"v": 1, "kdf": "PBKDF2-SHA256", "iter": 600000, "cipher": "AES-256-GCM",
+           "salt": "AAAAAAAAAAAAAAAAAAAAAA==", "iv": "AAAAAAAAAAAAAAAA", "ct": "AAAAAAAAAAAAAAAAAAAAAAAA"}
+
+
+def test_encrypted_timetable_shape_accepted():
+    assert errs_after(lambda d: d.update(timetable=dict(GOOD_TT))) == []
+
+
+def test_plain_text_timetable_rejected():
+    assert any("plain text" in e for e in errs_after(lambda d: d.update(timetable={"rows": [{"when": "Mon", "what": "x"}]})))
+
+
+def test_weak_timetable_kdf_rejected():
+    assert any("iter" in e for e in errs_after(lambda d: d.update(timetable=dict(GOOD_TT, iter=1000))))
+
+
+def test_group_member_must_exist():
+    def m(d):
+        d["meta"]["groups"] = [{"id": "X-1–2", "name": "X", "members": ["NET-1", "NOPE-1"]}]
+    assert any("unknown member" in e for e in errs_after(m))
+
+
 if __name__ == "__main__":
     import inspect
     import tempfile
