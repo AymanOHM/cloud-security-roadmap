@@ -23,10 +23,10 @@
     "when": "Mar–May 2027",
     "start": "2027-03",
     "end": "2027-05",
-    "status": "Decided (G15); challenged in the written roadmap",
+    "status": "Conditional (G15 amended 23 Nov 2026): only if DEBI funds the exam",
     "cost": "~$400 if unfunded (unverified); DEBI funding unverified",
     "fills": "Vendor firewall admin",
-    "verdict": "Challenge: drop unless the exam is funded",
+    "verdict": "Conditional: only if DEBI funds the exam, or the target becomes network-security roles",
     "comps": [
       "NSEC-1"
     ]

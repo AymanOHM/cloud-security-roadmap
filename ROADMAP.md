@@ -11,7 +11,7 @@ Doc 19 (G8) sets the entry role: junior DevOps/cloud engineer or Python backend.
 - **Use NTI for building, DEBI for security fundamentals.** NTI's 420 h are a DevOps curriculum (doc 19 §C). DEBI supplies the security core NTI lacks. AWS security services (CloudTrail, GuardDuty, Config, SCPs) are in neither, so they're the independent part of the plan, built in project PS-7.
 - **86 competencies, one ID scheme.** IDs reuse doc 06 (NET, LNX, CTR, CI, CLD and so on), so the records keep working. New IDs cover the cloud-security part. The interactive HTML companion (Phase 8) uses the same IDs and order.
 - **Projects follow doc 19 §G.** PS-1 to PS-5 harden, pipeline, deploy, Terraform and monitor the graduation project. PS-7 adds the cloud-security baseline and detection after NTI.
-- **Certs:** SAA-C03 now (decided). SCS-C03 after PS-7, about Q4 2027. I'm challenging NSE 4 (G15), and Security+ stays deferred (G14).
+- **Certs:** SAA-C03 now (decided). SCS-C03 after PS-7, about Q4 2027. NSE 4 only if DEBI funds the exam (G15 amended), and Security+ stays deferred (G14).
 - **Remaining uncertainty:** DEBI's assigned course list. Every DEBI course reference is marked unverified until it's published.
 
 ## Source check
@@ -157,13 +157,13 @@ Dec 2026 to mid-Feb 2027 (NTI Docker, CI/CD, AWS, Terraform, K8s, monitoring). *
 
 | ID | Competency | Source | Prerequisites | Learning objectives | Practical work | Evidence | Priority |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| CTR-1 | Dockerfile from a blank file (refresh) | NTI | LNX-1 | Write the grad project's Dockerfile from memory | PS-1 | Dockerfile rewritten from memory (PS-1). | High |
+| CTR-1 | Dockerfile from a blank file (refresh) | NTI | LNX-1, LNX-4 | Write the grad project's Dockerfile from memory | PS-1 | Dockerfile rewritten from memory (PS-1). | High |
 | CTR-2 | Hardened images | NTI | CTR-1 | Ship a minimal non-root image | PS-1 | PS-1 Dockerfile: multi-stage, non-root, healthcheck, pinned. | High |
 | CTR-3 | Docker Compose (have) | Existing | CTR-1 | Keep using it as the local stack | — | Grad project runs with Compose. | Low |
 | CTR-4 | Debug containers | NTI | CTR-3, NET-6 | Fix 3 broken Compose setups | 3 broken Compose setups | Doc 06 CTR exit check. | Medium |
 | CTR-5 | Container internals | NTI | CTR-1, LNX-3 | Explain what isolates a container | — | 2-minute explanation in English. | Medium |
 | CTR-6 | Image scanning and triage | NTI | CTR-2 | Triage scanner output, not just run it | PS-1 | Trivy report with top findings fixed or justified in the README. | High |
-| K8S-1 | Kubernetes fundamentals | NTI | CTR-5 | Deploy the grad project to a local cluster | kind or k3s locally | NTI assessment; PS-6 only if target postings ask (doc 19). | Medium |
+| K8S-1 | Kubernetes fundamentals | NTI | CTR-5 | Deploy the grad project to a local cluster | kind or k3s locally | The grad project runs on a local kind/k3s cluster with readiness and liveness probes and a Secret; torn down and redeployed unaided. | Medium |
 | K8S-3 | Kubernetes delivery: Helm, Kustomize, GitOps | Independent | K8S-1, CI-3 | Argo CD keeps the local cluster in sync with Git | PS-6 | Argo CD syncs the grad project from Git into kind/k3s. | Low |
 | TST-1 | Testing with pytest (refresh) | Independent | PY-1–7, WEB-1–8 | Add tests that a pipeline can gate on | PS-2 | Tests run in PS-2's pipeline. | Medium |
 | TST-2 | Integration testing | Independent | TST-1 | Run integration tests against service containers in CI | PS-2 | PS-2's integration job catches a deliberately broken migration. | Medium |
@@ -172,7 +172,7 @@ Dec 2026 to mid-Feb 2027 (NTI Docker, CI/CD, AWS, Terraform, K8s, monitoring). *
 | CI-3 | Build and publish images in CI | NTI | CI-2, CTR-2 | Tagged image on every merge | PS-2 | Merge produces a tagged image. | High |
 | CI-4 | CI secrets and branch protection | NTI | CI-2 | Protect main with required checks | PS-2 | A PR with a failing check cannot merge. | High |
 | CI-5 | Release automation | Independent | CI-3, GIT-1–4 | Cut a tagged release from CI with a changelog | PS-2 | Tagged releases with a generated changelog; a /version endpoint returns the deployed version. | Medium |
-| DSO-1 | Pipeline security gates | NTI | CI-2, CTR-6 | Choose and tune gates; explain each trade-off | PS-2: plant a vulnerable dependency and a fake secret | Pipeline blocks both planted issues; README explains each gate. | High |
+| DSO-1 | Pipeline security gates | NTI | CI-2, CTR-6 | Choose and tune gates; explain each trade-off; Run an OWASP ZAP baseline scan against the staging app and triage its findings | PS-2: plant a vulnerable dependency and a fake secret | Pipeline blocks both planted issues; README explains each gate. | High |
 | CLD-1 | Cloud concepts and cost control | NTI | NET-1 | Set a budget alarm before any lab | Budget alarm on your AWS account | Budget alarm exists; explain shared responsibility. | High |
 | CLD-2 | AWS IAM basics | NTI | CLD-1, SEC-6 | Read and write a least-privilege policy | PS-3 | PS-3 uses roles only; no long-lived keys on the instance. | High |
 | CLD-3 | VPC networking | NTI | CLD-1, NET-2, NET-3 | Build a two-tier VPC by hand once, then in Terraform | PS-3 | Explain the packet path private subnet → NAT → internet (doc 19 'can explain cold'). | High |
@@ -222,7 +222,7 @@ About Apr to Sep 2027. **Gate 4: PS-7 detects 5 simulated attacks with tested de
 | CSEC-3 | Audit logging and posture | Independent | CSEC-1, CLD-5 | Raise the CIS score and explain each fix | PS-7 | CIS score before and after. | High |
 | CSEC-4 | Cloud threat detection | Independent | CSEC-3, LOG-1 | Write and test 5 detections | PS-7 | Detection repo with test evidence. | High |
 | CSEC-5 | Data protection | Independent | CLD-5, SEC-2 | Explain a key policy | PS-3, PS-7 | Key policy with reasoning. | Medium |
-| CSEC-6 | Network and edge protection | Independent | NET-8, SEC-5 | Remove all unnecessary public exposure | PS-7 | Exposure diagram with every public path justified. | Medium |
+| CSEC-6 | Network and edge protection | Independent | NET-8, SEC-5, NET-5 | Remove all unnecessary public exposure | PS-7 | Exposure diagram with every public path justified. | Medium |
 | CSEC-7 | Cloud incident response | Independent | CSEC-4, IR-1 | Run the leaked-key playbook | PS-7 tabletop | Playbook + postmortem. | High |
 | CSEC-8 | Policy as code | Independent | IAC-2, DSO-1 | Block an insecure Terraform change in CI | PS-4 | PR with an insecure resource blocked. | High |
 | CSEC-9 | Cloud attack paths | Independent | CSEC-1, APPSEC-1 | Complete the labs and explain each fix | Lab accounts only | Write-ups with the defensive fix. | Medium |
@@ -347,7 +347,7 @@ Only two certs fill an actual gap: SAA-C03 now, and SCS-C03 after the projects. 
 | AWS Solutions Architect Associate (SAA-C03) | AWS services, which neither map names | **Keep** (decided, G16). $150 list; NTI's voucher discounts it. I found no announced retirement, but recheck the code before booking | 2–4 weeks after NTI's AWS block |
 | [AWS Security Specialty (SCS-C03)](https://docs.aws.amazon.com/aws-certification/latest/examguides/security-specialty-03.html) | Proves the Stage 4 specialization | **Target.** It replaced SCS-C02 in Dec 2025, with 170 minutes, 65 questions and a $300 fee. [AWS](https://aws.amazon.com/certification/certified-security-specialty) notes candidates commonly hold SAA first | After PS-7, about Q4 2027 |
 | CompTIA Security+ | HR filter. DEBI's content covers most of its syllabus | **Conditional.** Deferred (G14). $439 retail; SY0-801 launched 17 Nov 2026, and SY0-701 runs until 11 Jun 2027. Worth it for SOC roles, government work or Gulf postings that filter on it; low value for DevSecOps hiring | Revisit about May 2027, as already planned |
-| Fortinet NSE 4 | Vendor firewall administration | **Challenge: drop it** unless DEBI funds the exam itself or you target network-security roles. This changes G15 only if you agree; it doesn't serve cloud security | G15 slot: Mar–May 2027 |
+| Fortinet NSE 4 | Vendor firewall administration | **Conditional:** only if DEBI funds the exam itself or you target network-security roles (G15 amended 23 Nov 2026). It doesn't serve cloud security | G15 slot: Mar–May 2027 |
 | CKA → CKS | Kubernetes depth | **Optional.** Only if your target postings demand Kubernetes. NTI's voucher lowers the cost | After PS-6 |
 | Terraform Associate | IaC | **Skip.** The PS-4 repo proves more | — |
 | CEH, OSCP, CISSP, CISA/CISM | Offense, or experience-gated | **Skip.** Off-path or not open to you yet | — |

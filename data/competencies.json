@@ -701,7 +701,8 @@
       "Write the grad project's Dockerfile from memory"
     ],
     "pre": [
-      "LNX-1"
+      "LNX-1",
+      "LNX-4"
     ],
     "nti": "NTI Docker module (21 h).",
     "debi": null,
@@ -889,14 +890,12 @@
     "labs": [
       "kind or k3s locally"
     ],
-    "ev": "NTI assessment; PS-6 only if target postings ask (doc 19).",
+    "ev": "The grad project runs on a local kind/k3s cluster with readiness and liveness probes and a Secret; torn down and redeployed unaided.",
     "hours": "NTI Kubernetes module: 49 h",
     "pri": "M",
     "existing": null,
     "paths": [
-      "CIE",
-      "DSO",
-      "CSE"
+      "core"
     ]
   },
   {
@@ -1154,10 +1153,11 @@
     "stage": "CDE",
     "lane": "code",
     "src": "NTI",
-    "desc": "SAST (Bandit/Semgrep), dependency audit (pip-audit), secrets (gitleaks), image scan (Trivy); fail on high.",
+    "desc": "SAST (Bandit/Semgrep), dependency audit (pip-audit), secrets (gitleaks), image scan (Trivy); fail on high; a DAST baseline scan (OWASP ZAP) against the staging app.",
     "why": "The core DevSecOps deliverable; doc 19 project stage 2.",
     "obj": [
-      "Choose and tune gates; explain each trade-off"
+      "Choose and tune gates; explain each trade-off",
+      "Run an OWASP ZAP baseline scan against the staging app and triage its findings"
     ],
     "pre": [
       "CI-2",
@@ -1166,7 +1166,7 @@
     "nti": "NTI CI/CD + DevSecOps practice project; NTI map: 'Automating security' (verified).",
     "debi": "TryHackMe DevSecOps path rooms through DEBI access (doc 19 §D #6).",
     "res": [
-      "Semgrep, Bandit, gitleaks, Trivy docs"
+      "Semgrep, Bandit, gitleaks, Trivy, OWASP ZAP docs"
     ],
     "labs": [
       "PS-2: plant a vulnerable dependency and a fake secret"
@@ -2261,7 +2261,8 @@
     ],
     "pre": [
       "NET-8",
-      "SEC-5"
+      "SEC-5",
+      "NET-5"
     ],
     "nti": "NTI map: secure network zoning, DDoS mitigation (verified).",
     "debi": null,
