@@ -1,0 +1,202 @@
+[
+  {
+    "id": "PS-1",
+    "name": "Container hardening",
+    "stage": "CDE",
+    "doc19": "doc 19 project stage 1",
+    "window": "21 Nov – ~20 Dec 2026",
+    "comps": [
+      "CTR-1",
+      "CTR-2",
+      "CTR-6"
+    ],
+    "arch": "Grad project Dockerfile rewritten from memory: multi-stage, non-root, healthcheck, pinned base.",
+    "steps": [
+      "Rewrite the Dockerfile cold",
+      "Run trivy image",
+      "Fix or justify top findings in the README"
+    ],
+    "goal": "Minimal attack surface in what you ship.",
+    "deliv": "Dockerfile + Trivy triage in README.",
+    "value": "Shows you can harden, not only containerize."
+  },
+  {
+    "id": "PS-2",
+    "name": "CI with security gates",
+    "stage": "CDE",
+    "doc19": "doc 19 project stage 2",
+    "window": "Dec 2026",
+    "comps": [
+      "GIT-1–4",
+      "TST-1",
+      "TST-2",
+      "CI-1",
+      "CI-2",
+      "CI-3",
+      "CI-4",
+      "CI-5",
+      "DSO-1",
+      "DSO-2"
+    ],
+    "arch": "GitHub Actions on push: tests, pip-audit, Bandit, gitleaks, Trivy; fail on high; SBOM added later (DSO-2).",
+    "steps": [
+      "Tests in CI with Postgres/Redis service containers",
+      "Integration job",
+      "Add each gate",
+      "Protect main",
+      "Release automation (SemVer, changelog)",
+      "Plant a vulnerable dependency and a fake secret; show both blocked"
+    ],
+    "goal": "Nothing reaches a deploy unscanned.",
+    "deliv": "One red and one green run; README explains each gate's trade-off.",
+    "value": "The DevSecOps job description in one repo."
+  },
+  {
+    "id": "PS-3",
+    "name": "AWS deployment",
+    "stage": "CDE",
+    "doc19": "doc 19 project stage 3",
+    "window": "Jan 2027, during NTI's AWS block",
+    "comps": [
+      "CLD-1",
+      "CLD-2",
+      "CLD-3",
+      "NET-8",
+      "CLD-4",
+      "CLD-5",
+      "CSEC-5"
+    ],
+    "arch": "VPC with public/private subnets; app on EC2 or ECS; Postgres private; least-privilege security groups; secrets in SSM/Secrets Manager; budget alarm; documented teardown.",
+    "steps": [
+      "Budget alarm",
+      "VPC by hand once",
+      "Twelve-Factor config review",
+      "Deploy the app",
+      "Move secrets to SSM",
+      "Write the teardown"
+    ],
+    "goal": "Private data tier, no long-lived keys, controlled cost.",
+    "deliv": "Running app + architecture diagram + teardown doc.",
+    "value": "Matches the AWS skills most Egyptian DevOps postings name."
+  },
+  {
+    "id": "PS-4",
+    "name": "Terraform + policy as code",
+    "stage": "CDE",
+    "doc19": "doc 19 project stage 4",
+    "window": "Jan – Feb 2027",
+    "comps": [
+      "IAC-1",
+      "IAC-2",
+      "CI-6",
+      "CSEC-8"
+    ],
+    "arch": "PS-3 environment fully in Terraform with remote state; Checkov in CI blocks insecure changes.",
+    "steps": [
+      "Port PS-3 to Terraform",
+      "Remote state with locking",
+      "destroy + re-apply",
+      "Dev and prod from the same code",
+      "Checkov gate"
+    ],
+    "goal": "Reproducible infra with guardrails before deploy.",
+    "deliv": "Terraform repo; a PR blocked by Checkov.",
+    "value": "IaC is in nearly every DevOps posting."
+  },
+  {
+    "id": "PS-5",
+    "name": "Monitoring",
+    "stage": "CDE",
+    "doc19": "doc 19 project stage 5",
+    "window": "by mid-Feb 2027",
+    "comps": [
+      "OPS-1",
+      "OPS-2",
+      "OPS-3",
+      "CLD-6"
+    ],
+    "arch": "Structured logs + metrics + one alert (CloudWatch or Prometheus/Grafana), triggered on purpose.",
+    "steps": [
+      "Structured logging",
+      "Dashboard",
+      "Alert",
+      "Inject a failure and find it from telemetry"
+    ],
+    "goal": "Know when it breaks before users do.",
+    "deliv": "Dashboard screenshot, alert evidence.",
+    "value": "Closes the ops loop interviewers ask about."
+  },
+  {
+    "id": "PS-6",
+    "name": "Kubernetes",
+    "stage": "CSS",
+    "doc19": "doc 19 project stage 6, optional",
+    "window": "only if target postings ask",
+    "comps": [
+      "K8S-1",
+      "K8S-3",
+      "K8S-2"
+    ],
+    "arch": "kind or k3s locally; RBAC per namespace, Pod Security 'restricted', default-deny NetworkPolicies, Kyverno, Falco.",
+    "steps": [
+      "Deploy the app with Helm or Kustomize",
+      "Argo CD sync from Git",
+      "Apply each control",
+      "Run kube-bench before and after"
+    ],
+    "goal": "A cluster you can defend.",
+    "deliv": "Hardened cluster repo + kube-bench results.",
+    "value": "Opens K8s-heavy roles; first thing to drop otherwise."
+  },
+  {
+    "id": "PS-7",
+    "name": "Cloud security baseline + detection",
+    "stage": "CSS",
+    "doc19": "new, after NTI",
+    "window": "about Apr – Sep 2027",
+    "comps": [
+      "CSEC-1",
+      "CSEC-2",
+      "CSEC-3",
+      "CSEC-4",
+      "CSEC-6",
+      "CSEC-7",
+      "IR-1",
+      "LOG-1",
+      "SEC-8"
+    ],
+    "arch": "On top of PS-3/PS-4: CloudTrail to a locked bucket, Config, Security Hub (CIS), GuardDuty → EventBridge → alerts; 5 detections; leaked-key playbook.",
+    "steps": [
+      "OIDC deploy role",
+      "Logging + posture",
+      "5 detections as code",
+      "Simulate with Stratus Red Team",
+      "Tabletop + postmortem",
+      "One review by someone more experienced"
+    ],
+    "goal": "Detect within minutes; contain with a written procedure.",
+    "deliv": "Detection repo with tests, runbook, postmortem, CIS before/after.",
+    "value": "The bridge from DevSecOps to cloud security / SecOps roles."
+  },
+  {
+    "id": "PS-8",
+    "name": "DEBI capstone",
+    "stage": "CSS",
+    "doc19": "DEBI final project",
+    "window": "end of DEBI, about late 2027",
+    "comps": [
+      "CSEC-4",
+      "CSEC-7",
+      "TM-1"
+    ],
+    "arch": "PS-7 grown into a full detection lab, or a small posture scanner (Python + boto3). Subject to DEBI approval.",
+    "steps": [
+      "Get the topic approved",
+      "Extend PS-7",
+      "Present"
+    ],
+    "goal": "One app, three uses: NTI capstone, DEBI project, CV (doc 19 §C).",
+    "deliv": "DEBI submission.",
+    "value": "Turns a program requirement into portfolio evidence."
+  }
+]

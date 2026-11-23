@@ -1,0 +1,178 @@
+[
+  {
+    "area": "Linux and OS",
+    "nti": "Linux + Bash 35 h (doc 19); map: Bash only",
+    "debi": "OS basics, permissions, hardening; Google course 4 (unverified)",
+    "cls": "Complementary",
+    "lead": "NTI",
+    "action": "NTI for admin; DEBI only for hardening; skim DEBI's Linux course"
+  },
+  {
+    "area": "Networking",
+    "nti": "Prerequisite (CCNA level), not taught; map: firewalls, VLANs, ACLs, DNS/HTTP/TLS",
+    "debi": "OSI, subnetting, NAT, ports, tools; Google course 3 (unverified)",
+    "cls": "Complementary (DEBI fills NTI's gap)",
+    "lead": "DEBI",
+    "action": "DEBI content + Jeremy's IT Lab days; VPC side via SAA"
+  },
+  {
+    "area": "Programming",
+    "nti": "Python 22 h",
+    "debi": "Python automation course (unverified)",
+    "cls": "Duplicate",
+    "lead": "Neither",
+    "action": "Revision only; you already know Python"
+  },
+  {
+    "area": "Git and CI/CD",
+    "nti": "Git 7 h; CI/CD + practice project 28 h",
+    "debi": "Absent",
+    "cls": "NTI exclusive",
+    "lead": "NTI",
+    "action": "GitHub Actions in PS-2"
+  },
+  {
+    "area": "Docker",
+    "nti": "21 h; map: image scanning",
+    "debi": "Virtualization only",
+    "cls": "NTI exclusive",
+    "lead": "NTI",
+    "action": "Hardening + Trivy in PS-1"
+  },
+  {
+    "area": "Kubernetes",
+    "nti": "49 h",
+    "debi": "Absent",
+    "cls": "NTI exclusive",
+    "lead": "NTI",
+    "action": "PS-6 only if postings ask"
+  },
+  {
+    "area": "Cloud fundamentals",
+    "nti": "AWS 49 h",
+    "debi": "Concept box only",
+    "cls": "Complementary (thin on DEBI)",
+    "lead": "NTI",
+    "action": "NTI block + SAA prep"
+  },
+  {
+    "area": "AWS services",
+    "nti": "AWS 49 h",
+    "debi": "Named as an environment; AWS courses don't count (G10)",
+    "cls": "NTI exclusive",
+    "lead": "NTI",
+    "action": "SAA-C03; PS-3"
+  },
+  {
+    "area": "IaC",
+    "nti": "Terraform 21 h, Ansible 14 h",
+    "debi": "'Understand IaC' only",
+    "cls": "NTI exclusive",
+    "lead": "NTI",
+    "action": "PS-4"
+  },
+  {
+    "area": "IAM and identity",
+    "nti": "Map: IAM, least privilege, RBAC",
+    "debi": "Kerberos, LDAP, RADIUS, SSO, MFA",
+    "cls": "Complementary",
+    "lead": "DEBI theory → independent AWS depth",
+    "action": "CSEC-1 in PS-7"
+  },
+  {
+    "area": "Network security",
+    "nti": "Map: firewalls, IDS/IPS, DDoS, zoning",
+    "debi": "Hardening, NIDS/NIPS, secure protocols, Fortinet (likely)",
+    "cls": "Duplicate",
+    "lead": "DEBI",
+    "action": "Cloud version in CSEC-6"
+  },
+  {
+    "area": "Monitoring and logging",
+    "nti": "Monitoring 7 h (ops metrics)",
+    "debi": "Security logs, SIEM; Google course 6 (unverified)",
+    "cls": "Complementary",
+    "lead": "NTI ops / DEBI security",
+    "action": "PS-5 then PS-7"
+  },
+  {
+    "area": "Vulnerability management",
+    "nti": "Map: Nessus, OpenVAS, Qualys, patching",
+    "debi": "Basics, Nmap",
+    "cls": "Complementary",
+    "lead": "NTI",
+    "action": "VM-1 on your own VM"
+  },
+  {
+    "area": "SecOps and IR",
+    "nti": "Map: IR lifecycle, forensics, EDR, SOAR",
+    "debi": "IR process, threat hunting, ATT&CK",
+    "cls": "Duplicate",
+    "lead": "DEBI",
+    "action": "IR-1 runbook + tabletop"
+  },
+  {
+    "area": "Application security",
+    "nti": "Map: OWASP, secure coding, Burp",
+    "debi": "Web attacks, OWASP",
+    "cls": "Duplicate (builder vs attacker)",
+    "lead": "NTI",
+    "action": "APPSEC-1 on the grad project"
+  },
+  {
+    "area": "DevSecOps practices",
+    "nti": "Agile & DevSecOps 14 h; map: SBOMs, supply chain",
+    "debi": "TryHackMe DevSecOps path (access, not assigned)",
+    "cls": "NTI exclusive",
+    "lead": "NTI",
+    "action": "DSO-1, DSO-2"
+  },
+  {
+    "area": "Threat modeling",
+    "nti": "Map: STRIDE, PASTA",
+    "debi": "Kill chain, Diamond, ATT&CK",
+    "cls": "Complementary",
+    "lead": "NTI",
+    "action": "TM-1 per README"
+  },
+  {
+    "area": "Crypto and PKI",
+    "nti": "Map: hashing, PKI design, cert lifecycle",
+    "debi": "Hashing, salting, key exchange, PKI",
+    "cls": "Duplicate",
+    "lead": "DEBI basics",
+    "action": "Applied in CSEC-5"
+  },
+  {
+    "area": "Governance",
+    "nti": "Map: SOC 2, ISO 27001, NIST",
+    "debi": "ISO, NIST, CIS, CSF, RMF",
+    "cls": "Duplicate",
+    "lead": "Either",
+    "action": "Reference only; CIS mapping in PS-7"
+  },
+  {
+    "area": "Offensive security",
+    "nti": "Absent",
+    "debi": "Large branch; CTF platforms",
+    "cls": "DEBI exclusive",
+    "lead": "DEBI",
+    "action": "Assigned rooms only; CSEC-9 for cloud attacks"
+  },
+  {
+    "area": "OpenStack",
+    "nti": "21 h",
+    "debi": "Absent",
+    "cls": "NTI exclusive",
+    "lead": "NTI",
+    "action": "Attend; low value for you (doc 19)"
+  },
+  {
+    "area": "Cloud security services (CloudTrail, GuardDuty, Config, Security Hub, SCPs)",
+    "nti": "Map: CSPM, KMS (names only)",
+    "debi": "Absent",
+    "cls": "Missing",
+    "lead": "Independent",
+    "action": "PS-7"
+  }
+]

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NTI + DEBI Unified Roadmap</title>
+<style>
+:root{
+  --bg:#0d1117;--panel:#161b22;--panel2:#1c222b;--line:#2a313c;--line2:#3a4350;
+  --text:#e6edf3;--muted:#8b949e;--faint:#6e7681;
+  --NTI:#4c8dff;--DEBI:#c27bff;--IND:#f0a83a;--SHARED:#2fbfa8;--EXIST:#9aabbd;
+  --ns:#6e7681;--ip:#e3b341;--done:#3fb950;--blocked:#f85149;--rec:#3fb950;
+  --radius:8px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button,select,input,textarea{font:inherit;color:inherit}
+a{color:var(--NTI)}
+.app{display:flex;flex-direction:column;height:100vh}
+header{display:flex;align-items:center;gap:16px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+header h1{font-size:15px;margin:0;font-weight:650;white-space:nowrap}
+header .ver{color:var(--muted);font-size:12px}
+.hprog{display:flex;align-items:center;gap:8px;margin-left:auto;font-size:12px;color:var(--muted)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;display:flex;min-width:80px}
+.bar span{display:block;height:100%}
+nav{display:flex;gap:2px;padding:0 12px;border-bottom:1px solid var(--line);background:var(--panel);overflow-x:auto}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav button.on{color:var(--text);border-bottom-color:var(--NTI)}
+main{flex:1;display:flex;min-height:0;position:relative}
+.view{flex:1;min-width:0;overflow:auto;display:none}
+.view.on{display:block}
+.gview.on{display:flex;flex-direction:column;overflow:hidden}
+.toolbar{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap;background:var(--bg)}
+.btn{background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:5px 10px;cursor:pointer;color:var(--text)}
+.btn:hover{border-color:var(--muted)}
+.btn.on{border-color:var(--NTI);background:#1a2638}
+.btn.danger{border-color:#5a2a2a;color:#ffaba8}
+select.btn{padding:5px 8px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted);align-items:center}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;border:2px solid;vertical-align:-2px;margin-right:4px;background:var(--panel)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:0}
+.canvas{flex:1;position:relative;overflow:hidden;cursor:grab;background:
+  radial-gradient(circle,#1b212a 1px,transparent 1px) 0 0/22px 22px}
+.canvas.drag{cursor:grabbing}
+.canvas svg{position:absolute;inset:0;width:100%;height:100%;user-select:none}
+.node{cursor:pointer}
+.node .box{fill:var(--panel);stroke-width:1.5}
+.node:hover .box{fill:var(--panel2)}
+.node.sel .box{stroke-width:3}
+.node.dim{opacity:.22}
+.node.blk .box{opacity:.6}.node.blk text{opacity:.7}
+.edge{fill:none;stroke:var(--line2);stroke-width:1.2;opacity:.0}
+.edges-all .edge{opacity:.35}
+.edge.flow{opacity:.55}
+.has-sel .edge.flow{opacity:.12}
+.has-sel .edge.in,.has-sel .edge.out{opacity:1}
+.edge.in{stroke:#58a6ff;opacity:1;stroke-width:2}
+.edge.out{stroke:#d2a8ff;opacity:1;stroke-width:2}
+.zoombox{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:4px;z-index:2}
+.zoombox .btn{width:34px;height:34px;padding:0}
+/* side panel */
+#panel{width:420px;max-width:100%;border-left:1px solid var(--line);background:var(--panel);overflow:auto;display:none;flex-shrink:0}
+#panel.on{display:block}
+#panel .ph{position:sticky;top:0;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 14px;display:flex;gap:8px;align-items:flex-start;z-index:1}
+#panel .ph h2{margin:0;font-size:16px;line-height:1.3}
+#panel .pid{font-size:12px;font-weight:700;letter-spacing:.3px}
+#panel .close{margin-left:auto;flex-shrink:0}
+#panel .pb{padding:12px 14px 40px}
+.sec{margin:14px 0}
+.sec h3{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:0 0 6px;font-weight:650}
+.sec p{margin:0}
+.sec ul{margin:0;padding-left:18px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.badge{font-size:11px;padding:2px 7px;border-radius:10px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+.statusset{display:flex;gap:6px}
+.statusset button{flex:1;padding:7px 6px;border-radius:6px;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;font-size:12px}
+.statusset button.on[data-s="ns"]{border-color:var(--ns);background:#22272e}
+.statusset button.on[data-s="ip"]{border-color:var(--ip);background:#2a2410}
+.statusset button.on[data-s="done"]{border-color:var(--done);background:#12261a}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:3px 8px;border-radius:12px;border:1px solid var(--line2);background:var(--panel2);cursor:pointer;margin:0 4px 4px 0}
+.chip:hover{border-color:var(--muted)}
+textarea{width:100%;min-height:70px;background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:8px;resize:vertical}
+.warn{border:1px solid #5a4a1a;background:#221c0c;color:#e8d28a;border-radius:6px;padding:8px 10px;font-size:12px}
+.blockmsg{border:1px solid #5a2a2a;background:#2a1414;color:#ffb3ae;border-radius:6px;padding:8px 10px;font-size:12px}
+.unk{color:var(--faint);font-style:italic}
+/* generic pages */
+.page{padding:18px 20px 60px;max-width:1200px}
+.page h2{font-size:18px;margin:0 0 4px}
+.page .lead{color:var(--muted);margin:0 0 16px;max-width:820px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:8px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px;position:sticky;top:0;background:var(--bg)}
+tr.cl:hover td{background:var(--panel)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.kpi{font-size:26px;font-weight:700}
+.kpil{font-size:12px;color:var(--muted)}
+.stagehead{display:flex;align-items:center;gap:10px;margin:22px 0 6px}
+.stagehead h3{margin:0;font-size:15px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filters input{background:var(--panel2);border:1px solid var(--line2);border-radius:6px;padding:5px 10px;min-width:180px}
+.srcb{font-size:11px;font-weight:700;padding:1px 6px;border-radius:4px;border:1px solid;white-space:nowrap}
+.mini{font-size:12px;color:var(--muted)}
+.pathcard{cursor:pointer}
+.pathcard.rec{border-color:var(--rec)}
+.pathcard.on{outline:2px solid var(--NTI)}
+.trunk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 18px}
+.trunk .seg{padding:8px 12px;border:1px solid var(--line2);border-radius:6px;background:var(--panel)}
+.arrow{color:var(--faint)}
+.proj{position:relative}
+.projflow{display:grid;gap:12px}
+.tl{position:relative;margin-top:10px}
+.tlgrid{display:grid;grid-template-columns:160px 1fr;gap:0}
+.tlrow{display:contents}
+.tllab{padding:10px 8px;border-bottom:1px solid var(--line);font-size:13px}
+.tltrack{position:relative;border-bottom:1px solid var(--line);min-height:44px}
+.tlbar{position:absolute;top:10px;height:24px;border-radius:5px;font-size:11px;padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid}
+.tlmonths{display:flex;font-size:11px;color:var(--muted)}
+.tlmonths div{flex:1;border-left:1px solid var(--line);padding-left:3px}
+.today{position:absolute;top:0;bottom:0;width:0;border-left:2px dashed var(--ip)}
+.kanban{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:12px;overflow-x:auto;align-items:start}
+.kcol{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);display:flex;flex-direction:column;max-height:calc(100vh - 260px);min-height:200px}
+.kcol.over{border-color:var(--NTI);background:#15202e}
+.khead{padding:10px 12px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.khead .mini{width:100%}
+.kbody{padding:8px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.kcard{background:var(--panel2);border:1px solid var(--line2);border-left:4px solid;border-radius:6px;padding:8px 10px;cursor:grab}
+.kcard:hover{border-color:var(--muted)}
+.kcard.dragging{opacity:.4}
+.kname{font-weight:600;font-size:13px;margin-bottom:4px}
+.kmeta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+footer.note{color:var(--faint);font-size:12px;padding:16px 20px;border-top:1px solid var(--line)}
+@media (max-width:900px){
+  #panel{position:absolute;inset:0;width:100%;z-index:5}
+  header .ver{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>NTI + DEBI Unified Roadmap</h1><span class="ver" id="ver"></span>
+  <div class="hprog"><span id="hpct"></span><div class="bar" style="width:160px" id="hbar"></div></div>
+</header>
+<nav id="tabs">
+  <button data-v="flow" class="on">Flowchart</button>
+  <button data-v="roadmap">Stage map</button>
+  <button data-v="kanban">Kanban</button>
+  <button data-v="checklist">Checklist</button>
+  <button data-v="paths">Career paths</button>
+  <button data-v="compare">NTI vs DEBI</button>
+  <button data-v="projects">Projects</button>
+  <button data-v="certs">Certifications</button>
+  <button data-v="dash">Dashboard</button>
+</nav>
+<main>
+  <section class="view gview on" id="v-flow">
+    <div class="toolbar gtool"></div>
+    <div class="canvas" id="cv-flow">
+      <svg xmlns="http://www.w3.org/2000/svg"><g class="vp"></g></svg>
+      <div class="zoombox"><button class="btn zin" title="Zoom in">+</button><button class="btn zout" title="Zoom out">−</button><button class="btn zfit" title="Toggle: whole map / fit width">⤢</button></div>
+    </div>
+  </section>
+  <section class="view gview" id="v-roadmap">
+    <div class="toolbar gtool" data-edges="1"></div>
+    <div class="canvas" id="cv-roadmap">
+      <svg xmlns="http://www.w3.org/2000/svg"><g class="vp"></g></svg>
+      <div class="zoombox"><button class="btn zin" title="Zoom in">+</button><button class="btn zout" title="Zoom out">−</button><button class="btn zfit" title="Toggle: whole map / fit width">⤢</button></div>
+    </div>
+  </section>
+  <section class="view" id="v-kanban"></section>
+  <section class="view" id="v-checklist"></section>
+  <section class="view" id="v-paths"></section>
+  <section class="view" id="v-compare"></section>
+  <section class="view" id="v-projects"></section>
+  <section class="view" id="v-certs"></section>
+  <section class="view" id="v-dash"></section>
+  <aside id="panel"></aside>
+</main>
+</div>
+<script>
+"use strict";
+const D = /*DATA*/null;
+const KEY = "ntidebi-roadmap-v1";
+const SRC_LABEL = {NTI:"NTI",DEBI:"DEBI",IND:"Independent",SHARED:"Shared",EXIST:"Existing"};
+const ST_LABEL = {ns:"Not started",ip:"In progress",done:"Completed"};
+const PRI = {H:"High",M:"Medium",L:"Low"};
+const byId = Object.fromEntries(D.comps.map(c=>[c.id,c]));
+const stageById = Object.fromEntries(D.stages.map(s=>[s.id,s]));
+const pathById = Object.fromEntries(D.paths.map(p=>[p.id,p]));
+const dependents = {}; D.comps.forEach(c=>dependents[c.id]=[]);
+D.comps.forEach(c=>c.pre.forEach(p=>dependents[p].push(c.id)));
+const projByComp = {}; D.projects.forEach(p=>p.comps.forEach(id=>(projByComp[id]=projByComp[id]||[]).push(p.id)));
+
+/* ---------- storage ---------- */
+let storageOK = true;
+function blank(){return {status:{},notes:{},evidence:{},updated:{}}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");return s&&s.status?Object.assign(blank(),s):blank()}catch(e){storageOK=false;return blank()}}
+let S = load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storageOK=false}}
+const st = id => S.status[id]||"ns";
+const isBlocked = id => st(id)!=="done" && byId[id].pre.some(p=>st(p)!=="done");
+const missingPre = id => byId[id].pre.filter(p=>st(p)!=="done");
+function setStatus(id,v){S.status[id]=v;S.updated[id]=new Date().toISOString();save();refreshAll()}
+
+/* ---------- helpers ---------- */
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const el = (h)=>{const t=document.createElement("template");t.innerHTML=h.trim();return t.content.firstElementChild};
+const srcBadge = s => `<span class="srcb" style="color:var(--${s});border-color:var(--${s})">${SRC_LABEL[s]}</span>`;
+const dotFor = id => {const s=st(id),lk=isBlocked(id)&&s==="ns";const style=lk?"background:#3a4350":s==="ns"?"border:1.5px solid #e6edf3":`background:var(--${s})`;return `<span class="dot" style="${style}" title="${lk?"Locked: prerequisites not done":ST_LABEL[s]}"></span>`};
+function pct(list){if(!list.length)return 0;return Math.round(100*list.filter(id=>st(id)==="done").length/list.length)}
+function barHTML(list,w){const n=list.length||1,d=list.filter(i=>st(i)==="done").length,p=list.filter(i=>st(i)==="ip").length;
+  return `<div class="bar" style="${w?`width:${w}px`:""}"><span style="width:${100*d/n}%;background:var(--done)"></span><span style="width:${100*p/n}%;background:var(--ip)"></span></div>`}
+const compsIn = stg => D.comps.filter(c=>c.stage===stg).map(c=>c.id);
+const ALL = D.comps.map(c=>c.id);
+
+/* ---------- tabs ---------- */
+let curView="flow";
+document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;showView(b.dataset.v)});
+function showView(v){curView=v;document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));renderView(v);
+  const g=GRAPHS[v]; if(g) requestAnimationFrame(()=>{if(!g.fitted)g.fit()})}
+function renderView(v){({flow:renderGraphState,roadmap:renderGraphState,kanban:renderKanban,checklist:renderChecklist,paths:renderPaths,compare:renderCompare,projects:renderProjects,certs:renderCerts,dash:renderDash})[v]()}
+
+/* ---------- shared graph helpers ---------- */
+const svgNS="http://www.w3.org/2000/svg";
+function sv(tag,attrs,parent){const n=document.createElementNS(svgNS,tag);for(const k in attrs)n.setAttribute(k,attrs[k]);if(parent)parent.appendChild(n);return n}
+function trunc(s,n){return s.length>n?s.slice(0,n-1)+"…":s}
+function wrap(s,n,maxLines){const words=s.split(" ");const lines=[];let cur="";
+  for(const w of words){if((cur+" "+w).trim().length<=n)cur=(cur+" "+w).trim();else{if(cur)lines.push(cur);cur=w}}
+  if(cur)lines.push(cur);
+  if(lines.length>maxLines){const keep=lines.slice(0,maxLines);keep[maxLines-1]=trunc(keep[maxLines-1]+" "+lines.slice(maxLines).join(" "),n);return keep}
+  return lines}
+const STAGE_SHORT={FND:"Foundation",CDE:"Cloud & DevOps",SEN:"Security eng.",CSS:"Cloud security",JOB:"Job readiness"};
+let selId=null, pathFilter="", showAllEdges=false, blockedOnly=false;
+
+/* A zoomable, pannable SVG viewer bound to one canvas */
+function Viewer(name){
+  const canvas=document.getElementById("cv-"+name), svg=canvas.querySelector("svg"), vp=svg.querySelector("g.vp");
+  const V={name,canvas,svg,vp,T:{k:1,x:0,y:0},W:100,H:100,fitted:false,nodes:{},edges:[],stageBars:{}};
+  V.apply=()=>vp.setAttribute("transform",`translate(${V.T.x},${V.T.y}) scale(${V.T.k})`);
+  V.fit=()=>{const r=canvas.getBoundingClientRect();if(!r.width)return;const k=Math.max(0.45,Math.min(1.1,r.width/V.W*0.98));V.T={k,x:Math.max(8,(r.width-V.W*k)/2),y:8};V.apply();V.fitted=true};
+  V.fitAll=()=>{const r=canvas.getBoundingClientRect();if(!r.width)return;const k=Math.min(r.width/V.W,r.height/V.H)*0.98;V.T={k:Math.max(k,0.12),x:(r.width-V.W*k)/2,y:8};V.apply()};
+  V.zoomAt=(f,cx,cy)=>{const T=V.T,k=Math.min(3,Math.max(0.12,T.k*f));T.x=cx-(cx-T.x)*k/T.k;T.y=cy-(cy-T.y)*k/T.k;T.k=k;V.apply()};
+  V.centerOn=(x,y)=>{const r=canvas.getBoundingClientRect();if(!r.width)return;if(V.T.k<0.7)V.T.k=0.9;V.T.x=r.width/2-x*V.T.k;V.T.y=r.height/2-y*V.T.k;V.apply()};
+  canvas.addEventListener("wheel",e=>{e.preventDefault();const r=canvas.getBoundingClientRect();V.zoomAt(Math.exp(-e.deltaY*0.0015),e.clientX-r.left,e.clientY-r.top)},{passive:false});
+  let drag=null;
+  canvas.addEventListener("pointerdown",e=>{if(e.target.closest(".zoombox"))return;drag={x:e.clientX,y:e.clientY,tx:V.T.x,ty:V.T.y,moved:false};canvas.classList.add("drag")});
+  window.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>3)drag.moved=true;V.T.x=drag.tx+dx;V.T.y=drag.ty+dy;V.apply()});
+  window.addEventListener("pointerup",()=>{if(drag){canvas.classList.remove("drag");setTimeout(()=>drag=null,0)}});
+  canvas.addEventListener("click",e=>{if(drag&&drag.moved){e.stopPropagation();e.preventDefault()}},true);
+  svg.addEventListener("click",e=>{if(!e.target.closest(".node")){selId=null;renderGraphState()}});
+  canvas.querySelector(".zin").onclick=()=>{const r=canvas.getBoundingClientRect();V.zoomAt(1.25,r.width/2,r.height/2)};
+  canvas.querySelector(".zout").onclick=()=>{const r=canvas.getBoundingClientRect();V.zoomAt(0.8,r.width/2,r.height/2)};
+  canvas.querySelector(".zfit").onclick=()=>{V._all=!V._all;V._all?V.fitAll():V.fit()};
+  return V;
+}
+/* one node: name as headline (ID lives in the detail panel) */
+function drawNode(V,parent,c,x,y,w,h,sub){
+  const g=sv("g",{class:"node",transform:`translate(${x},${y})`,tabindex:0,role:"button","aria-label":c.name},parent);
+  g.addEventListener("click",ev=>{ev.stopPropagation();select(c.id)});
+  g.addEventListener("keydown",ev=>{if(ev.key==="Enter")select(c.id)});
+  const col=`var(--${c.src})`;
+  const box=sv("rect",{class:"box",width:w,height:h,rx:7,stroke:col},g);
+  if(c.src==="EXIST")box.setAttribute("stroke-dasharray","5 3");
+  sv("rect",{width:4,height:h,rx:2,fill:col},g);
+  const chars=Math.floor((w-40)/6.6), lines=wrap(c.name,chars,2);
+  const top=sub?(lines.length>1?18:24):(lines.length>1?h/2-3:h/2+4);
+  lines.forEach((t,i)=>{sv("text",{x:12,y:top+i*15,fill:"#e6edf3","font-size":12,"font-weight":550},g).textContent=t});
+  if(sub){sv("text",{x:12,y:h-9,fill:"#8b949e","font-size":10.5},g).textContent=sub}
+  if(c.existing){sv("text",{x:w-22,y:h-9,fill:"#9aabbd","font-size":9.5,"text-anchor":"end"},g).textContent=c.existing==="have"?"have":"refresh"}
+  const dot=sv("circle",{cx:w-12,cy:13,r:5.5},g);
+  const lock=sv("g",{transform:`translate(${w-17},6)`,fill:"none",stroke:"#6e7681","stroke-width":1.4},g);
+  sv("rect",{x:1,y:5,width:9,height:7,rx:1.5,fill:"#6e7681",stroke:"none"},lock);sv("path",{d:"M3 5V3.5a2.5 2.5 0 0 1 5 0V5"},lock);
+  const ti=sv("title",{},g);ti.textContent=c.name;
+  V.nodes[c.id]={g,box,dot,lock,x,y,w,h};
+}
+function drawEdges(V,parent,mode){
+  const eg=sv("g",{class:"edges"},parent);V.edges.length=0;
+  D.comps.forEach(c=>c.pre.forEach(p=>{
+    const a=V.nodes[p]||V._pos[p],b=V.nodes[c.id]||V._pos[c.id];if(!a||!b)return;
+    let x1=a.x+a.w,y1=a.y+a.h/2,x2=b.x,y2=b.y+b.h/2,d;
+    if(x2<=x1+4){x1=a.x+a.w/2;y1=a.y+a.h;x2=b.x+b.w/2;y2=b.y;
+      if(y2<y1){y1=a.y;y2=b.y+b.h;d=`M${x1} ${y1} C${x1} ${y1-30},${x2} ${y2+30},${x2} ${y2}`}
+      else d=`M${x1} ${y1} C${x1} ${y1+30},${x2} ${y2-30},${x2} ${y2}`}
+    else{const dx=Math.max(30,(x2-x1)/2);d=`M${x1} ${y1} C${x1+dx} ${y1},${x2-dx} ${y2},${x2} ${y2}`}
+    V.edges.push({from:p,to:c.id,el:sv("path",{d,class:"edge "+mode,"marker-end":`url(#arr-${V.name})`},eg)});
+  }));
+  const defs=sv("defs",{},parent);const m=sv("marker",{id:"arr-"+V.name,viewBox:"0 0 10 10",refX:9,refY:5,markerWidth:6,markerHeight:6,orient:"auto-start-reverse"},defs);
+  sv("path",{d:"M0 0L10 5L0 10z",fill:"#8b949e"},m);
+  return eg;
+}
+
+/* ---------- stage map (stages × domains) ---------- */
+const NW=176,NH=46,GX=12,GY=10,PADX=18,PADY=16,LANEW=150,HEADH=86,SUB=2;
+const colW=SUB*(NW+GX)-GX+2*PADX;
+function drawStageMap(V){
+  const vp=V.vp;vp.innerHTML="";V.nodes={};V._pos={};
+  const laneY={},laneH={};let y=HEADH;
+  D.lanes.forEach(l=>{let rows=0;
+    D.stages.forEach(s=>{const n=D.comps.filter(c=>c.lane===l.id&&c.stage===s.id).length;rows=Math.max(rows,Math.ceil(n/SUB))});
+    if(!rows)return;laneY[l.id]=y;laneH[l.id]=rows*(NH+GY)-GY+2*PADY;
+    D.stages.forEach((s,si)=>D.comps.filter(c=>c.lane===l.id&&c.stage===s.id).forEach((c,i)=>{
+      V._pos[c.id]={x:LANEW+si*colW+PADX+(i%SUB)*(NW+GX),y:y+PADY+Math.floor(i/SUB)*(NH+GY),w:NW,h:NH}}));
+    y+=laneH[l.id]});
+  V.W=LANEW+D.stages.length*colW+20;V.H=y+20;
+  D.stages.forEach((s,si)=>{const x=LANEW+si*colW;
+    sv("rect",{x:x+2,y:4,width:colW-4,height:V.H-8,rx:10,fill:si%2?"#11161d":"#0f141a",stroke:"#1f2630"},vp);
+    const g=sv("g",{class:"node"},vp);g.addEventListener("click",()=>openStage(s.id));
+    sv("text",{x:x+PADX,y:30,fill:"#e6edf3","font-size":15,"font-weight":650},g).textContent=`${s.n} · ${s.name}`;
+    sv("text",{x:x+PADX,y:50,fill:"#8b949e","font-size":11.5},g).textContent=trunc(s.window,58);
+    V.stageBars[s.id]={g:sv("g",{},g),x:x+PADX,w:colW-2*PADX-40,y:62};
+    const gx=x+colW-2,gd=sv("g",{class:"node"},vp);gd.addEventListener("click",ev=>{ev.stopPropagation();openStage(s.id)});
+    sv("path",{d:`M${gx} 21l9 9l-9 9l-9 -9z`,fill:"#e6edf3",stroke:"#0d1117","stroke-width":2},gd);sv("title",{},gd).textContent=s.gate;
+  });
+  D.lanes.forEach(l=>{if(laneY[l.id]==null)return;
+    sv("line",{x1:10,x2:V.W-10,y1:laneY[l.id],y2:laneY[l.id],stroke:"#232a34"},vp);
+    sv("text",{x:16,y:laneY[l.id]+24,fill:"#8b949e","font-size":12,"font-weight":650},vp).textContent=l.name});
+  drawEdges(V,vp,"faint");
+  const ng=sv("g",{},vp);D.comps.forEach(c=>{const p=V._pos[c.id];drawNode(V,ng,c,p.x,p.y,p.w,p.h,null)});
+}
+
+/* ---------- flowchart (dependency order, left to right) ---------- */
+const FW=206,FH=60,FGX=96,FGY=14,FTOP=74;
+function drawFlow(V){
+  const vp=V.vp;vp.innerHTML="";V.nodes={};V._pos={};
+  const depth={};const dfs=id=>{if(id in depth)return depth[id];const p=byId[id].pre;return depth[id]=p.length?1+Math.max(...p.map(dfs)):0};
+  D.comps.forEach(c=>dfs(c.id));
+  const maxD=Math.max(...Object.values(depth));
+  const sOrd=Object.fromEntries(D.stages.map((s,i)=>[s.id,i])),lOrd=Object.fromEntries(D.lanes.map((l,i)=>[l.id,i]));
+  const cols=[...Array(maxD+1)].map((_,d)=>D.comps.filter(c=>depth[c.id]===d).sort((a,b)=>sOrd[a.stage]-sOrd[b.stage]||lOrd[a.lane]-lOrd[b.lane]).map(c=>c.id));
+  const idx={};const reindex=()=>cols.forEach(col=>col.forEach((id,i)=>idx[id]=i-(col.length-1)/2));
+  reindex();
+  for(let it=0;it<8;it++){ // barycenter sweeps to reduce crossings
+    for(let d=1;d<=maxD;d++){cols[d].sort((a,b)=>{const ba=avg(byId[a].pre.map(p=>idx[p])),bb=avg(byId[b].pre.map(p=>idx[p]));return ba-bb});reindex()}
+    for(let d=maxD-1;d>=0;d--){cols[d].sort((a,b)=>{const da=dependents[a].map(x=>idx[x]),db=dependents[b].map(x=>idx[x]);return (da.length?avg(da):idx[a])-(db.length?avg(db):idx[b])});reindex()}
+  }
+  function avg(a){return a.length?a.reduce((s,x)=>s+x,0)/a.length:0}
+  const maxN=Math.max(...cols.map(c=>c.length)),colH=n=>n*(FH+FGY)-FGY,Hmax=colH(maxN);
+  cols.forEach((col,d)=>{const x=30+d*(FW+FGX),y0=FTOP+(Hmax-colH(col.length))/2;
+    col.forEach((id,i)=>V._pos[id]={x,y:y0+i*(FH+FGY),w:FW,h:FH})});
+  V.W=30+(maxD+1)*(FW+FGX);V.H=FTOP+Hmax+30;
+  cols.forEach((col,d)=>{const x=30+d*(FW+FGX);
+    sv("text",{x,y:30,fill:"#e6edf3","font-size":13,"font-weight":650},vp).textContent=d===0?"Start here":`Step ${d+1}`;
+    sv("text",{x,y:48,fill:"#8b949e","font-size":11},vp).textContent=d===0?"No prerequisites":`Needs step ${d} or earlier`});
+  drawEdges(V,vp,"flow");
+  const ng=sv("g",{},vp);D.comps.forEach(c=>{const p=V._pos[c.id];drawNode(V,ng,c,p.x,p.y,p.w,p.h,`${STAGE_SHORT[c.stage]} · ${SRC_LABEL[c.src]}`)});
+}
+
+const GRAPHS={flow:Viewer("flow"),roadmap:Viewer("roadmap")};
+drawFlow(GRAPHS.flow);drawStageMap(GRAPHS.roadmap);
+
+function renderGraphState(){
+  Object.values(GRAPHS).forEach(V=>{
+    D.comps.forEach(c=>{const n=V.nodes[c.id];if(!n)return;const s=st(c.id),b=isBlocked(c.id),locked=b&&s==="ns";
+      n.lock.style.display=locked?"":"none";n.dot.style.display=locked?"none":"";
+      n.dot.setAttribute("fill",s==="done"?"var(--done)":s==="ip"?"var(--ip)":"none");
+      n.dot.setAttribute("stroke",s==="ns"?"#e6edf3":"none");n.dot.setAttribute("stroke-width",1.5);
+      n.box.style.fill=s==="done"?"#122119":s==="ip"?"#231f10":"";
+      n.g.classList.toggle("blk",b);n.g.classList.toggle("sel",c.id===selId);
+      let dim=false;if(pathFilter)dim=!(c.paths.includes("core")||c.paths.includes(pathFilter));if(blockedOnly)dim=dim||!b;
+      n.g.classList.toggle("dim",dim)});
+    V.svg.classList.toggle("edges-all",showAllEdges);V.svg.classList.toggle("has-sel",!!selId);
+    V.edges.forEach(e=>{e.el.classList.toggle("in",!!selId&&e.to===selId);e.el.classList.toggle("out",!!selId&&e.from===selId)});
+    Object.entries(V.stageBars).forEach(([sid,b])=>{b.g.innerHTML="";const L=compsIn(sid),done=L.filter(i=>st(i)==="done").length,ip=L.filter(i=>st(i)==="ip").length;
+      sv("rect",{x:b.x,y:b.y,width:b.w,height:6,rx:3,fill:"#2a313c"},b.g);
+      sv("rect",{x:b.x,y:b.y,width:b.w*done/L.length,height:6,rx:3,fill:"var(--done)"},b.g);
+      sv("rect",{x:b.x+b.w*done/L.length,y:b.y,width:b.w*ip/L.length,height:6,fill:"var(--ip)"},b.g);
+      sv("text",{x:b.x+b.w+6,y:b.y+7,fill:"#8b949e","font-size":11},b.g).textContent=`${done}/${L.length}`});
+  });
+}
+window.addEventListener("resize",()=>{const g=GRAPHS[curView];if(g)g.fit()});
+function centerOn(id){const V=GRAPHS[curView];if(!V)return;const p=V.nodes[id];if(p)V.centerOn(p.x+p.w/2,p.y+p.h/2)}
+
+/* toolbars (one per graph view, shared state) */
+const LEGEND=Object.keys(SRC_LABEL).map(k=>`<span><span class="sw" style="border-color:var(--${k})${k==="EXIST"?";border-style:dashed":""}"></span>${esc(D.sources[k])}</span>`).join("")+
+  `<span><span class="dot" style="border:1.5px solid #e6edf3"></span>Ready</span><span><span class="dot" style="background:var(--ip)"></span>In progress</span><span><span class="dot" style="background:var(--done)"></span>Completed</span><span>🔒 Locked</span><span style="color:#58a6ff">— needs</span><span style="color:#d2a8ff">— unlocks</span>`;
+document.querySelectorAll(".gtool").forEach(tb=>{
+  tb.innerHTML=`<select class="btn pathSel" title="Highlight a career path"><option value="">Path: all competencies</option>${D.paths.map(p=>`<option value="${p.id}">Path: ${esc(p.name)}${p.rec?" (recommended)":""}</option>`).join("")}</select>
+   ${tb.dataset.edges?`<button class="btn edgeTog">All dependencies</button>`:""}<button class="btn blkTog">Locked only</button><div class="legend">${LEGEND}</div>`;
+});
+function syncToolbars(){document.querySelectorAll(".pathSel").forEach(s=>s.value=pathFilter);document.querySelectorAll(".edgeTog").forEach(b=>b.classList.toggle("on",showAllEdges));document.querySelectorAll(".blkTog").forEach(b=>b.classList.toggle("on",blockedOnly))}
+document.addEventListener("change",e=>{if(e.target.classList.contains("pathSel")){pathFilter=e.target.value;syncToolbars();renderGraphState()}});
+document.addEventListener("click",e=>{if(e.target.classList.contains("edgeTog")){showAllEdges=!showAllEdges;syncToolbars();renderGraphState()}
+  if(e.target.classList.contains("blkTog")){blockedOnly=!blockedOnly;syncToolbars();renderGraphState()}});
+
+/* ---------- kanban ---------- */
+let KF={stage:"",path:"",q:""};
+const KCOLS=[{k:"locked",name:"Locked",hint:"Prerequisites not done yet",drop:false},{k:"ns",name:"Ready to start",hint:"Prerequisites met",drop:true},{k:"ip",name:"In progress",hint:"",drop:true},{k:"done",name:"Completed",hint:"Evidence exists",drop:true}];
+const kcol=id=>{const s=st(id);return s==="done"?"done":s==="ip"?"ip":isBlocked(id)?"locked":"ns"};
+function renderKanban(){
+  const v=document.getElementById("v-kanban");
+  const list=D.comps.filter(c=>(!KF.stage||c.stage===KF.stage)&&(!KF.path||c.paths.includes("core")||c.paths.includes(KF.path))&&(!KF.q||(c.name+" "+c.id).toLowerCase().includes(KF.q.toLowerCase())));
+  const pr={H:0,M:1,L:2},so=Object.fromEntries(D.stages.map((s,i)=>[s.id,i]));
+  v.innerHTML=`<div class="page" style="max-width:none"><h2>Kanban</h2><p class="lead">Drag a card to change its status, or open it and use the buttons. A card that leaves "Locked" early keeps a warning until its prerequisites are done.</p>
+  <div class="filters"><input id="kq" placeholder="Search" value="${esc(KF.q)}">
+   <select class="btn" id="kst"><option value="">All stages</option>${D.stages.map(s=>`<option value="${s.id}" ${KF.stage===s.id?"selected":""}>${s.n}. ${esc(s.name)}</option>`).join("")}</select>
+   <select class="btn" id="kpa"><option value="">All paths</option>${D.paths.map(p=>`<option value="${p.id}" ${KF.path===p.id?"selected":""}>${esc(p.name)}</option>`).join("")}</select></div>
+  <div class="kanban">${KCOLS.map(col=>{const cards=list.filter(c=>kcol(c.id)===col.k).sort((a,b)=>so[a.stage]-so[b.stage]||pr[a.pri]-pr[b.pri]);
+    return `<div class="kcol" data-col="${col.k}"><div class="khead"><b>${col.name}</b><span class="badge">${cards.length}</span><div class="mini">${col.hint}</div></div>
+    <div class="kbody">${cards.map(c=>`<div class="kcard" draggable="true" data-id="${c.id}" style="border-left-color:var(--${c.src})">
+      <div class="kname">${esc(c.name)}</div>
+      <div class="kmeta">${srcBadge(c.src)}<span class="mini">${esc(STAGE_SHORT[c.stage])} · ${PRI[c.pri]}</span>${c.existing?`<span class="mini">· ${c.existing}</span>`:""}</div>
+      ${col.k==="locked"?`<div class="mini" style="margin-top:4px">Waiting on ${missingPre(c.id).length}: ${missingPre(c.id).slice(0,3).map(p=>esc(trunc(byId[p].name,24))).join(", ")}${missingPre(c.id).length>3?"…":""}</div>`:""}
+      ${col.k==="ip"&&isBlocked(c.id)?`<div class="mini" style="margin-top:4px;color:var(--ip)">Started before its prerequisites</div>`:""}
+      ${S.evidence[c.id]?`<div class="mini" style="margin-top:4px">📎 evidence noted</div>`:""}</div>`).join("")||`<div class="mini" style="padding:8px">Nothing here</div>`}</div></div>`}).join("")}</div></div>`;
+  const q=v.querySelector("#kq");q.oninput=e=>{KF.q=e.target.value;const p=e.target.selectionStart;renderKanban();const n=document.getElementById("kq");n.focus();n.setSelectionRange(p,p)};
+  v.querySelector("#kst").onchange=e=>{KF.stage=e.target.value;renderKanban()};
+  v.querySelector("#kpa").onchange=e=>{KF.path=e.target.value;renderKanban()};
+  v.querySelectorAll(".kcard").forEach(card=>{card.onclick=()=>select(card.dataset.id);
+    card.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",card.dataset.id);card.classList.add("dragging")});
+    card.addEventListener("dragend",()=>card.classList.remove("dragging"))});
+  v.querySelectorAll(".kcol").forEach(colEl=>{const col=KCOLS.find(c=>c.k===colEl.dataset.col);
+    colEl.addEventListener("dragover",e=>{if(col.drop){e.preventDefault();colEl.classList.add("over")}});
+    colEl.addEventListener("dragleave",()=>colEl.classList.remove("over"));
+    colEl.addEventListener("drop",e=>{e.preventDefault();colEl.classList.remove("over");const id=e.dataTransfer.getData("text/plain");if(id&&byId[id])setStatus(id,col.k)})});
+}
+
+/* ---------- side panel ---------- */
+const panel=document.getElementById("panel");
+function closePanel(){panel.classList.remove("on");selId=null;renderGraphState()}
+function select(id,opts){selId=id;renderGraphState();openComp(id);if(opts&&opts.center&&GRAPHS[curView])centerOn(id)}
+function chipFor(id){const c=byId[id];return `<span class="chip" data-go="${id}" title="${id}" style="border-left:3px solid var(--${c.src})">${dotFor(id)}${esc(trunc(c.name,34))} <span class="mini">${id}</span></span>`}
+function matHTML(v,who){return v?`<p>${esc(v)}</p>`:`<p class="unk">No ${who} material identified in the source material for this competency.</p>`}
+function openComp(id){
+  const c=byId[id],s=stageById[c.stage],b=isBlocked(id),deps=dependents[id];
+  const lanes=Object.fromEntries(D.lanes.map(l=>[l.id,l.name]));
+  panel.innerHTML=`
+  <div class="ph"><div><div class="pid" style="color:var(--${c.src})">${c.id}</div><h2>${esc(c.name)}</h2>
+   <div class="badges">${srcBadge(c.src)}<span class="badge">Stage ${s.n} · ${esc(s.name)}</span><span class="badge">${esc(lanes[c.lane])}</span><span class="badge">Priority: ${PRI[c.pri]}</span>${c.existing?`<span class="badge">Existing: ${c.existing}</span>`:""}</div></div>
+   <button class="btn close" id="pclose" aria-label="Close">✕</button></div>
+  <div class="pb">
+   <div class="statusset" id="sset">${["ns","ip","done"].map(k=>`<button data-s="${k}" class="${st(id)===k?"on":""}">${ST_LABEL[k]}</button>`).join("")}</div>
+   ${b?`<div class="sec blockmsg"><b>Locked.</b> Complete first: ${missingPre(id).map(chipFor).join("")}</div>`:""}
+   <div class="sec"><h3>Description</h3><p>${esc(c.desc)}</p></div>
+   <div class="sec"><h3>Why it matters</h3><p>${esc(c.why)}</p></div>
+   <div class="sec"><h3>Learning objectives</h3><ul>${c.obj.map(o=>`<li>${esc(o)}</li>`).join("")}</ul></div>
+   <div class="sec"><h3>Prerequisites</h3>${c.pre.length?c.pre.map(chipFor).join(""):`<p class="mini">None</p>`}</div>
+   <div class="sec"><h3>Unlocks</h3>${deps.length?deps.map(chipFor).join(""):`<p class="mini">Nothing directly</p>`}</div>
+   <div class="sec"><h3>NTI material</h3>${matHTML(c.nti,"NTI")}</div>
+   <div class="sec"><h3>DEBI material</h3>${matHTML(c.debi,"DEBI")}</div>
+   <div class="sec"><h3>Additional resources</h3>${c.res.length?`<ul>${c.res.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`:`<p class="mini">None needed beyond the above</p>`}</div>
+   <div class="sec"><h3>Labs and exercises</h3>${c.labs.length?`<ul>${c.labs.map(r=>`<li>${esc(r)}</li>`).join("")}</ul>`:`<p class="mini">—</p>`}${(projByComp[id]||[]).length?`<p class="mini" style="margin-top:6px">Project stages: ${projByComp[id].join(", ")}</p>`:""}</div>
+   <div class="sec"><h3>Evidence of mastery</h3><p>${esc(c.ev)}</p></div>
+   <div class="sec"><h3>Estimated hours</h3>${c.hours?`<p>${esc(c.hours)}</p>`:`<p class="unk">Not stated in the source material.</p>`}</div>
+   <div class="sec"><h3>Career paths</h3><p>${c.paths.includes("core")?"Core: needed on every path":"Specialization: "+c.paths.map(p=>esc(pathById[p].name)).join(", ")}</p></div>
+   <div class="sec"><h3>My notes</h3><textarea id="pnotes" placeholder="Notes">${esc(S.notes[id]||"")}</textarea></div>
+   <div class="sec"><h3>My evidence (links, repo paths, scores)</h3><textarea id="pev" placeholder="e.g. github.com/... commit, exam score">${esc(S.evidence[id]||"")}</textarea>
+   ${S.updated[id]?`<p class="mini" style="margin-top:6px">Last status change: ${new Date(S.updated[id]).toLocaleString()}</p>`:""}</div>
+  </div>`;
+  panel.classList.add("on");
+  panel.querySelector("#pclose").onclick=closePanel;
+  panel.querySelector("#sset").onclick=e=>{const bt=e.target.closest("button");if(bt)setStatus(id,bt.dataset.s)};
+  panel.querySelector("#pnotes").oninput=e=>{S.notes[id]=e.target.value;save()};
+  panel.querySelector("#pev").oninput=e=>{S.evidence[id]=e.target.value;save()};
+  panel.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go,{center:true}));
+}
+function openStage(sid){
+  const s=stageById[sid],L=compsIn(sid);selId=null;renderGraphState();
+  const blocked=L.filter(isBlocked).length;
+  panel.innerHTML=`<div class="ph"><div><div class="pid">STAGE ${s.n}</div><h2>${esc(s.name)}</h2><p class="mini" style="margin:4px 0 0">${esc(s.window)}</p></div><button class="btn close" id="pclose">✕</button></div>
+  <div class="pb"><div class="sec">${barHTML(L)}<p class="mini" style="margin-top:6px">${L.filter(i=>st(i)==="done").length} completed · ${L.filter(i=>st(i)==="ip").length} in progress · ${blocked} blocked · ${L.length} total</p></div>
+  <div class="sec"><h3>Gate</h3><p>${esc(s.gate)}</p></div>
+  <div class="sec"><h3>Competencies</h3>${L.map(chipFor).join("")}</div></div>`;
+  panel.classList.add("on");panel.querySelector("#pclose").onclick=closePanel;
+  panel.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go,{center:true}));
+}
+
+/* ---------- checklist ---------- */
+let F={q:"",st:"",src:"",stage:"",blk:false};
+function renderChecklist(){
+  const v=document.getElementById("v-checklist");
+  const list=D.comps.filter(c=>(!F.q||(c.id+" "+c.name).toLowerCase().includes(F.q.toLowerCase()))&&(!F.st||st(c.id)===F.st)&&(!F.src||c.src===F.src)&&(!F.stage||c.stage===F.stage)&&(!F.blk||isBlocked(c.id)));
+  v.innerHTML=`<div class="page"><h2>Competency checklist</h2><p class="lead">Same IDs and order as the written roadmap. A competency counts as completed when its evidence exists, not when a course ends.</p>
+  <div class="filters"><input id="fq" placeholder="Search ID or name" value="${esc(F.q)}">
+  <select class="btn" id="fst"><option value="">Any status</option>${Object.entries(ST_LABEL).map(([k,l])=>`<option value="${k}" ${F.st===k?"selected":""}>${l}</option>`).join("")}</select>
+  <select class="btn" id="fsrc"><option value="">Any source</option>${Object.keys(SRC_LABEL).map(k=>`<option value="${k}" ${F.src===k?"selected":""}>${SRC_LABEL[k]}</option>`).join("")}</select>
+  <select class="btn" id="fstage"><option value="">Any stage</option>${D.stages.map(s=>`<option value="${s.id}" ${F.stage===s.id?"selected":""}>${s.n}. ${esc(s.name)}</option>`).join("")}</select>
+  <button class="btn ${F.blk?"on":""}" id="fblk">Locked only</button><span class="mini" style="align-self:center">${list.length} shown</span></div>
+  ${D.stages.map(s=>{const rows=list.filter(c=>c.stage===s.id);if(!rows.length)return"";const L=compsIn(s.id);
+   return `<div class="stagehead"><h3>${s.n}. ${esc(s.name)}</h3>${barHTML(L,140)}<span class="mini">${pct(L)}%</span></div>
+   <table><thead><tr><th style="width:120px">Status</th><th style="width:90px">ID</th><th>Competency</th><th style="width:90px">Source</th><th style="width:70px">Priority</th><th>Prerequisites</th></tr></thead><tbody>
+   ${rows.map(c=>`<tr class="cl"><td><select class="btn" data-sid="${c.id}">${Object.entries(ST_LABEL).map(([k,l])=>`<option value="${k}" ${st(c.id)===k?"selected":""}>${l}</option>`).join("")}</select></td>
+   <td><a href="#" data-open="${c.id}" style="color:var(--${c.src});font-weight:700;text-decoration:none">${c.id}</a></td><td>${esc(c.name)}${isBlocked(c.id)?` <span class="badge">🔒 locked</span>`:""}${S.evidence[c.id]?` <span class="badge">evidence</span>`:""}</td>
+   <td>${srcBadge(c.src)}</td><td>${PRI[c.pri]}</td><td class="mini">${c.pre.map(p=>`<span style="color:${st(p)==="done"?"var(--done)":"inherit"}">${p}</span>`).join(", ")||"—"}</td></tr>`).join("")}</tbody></table>`}).join("")}</div>`;
+  const q=v.querySelector("#fq");q.oninput=e=>{F.q=e.target.value;const pos=e.target.selectionStart;renderChecklist();const n=document.getElementById("fq");n.focus();n.setSelectionRange(pos,pos)};
+  v.querySelector("#fst").onchange=e=>{F.st=e.target.value;renderChecklist()};
+  v.querySelector("#fsrc").onchange=e=>{F.src=e.target.value;renderChecklist()};
+  v.querySelector("#fstage").onchange=e=>{F.stage=e.target.value;renderChecklist()};
+  v.querySelector("#fblk").onclick=()=>{F.blk=!F.blk;renderChecklist()};
+  v.querySelectorAll("select[data-sid]").forEach(s=>s.onchange=()=>setStatus(s.dataset.sid,s.value));
+  v.querySelectorAll("[data-open]").forEach(a=>a.onclick=e=>{e.preventDefault();select(a.dataset.open)});
+}
+
+/* ---------- career paths ---------- */
+let curPath="DSO";
+function renderPaths(){
+  const v=document.getElementById("v-paths");const core=D.comps.filter(c=>c.paths.includes("core")).map(c=>c.id);
+  const p=pathById[curPath];const spec=D.comps.filter(c=>c.paths.includes(curPath)).map(c=>c.id);
+  const sharedWith=id=>byId[id].paths.filter(x=>x!==curPath&&x!=="core").map(x=>pathById[x].name);
+  v.innerHTML=`<div class="page"><h2>Career specialization decision point</h2>
+  <p class="lead">Most of Stages 1–3, plus job readiness, form a shared core for every path. The branch happens at Stage 4. The recommendation keeps doc 19's decision: enter as a junior DevOps/cloud engineer (or backend), grow into DevSecOps, with cloud security as the destination.</p>
+  <div class="trunk"><div class="seg">Core: ${core.length} competencies · ${pct(core)}% done</div><span class="arrow">→</span><div class="seg" style="border-color:var(--ip)">◆ Decision point (Stage 4)</div><span class="arrow">→</span><span class="mini">choose a branch below</span></div>
+  <div class="grid g2" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">${D.paths.map(x=>{const L=D.comps.filter(c=>c.paths.includes(x.id)).map(c=>c.id);
+    return `<div class="card pathcard ${x.rec?"rec":""} ${x.id===curPath?"on":""}" data-p="${x.id}"><div style="display:flex;justify-content:space-between;gap:6px"><b>${esc(x.name)}</b>${x.rec?`<span class="badge" style="color:var(--rec);border-color:var(--rec)">Recommended</span>`:""}</div>
+    <p class="mini" style="margin:6px 0">${esc(x.entry)}</p>${barHTML([...core,...L])}<p class="mini" style="margin:6px 0 0">${L.length} specific · ${pct([...core,...L])}% of path done</p></div>`}).join("")}</div>
+  <div class="grid g2" style="margin-top:16px">
+   <div class="card"><h3 style="margin:0 0 4px;font-size:14px">${esc(p.name)}: specialization-specific (${spec.length})</h3><p class="mini" style="margin:0 0 8px">${esc(p.why)}</p>
+    ${spec.map(id=>`<div style="margin-bottom:6px">${chipFor(id)}${sharedWith(id).length?`<span class="mini"> also: ${sharedWith(id).map(esc).join(", ")}</span>`:`<span class="mini"> only this path</span>`}</div>`).join("")}</div>
+   <div class="card"><h3 style="margin:0 0 8px;font-size:14px">Shared core (${core.length})</h3>${core.map(chipFor).join("")}</div>
+  </div>
+  <p style="margin-top:12px"><button class="btn" id="hl">Highlight this path on the flowchart</button></p></div>`;
+  v.querySelectorAll("[data-p]").forEach(c=>c.onclick=()=>{curPath=c.dataset.p;renderPaths()});
+  v.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go));
+  v.querySelector("#hl").onclick=()=>{pathFilter=curPath;syncToolbars();showView("flow");renderGraphState()};
+}
+
+/* ---------- compare ---------- */
+function renderCompare(){
+  const v=document.getElementById("v-compare");const hrs=Object.entries(D.ntiHours);const max=Math.max(...hrs.map(h=>h[1]));
+  const clsCol=c=>c.startsWith("Duplicate")?"var(--ip)":c.startsWith("Complementary")?"var(--SHARED)":c.startsWith("Missing")?"var(--blocked)":c.startsWith("NTI")?"var(--NTI)":"var(--DEBI)";
+  v.innerHTML=`<div class="page"><h2>NTI vs DEBI</h2>
+  <div class="warn" style="margin:8px 0 14px">Verified: NTI module hours (Study Plan doc 19 §C) and both roadmap.sh PDFs. <b>Unverified:</b> DEBI's assigned course list, which hasn't been announced. The Google Cybersecurity Certificate mapping comes from past DEBI students (doc 19).</div>
+  <table><thead><tr><th>Area</th><th>NTI</th><th>DEBI</th><th>Class</th><th>Lead</th><th>What to do</th></tr></thead><tbody>
+  ${D.compare.map(r=>`<tr class="cl"><td><b>${esc(r.area)}</b></td><td>${esc(r.nti)}</td><td>${esc(r.debi)}</td><td><span class="badge" style="color:${clsCol(r.cls)};border-color:${clsCol(r.cls)}">${esc(r.cls)}</span></td><td>${esc(r.lead)}</td><td>${esc(r.action)}</td></tr>`).join("")}</tbody></table>
+  <h2 style="margin-top:28px">NTI module hours (420 h track)</h2><p class="lead">From doc 19 §C. DEBI publishes no hours yet; it expects at least 3 h a day.</p>
+  <div class="card">${hrs.sort((a,b)=>b[1]-a[1]).map(([k,h])=>`<div style="display:grid;grid-template-columns:220px 1fr 50px;gap:10px;align-items:center;margin:5px 0"><span class="mini" style="color:var(--text)">${esc(k)}</span><div class="bar" style="height:10px"><span style="width:${100*h/max}%;background:var(--NTI)"></span></div><span class="mini">${h} h</span></div>`).join("")}</div></div>`;
+}
+
+/* ---------- projects ---------- */
+function renderProjects(){
+  const v=document.getElementById("v-projects");
+  v.innerHTML=`<div class="page"><h2>Project progression</h2><p class="lead">One app (your graduation project), built up in layers. Stages PS-1 to PS-5 follow doc 19 §G. PS-7 is the cloud-security layer added after NTI. Each stage must stand on its own and be CV-ready when it's done.</p>
+  <div class="projflow">${D.projects.map((p,i)=>{const L=p.comps;return `${i?`<div class="arrow" style="text-align:center">↓ builds on ${D.projects[i-1].id}</div>`:""}
+   <div class="card proj"><div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap"><b style="font-size:15px">${p.id} · ${esc(p.name)}</b><span class="badge">${esc(p.doc19)}</span><span class="badge">Stage ${stageById[p.stage].n}</span><span class="mini">${esc(p.window)}</span><span style="margin-left:auto" class="mini">${pct(L)}% of its competencies done</span></div>
+   <div style="margin:8px 0">${barHTML(L)}</div>
+   <div class="grid g2" style="margin-top:8px"><div><p style="margin:0 0 6px"><b>Architecture.</b> ${esc(p.arch)}</p><p style="margin:0 0 6px"><b>Security goal.</b> ${esc(p.goal)}</p><p style="margin:0 0 6px"><b>Deliverables.</b> ${esc(p.deliv)}</p><p style="margin:0"><b>Why it gets you hired.</b> ${esc(p.value)}</p></div>
+   <div><b>Steps</b><ol style="margin:4px 0 8px;padding-left:18px">${p.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol><b>Competencies</b><div style="margin-top:4px">${L.map(chipFor).join("")}</div></div></div></div>`}).join("")}</div></div>`;
+  v.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go));
+}
+
+/* ---------- certs ---------- */
+function renderCerts(){
+  const v=document.getElementById("v-certs");
+  const start=new Date(2026,10,1), months=14; const mIdx=s=>{const [y,m]=s.split("-").map(Number);return (y-2026)*12+(m-1)-10};
+  const now=new Date();const nowPos=((now.getFullYear()-2026)*12+now.getMonth()-10+now.getDate()/31)/months*100;
+  const mn=["Nov","Dec","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const col=k=>k.verdict.startsWith("Keep")||k.verdict.startsWith("Target")?"var(--done)":k.verdict.startsWith("Challenge")?"var(--blocked)":"var(--ip)";
+  v.innerHTML=`<div class="page"><h2>Certification timeline</h2><p class="lead">Certifications follow the competency gaps, not the other way round. Bars are planned windows (doc 19 §E plus the written roadmap). Readiness = share of the cert's competencies you've completed.</p>
+  <div class="card tl"><div class="tlgrid"><div></div><div class="tlmonths">${mn.map((m,i)=>`<div>${m}${i===2||i===0?` ${i?2027:2026}`:""}</div>`).join("")}</div>
+  ${D.certs.map(k=>{const a=mIdx(k.start),b=mIdx(k.end)+1;return `<div class="tlrow"><div class="tllab"><b>${esc(k.id)}</b><div class="mini">${esc(k.status)}</div></div>
+   <div class="tltrack">${nowPos>=0&&nowPos<=100?`<div class="today" style="left:${nowPos}%" title="Today"></div>`:""}<div class="tlbar" style="left:${100*a/months}%;width:${100*(b-a)/months}%;border-color:${col(k)};background:color-mix(in srgb, ${col(k)} 18%, transparent)" title="${esc(k.when)}">${esc(k.when)}</div></div></div>`}).join("")}</div></div>
+  <table style="margin-top:16px"><thead><tr><th>Cert</th><th>Gap it fills</th><th>Verdict</th><th>Cost</th><th>Readiness</th><th>Competencies</th></tr></thead><tbody>
+  ${D.certs.map(k=>`<tr class="cl"><td><b>${esc(k.name)}</b></td><td>${esc(k.fills)}</td><td style="color:${col(k)}">${esc(k.verdict)}</td><td>${esc(k.cost)}</td><td>${barHTML(k.comps,90)}<span class="mini">${pct(k.comps)}%</span></td><td>${k.comps.map(chipFor).join("")}</td></tr>`).join("")}</tbody></table>
+  <p class="mini" style="margin-top:10px">Prices as recorded in doc 19 and AWS's SCS-C03 page; recheck before booking. Skipped on purpose: Terraform Associate, CEH, OSCP, CISSP, CISA/CISM, Cloud Practitioner.</p></div>`;
+  v.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go));
+}
+
+/* ---------- dashboard ---------- */
+function renderDash(){
+  const v=document.getElementById("v-dash");
+  const done=ALL.filter(i=>st(i)==="done"),ip=ALL.filter(i=>st(i)==="ip"),blk=ALL.filter(isBlocked).filter(i=>st(i)==="ns"),ready=ALL.filter(i=>st(i)==="ns"&&!isBlocked(i));
+  const order=Object.fromEntries(D.stages.map((s,i)=>[s.id,i]));const pr={H:0,M:1,L:2};
+  const next=ready.slice().sort((a,b)=>order[byId[a].stage]-order[byId[b].stage]||pr[byId[a].pri]-pr[byId[b].pri]).slice(0,10);
+  const exist=D.comps.filter(c=>c.existing&&st(c.id)!=="done").map(c=>c.id);
+  v.innerHTML=`<div class="page"><h2>Progress dashboard</h2><p class="lead">Progress is saved in this browser only (localStorage). Export a backup before clearing browser data or switching machines. The Study Plan records stay the official source of truth (doc 14).</p>
+  ${storageOK?"":`<div class="warn">This browser blocked localStorage, so progress won't survive a reload. Use Export.</div>`}
+  <div class="grid g4"><div class="card"><div class="kpi">${pct(ALL)}%</div><div class="kpil">Overall (${done.length}/${ALL.length} completed)</div></div>
+   <div class="card"><div class="kpi" style="color:var(--ip)">${ip.length}</div><div class="kpil">In progress</div></div>
+   <div class="card"><div class="kpi">${ready.length}</div><div class="kpil">Ready to start (prerequisites met)</div></div>
+   <div class="card"><div class="kpi" style="color:var(--muted)">${blk.length}</div><div class="kpil">Locked (prerequisites not done yet)</div></div></div>
+  <div class="grid g2" style="margin-top:12px"><div class="card"><h3 style="margin:0 0 4px;font-size:14px">Skills radar</h3><p class="mini" style="margin:0 0 6px">Share of each domain completed (solid) and started (dashed). The idea comes from devopsroadmap.io's skills radar.</p>${radarSVG()}</div><div class="card" style=""><h3 style="margin:0 0 10px;font-size:14px">By stage</h3>${D.stages.map(s=>{const L=compsIn(s.id);return `<div style="display:grid;grid-template-columns:240px 1fr 110px;gap:10px;align-items:center;margin:7px 0;cursor:pointer" data-stage="${s.id}"><span>${s.n}. ${esc(s.name)}</span>${barHTML(L)}<span class="mini">${L.filter(i=>st(i)==="done").length}/${L.length} · ${pct(L)}%</span></div>`}).join("")}
+   <h3 style="margin:16px 0 10px;font-size:14px">By source</h3>${Object.keys(SRC_LABEL).map(k=>{const L=D.comps.filter(c=>c.src===k).map(c=>c.id);return `<div style="display:grid;grid-template-columns:240px 1fr 110px;gap:10px;align-items:center;margin:7px 0"><span>${srcBadge(k)} ${esc(D.sources[k])}</span>${barHTML(L)}<span class="mini">${L.filter(i=>st(i)==="done").length}/${L.length}</span></div>`}).join("")}</div>
+  </div><div class="grid g2" style="margin-top:12px">
+   <div class="card"><h3 style="margin:0 0 8px;font-size:14px">Next up (unblocked, earliest stage, highest priority)</h3>${next.map(chipFor).join("")||`<p class="mini">Nothing ready.</p>`}</div>
+   <div class="card"><h3 style="margin:0 0 8px;font-size:14px">In progress</h3>${ip.map(chipFor).join("")||`<p class="mini">Nothing in progress.</p>`}</div>
+   <div class="card"><h3 style="margin:0 0 8px;font-size:14px">Existing or partly existing: claim with evidence</h3>${exist.map(chipFor).join("")||`<p class="mini">All claimed.</p>`}</div>
+   <div class="card"><h3 style="margin:0 0 8px;font-size:14px">Locked, and what they wait on</h3><div style="max-height:260px;overflow:auto">${blk.slice(0,40).map(id=>`<div class="mini" style="margin:3px 0"><b style="color:var(--${byId[id].src})">${id}</b> ← ${missingPre(id).join(", ")}</div>`).join("")||`<p class="mini">Nothing locked.</p>`}</div></div>
+  </div>
+  <div class="card" style="margin-top:12px"><h3 style="margin:0 0 8px;font-size:14px">Data</h3>
+   <button class="btn" id="exp">Export progress (JSON)</button> <label class="btn" style="display:inline-block">Import progress<input type="file" id="imp" accept="application/json" style="display:none"></label> <button class="btn danger" id="rst">Reset all progress</button>
+   <p class="mini" style="margin:8px 0 0">Version ${esc(D.version)}. Competency IDs match the written roadmap and Study Plan doc 06 (new IDs: IAC, K8S, DSO, VM, NSEC, LOG, IR, TM, CSEC, JOB).</p></div></div>`;
+  v.querySelectorAll("[data-go]").forEach(ch=>ch.onclick=()=>select(ch.dataset.go));
+  v.querySelectorAll("[data-stage]").forEach(r=>r.onclick=()=>openStage(r.dataset.stage));
+  v.querySelector("#exp").onclick=()=>{const blob=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="roadmap-progress-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+  v.querySelector("#imp").onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=JSON.parse(t);if(!o.status)throw 0;S=Object.assign(blank(),o);save();refreshAll()}catch(_){alert("That file isn't a progress export.")}})};
+  v.querySelector("#rst").onclick=()=>{if(confirm("Reset all statuses, notes and evidence? This can't be undone (export first if unsure).")){S=blank();save();closePanel();refreshAll()}};
+}
+
+
+function radarSVG(){
+  const L=D.lanes.filter(l=>D.comps.some(c=>c.lane===l.id)),n=L.length,R=120,cx=170,cy=150;
+  const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+r*Math.cos(a),cy+r*Math.sin(a)]};
+  const val=(l,f)=>{const ids=D.comps.filter(c=>c.lane===l.id).map(c=>c.id);return ids.filter(f).length/ids.length};
+  const poly=f=>L.map((l,i)=>pt(i,Math.max(0.02,val(l,f))*R).join(",")).join(" ");
+  let g="";[0.25,0.5,0.75,1].forEach(k=>{g+=`<polygon points="${L.map((_,i)=>pt(i,R*k).join(",")).join(" ")}" fill="none" stroke="#2a313c"/>`});
+  L.forEach((l,i)=>{const [x,y]=pt(i,R),[tx,ty]=pt(i,R+18);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#2a313c"/><text x="${tx}" y="${ty+4}" fill="#8b949e" font-size="11" text-anchor="${Math.abs(tx-cx)<10?"middle":tx>cx?"start":"end"}">${esc(l.name)} ${Math.round(100*val(l,id=>st(id)==="done"))}%</text>`});
+  g+=`<polygon points="${poly(id=>st(id)!=="ns")}" fill="none" stroke="var(--ip)" stroke-dasharray="4 3"/>`;
+  g+=`<polygon points="${poly(id=>st(id)==="done")}" fill="var(--done)" fill-opacity=".25" stroke="var(--done)" stroke-width="1.5"/>`;
+  return `<svg viewBox="-130 0 600 300" style="width:100%;max-width:560px;display:block;margin:auto" role="img" aria-label="Skills radar by domain">${g}</svg>`;
+}
+/* ---------- header + refresh ---------- */
+function renderHeader(){document.getElementById("ver").textContent="v"+D.version;document.getElementById("hpct").textContent=`${pct(ALL)}% · ${ALL.filter(i=>st(i)==="done").length}/${ALL.length}`;document.getElementById("hbar").outerHTML=barHTML(ALL,160).replace('class="bar"','class="bar" id="hbar"')}
+function refreshAll(){renderHeader();renderGraphState();if(!GRAPHS[curView])renderView(curView);if(selId&&panel.classList.contains("on"))openComp(selId)}
+renderGraphState();renderHeader();
+requestAnimationFrame(()=>GRAPHS.flow.fit());
+</script>
+</body>
+</html>

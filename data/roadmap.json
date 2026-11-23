@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "dataVersion": "1.2 · 23 Nov 2026",
+  "stages": [
+    {
+      "id": "FND",
+      "n": 1,
+      "name": "Foundation",
+      "window": "Now to Dec 2026 (NTI Linux block; DEBI start)",
+      "gate": "Gate 1: doc 06 F1 exit checks for NET and LNX pass unaided (URL walkthrough, 5 subnets in ~10 min, 3 broken-connectivity labs, fresh-VM Linux check)."
+    },
+    {
+      "id": "CDE",
+      "n": 2,
+      "name": "Cloud and DevOps Engineering",
+      "window": "Dec 2026 to mid-Feb 2027 (NTI Docker, CI/CD, AWS, Terraform, K8s, monitoring)",
+      "gate": "Gate 2: project stages PS-1 to PS-5 committed and SAA-C03 passed."
+    },
+    {
+      "id": "SEN",
+      "n": 3,
+      "name": "Security Engineering",
+      "window": "Mid-Feb to about Jun 2027 (DEBI becomes the main structure)",
+      "gate": "Gate 3: IR runbook + tabletop postmortem written; OWASP self-review of the grad project with 3+ real fixes; SEC exit check (30 questions at 80%+)."
+    },
+    {
+      "id": "CSS",
+      "n": 4,
+      "name": "Cloud Security Specialization",
+      "window": "About Apr to Sep 2027",
+      "gate": "Gate 4: PS-7 detects 5 simulated attacks with tested detections; SCS-C03 booked."
+    },
+    {
+      "id": "JOB",
+      "n": 5,
+      "name": "Portfolio and Job Readiness",
+      "window": "Runs throughout; shown last because it collects the evidence",
+      "gate": "Gate 5: both CV versions live; every finished project stage has a portfolio README; a full mock interview passed."
+    }
+  ],
+  "lanes": [
+    {
+      "id": "net",
+      "name": "Networking"
+    },
+    {
+      "id": "lnx",
+      "name": "Linux and operations"
+    },
+    {
+      "id": "code",
+      "name": "Code, Git and CI/CD"
+    },
+    {
+      "id": "ctr",
+      "name": "Containers and Kubernetes"
+    },
+    {
+      "id": "cloud",
+      "name": "Cloud and IaC"
+    },
+    {
+      "id": "sec",
+      "name": "Security"
+    },
+    {
+      "id": "csec",
+      "name": "Cloud security"
+    },
+    {
+      "id": "career",
+      "name": "Career"
+    }
+  ],
+  "sources": {
+    "NTI": "NTI leads",
+    "DEBI": "DEBI leads",
+    "IND": "Independent learning",
+    "SHARED": "Shared: both programs cover it",
+    "EXIST": "Existing competency (claim with evidence)"
+  },
+  "paths": [
+    {
+      "id": "DSO",
+      "name": "DevSecOps Engineer",
+      "rec": true,
+      "entry": "Enter as junior DevOps/cloud engineer (or backend); DevSecOps title in 1–2 years (doc 19 G8).",
+      "why": "Only path both programs feed directly; uses your backend skills; same skills cloud security hires on."
+    },
+    {
+      "id": "CSE",
+      "name": "Cloud Security Engineer",
+      "rec": false,
+      "entry": "Destination after DevSecOps experience; almost no junior titles in Egypt (doc 19 §B).",
+      "why": "Long-term target; Stage 4 is built for it."
+    },
+    {
+      "id": "CSO",
+      "name": "Cloud Security Operations / Detection",
+      "rec": false,
+      "entry": "Usually via SOC L1, the most common entry-level security opening (shift work).",
+      "why": "Fallback only (G8); fits DEBI best, uses backend least."
+    },
+    {
+      "id": "ASE",
+      "name": "Application Security Engineer",
+      "rec": false,
+      "entry": "Later specialty; needs code-review or pentest experience.",
+      "why": "Fits your backend background, but neither program teaches it deeply."
+    },
+    {
+      "id": "CIE",
+      "name": "Cloud Infrastructure Engineer",
+      "rec": false,
+      "entry": "Highest entry-level access; same Stages 1–2.",
+      "why": "Safest door if getting hired fast matters most; risk of drifting from security."
+    }
+  ],
+  "ntiHours": {
+    "Linux + Bash": 35,
+    "Git": 7,
+    "Python": 22,
+    "Docker": 21,
+    "Kubernetes": 49,
+    "AWS": 49,
+    "Terraform": 21,
+    "Ansible": 14,
+    "CI/CD + DevSecOps practice project": 28,
+    "Agile & DevSecOps": 14,
+    "Monitoring": 7,
+    "OpenStack": 21
+  },
+  "ntiPart2Hours": {
+    "Business English": 35,
+    "Soft skills": 42,
+    "Project management": 14,
+    "Essential workplace skills": 35
+  }
+}

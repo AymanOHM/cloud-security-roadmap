@@ -1,0 +1,2608 @@
+[
+  {
+    "id": "NET-1",
+    "name": "OSI / TCP-IP layers and encapsulation",
+    "stage": "FND",
+    "lane": "net",
+    "src": "DEBI",
+    "desc": "Map protocols, devices and data to the layers; explain encapsulation.",
+    "why": "Every cloud networking and firewall decision is reasoned layer by layer.",
+    "obj": [
+      "Place any protocol or device on the right layer",
+      "Explain encapsulation end to end"
+    ],
+    "pre": [],
+    "nti": "NTI lists networking (CCNA level) as a prerequisite; it is not taught.",
+    "debi": "DEBI map: 'Understand the OSI model', 'Common protocols and their uses' (verified, roadmap PDF). Likely DEBI assignment, unverified: Google Cybersecurity Certificate, course 3 'Connect and Protect: Networks and Network Security'.",
+    "res": [
+      "Jeremy's IT Lab CCNA (selected days, doc 06 spine 1)"
+    ],
+    "labs": [
+      "TryHackMe networking rooms through DEBI"
+    ],
+    "ev": "Explain the layers for 2–3 min in English (COMM-1 style).",
+    "hours": null,
+    "pri": "H",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "NET-2",
+    "name": "IPv4 addressing and subnetting",
+    "stage": "FND",
+    "lane": "net",
+    "src": "DEBI",
+    "desc": "From an IP/CIDR derive network, broadcast, usable range and host count.",
+    "why": "VPC and subnet design (NET-8, CLD-3) depends on it; it is a common interview drill.",
+    "obj": [
+      "Subnet quickly and correctly",
+      "Read CIDR blocks in AWS without a calculator"
+    ],
+    "pre": [
+      "NET-1"
+    ],
+    "nti": null,
+    "debi": "DEBI map: 'Basics of subnetting', CIDR, subnet mask, public vs private IPs (verified).",
+    "res": [
+      "Jeremy's IT Lab subnetting days",
+      "subnettingpractice-style drills"
+    ],
+    "labs": [
+      "Packet Tracer labs"
+    ],
+    "ev": "5 networks subnetted in about 10 min (doc 06 F1 exit check).",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "NET-3",
+    "name": "Switching, routing, ARP and NAT",
+    "stage": "FND",
+    "lane": "net",
+    "src": "DEBI",
+    "desc": "Switching vs routing, MAC vs IP, ARP, default gateway, longest-prefix lookup, NAT/PAT.",
+    "why": "Pre-test gaps (routing, NAT) from doc 19; NAT gateways and route tables are core AWS.",
+    "obj": [
+      "Trace a packet across a LAN and through NAT",
+      "Read a routing table"
+    ],
+    "pre": [
+      "NET-1"
+    ],
+    "nti": null,
+    "debi": "DEBI map: router, switch, NAT, ARP, default gateway (verified). Google course 3 (unverified).",
+    "res": [
+      "Jeremy's IT Lab routing days"
+    ],
+    "labs": [
+      "Packet Tracer routing + NAT lab"
+    ],
+    "ev": "Explain the private-subnet → NAT → internet path and back without notes.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "NET-4",
+    "name": "DHCP and DNS",
+    "stage": "FND",
+    "lane": "net",
+    "src": "DEBI",
+    "desc": "DORA; recursive vs iterative resolution; record types; TTL and caching.",
+    "why": "DNS failures are a top cause of outages; Route 53 sits on it.",
+    "obj": [
+      "Explain DORA",
+      "Resolve a name by hand with dig +trace"
+    ],
+    "pre": [
+      "NET-1"
+    ],
+    "nti": null,
+    "debi": "DEBI map: DHCP, DNS, 'functions of each' (verified).",
+    "res": [
+      "MDN, RFC 1034 for depth"
+    ],
+    "labs": [
+      "dig +trace against a real domain"
+    ],
+    "ev": "Walk through DHCP and DNS resolution for a URL cold; resolve a real domain with `dig +trace` and explain each hop.",
+    "hours": null,
+    "pri": "M",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "NET-5",
+    "name": "TCP/UDP, HTTP and TLS",
+    "stage": "FND",
+    "lane": "net",
+    "src": "SHARED",
+    "desc": "Handshake, ports, HTTP semantics, TLS at concept level.",
+    "why": "Load balancers, WAF rules and certificate errors all live here.",
+    "obj": [
+      "Walk through 'what happens when I type a URL' in 5–8 min"
+    ],
+    "pre": [
+      "NET-1"
+    ],
+    "nti": "NTI map: 'Networking basics: DNS, HTTP, TLS' (verified, roadmap PDF).",
+    "debi": "DEBI map: 'SSL and TLS basics', common ports, HTTP/HTTPS (verified).",
+    "res": [
+      "MDN 'An overview of HTTP'"
+    ],
+    "labs": [
+      "curl -v against your own app"
+    ],
+    "ev": "Scoped URL walkthrough (doc 06) in English.",
+    "hours": null,
+    "pri": "H",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "NET-6",
+    "name": "Network tools",
+    "stage": "FND",
+    "lane": "net",
+    "src": "SHARED",
+    "desc": "ip, ping, traceroute/mtr, dig, curl -v, ss, tcpdump/Wireshark with a filter.",
+    "why": "The working toolkit for every debugging session in Stages 2–4.",
+    "obj": [
+      "Capture and filter traffic",
+      "Find which port a service listens on"
+    ],
+    "pre": [
+      "NET-3",
+      "NET-4"
+    ],
+    "nti": "NTI map: Nmap basics, Wireshark basics (verified).",
+    "debi": "DEBI map: troubleshooting tools, packet sniffers, port scanners (verified).",
+    "res": [
+      "man pages",
+      "Wireshark docs"
+    ],
+    "labs": [
+      "Capture your app's TLS handshake"
+    ],
+    "ev": "Annotated pcap of one request.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "NET-7",
+    "name": "Layered connectivity troubleshooting",
+    "stage": "FND",
+    "lane": "net",
+    "src": "DEBI",
+    "desc": "Link → IP → route → DNS → port → application, independently.",
+    "why": "The skill interviewers probe most for junior DevOps roles.",
+    "obj": [
+      "Diagnose a broken connection and name the failing layer"
+    ],
+    "pre": [
+      "NET-6",
+      "LNX-7"
+    ],
+    "nti": null,
+    "debi": "DEBI map: OS-independent troubleshooting (verified).",
+    "res": [
+      "doc 06 NET section"
+    ],
+    "labs": [
+      "3 break-and-fix scenarios on your Linux VM"
+    ],
+    "ev": "3 broken-connectivity labs fixed, failing layer stated (doc 06 exit check).",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "LNX-1",
+    "name": "Filesystem, pipes, grep/find",
+    "stage": "FND",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "Navigate the hierarchy, handle files, pipes and redirection, grep/find/xargs.",
+    "why": "Base layer for everything on a server.",
+    "obj": [
+      "Search logs recursively and filter them"
+    ],
+    "pre": [],
+    "nti": "NTI Linux Administration 1 (Linux + Bash module, 35 h). Material rated 5.5/10: use doc 20 guide.",
+    "debi": "DEBI map: 'Navigating using GUI and CLI', 'Performing CRUD on files' (verified). Google course 4 'Tools of the Trade: Linux and SQL' (unverified): skim only.",
+    "res": [
+      "Doc 20 NTI Linux guide",
+      "OverTheWire Bandit 0–20"
+    ],
+    "labs": [
+      "Bandit levels on bad days"
+    ],
+    "ev": "Fresh-VM exit check: find and filter errors across `/var/log` recursively (`grep -ri`, `find`) without lookup.",
+    "hours": "NTI Linux + Bash module: 35 h (shared by LNX-1 to LNX-8); doc 20 core path ~45 h",
+    "pri": "H",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "LNX-2",
+    "name": "Users, groups and permissions",
+    "stage": "FND",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "Users, groups, symbolic/octal permissions, ownership, sudo, SUID.",
+    "why": "Least privilege on a host; same logic as IAM later.",
+    "obj": [
+      "Set up users and groups with correct permissions"
+    ],
+    "pre": [
+      "LNX-1"
+    ],
+    "nti": "NTI Linux Administration 1.",
+    "debi": "DEBI map: 'Understand permissions' (verified).",
+    "res": [
+      "Doc 20 sections 6–7"
+    ],
+    "labs": [
+      "Doc 20 labs"
+    ],
+    "ev": "Fresh-VM exit check, users/groups part.",
+    "hours": null,
+    "pri": "H",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "LNX-3",
+    "name": "Processes and systemd services",
+    "stage": "FND",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "Signals, ps/top/kill; write and manage a systemd unit.",
+    "why": "Running your app as a service is step one of any deployment.",
+    "obj": [
+      "Write a unit for the grad project"
+    ],
+    "pre": [
+      "LNX-1"
+    ],
+    "nti": "NTI Linux Administration 1.",
+    "debi": null,
+    "res": [
+      "Doc 20 section 9",
+      "systemd docs"
+    ],
+    "labs": [
+      "Run the grad project under systemd"
+    ],
+    "ev": "Broken unit fixed from logs (exit check).",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "LNX-4",
+    "name": "Packages, environment and PATH",
+    "stage": "FND",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "apt, environment variables, PATH.",
+    "why": "Image builds and servers depend on it.",
+    "obj": [
+      "Install, pin and remove packages"
+    ],
+    "pre": [
+      "LNX-1"
+    ],
+    "nti": "NTI Linux Administration 1.",
+    "debi": null,
+    "res": [
+      "Doc 20 section 10"
+    ],
+    "labs": [
+      "Doc 20 labs"
+    ],
+    "ev": "Exit check passes without lookup.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "LNX-5",
+    "name": "Diagnose a failing service from logs",
+    "stage": "FND",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "journalctl, systemctl status, /var/log.",
+    "why": "Logs are where Stage 3 detection starts.",
+    "obj": [
+      "Find why a service fails in minutes"
+    ],
+    "pre": [
+      "LNX-3"
+    ],
+    "nti": "NTI Linux Administration 1.",
+    "debi": "DEBI map: event logs, syslogs (verified).",
+    "res": [
+      "Doc 20 section 11"
+    ],
+    "labs": [
+      "Doc 20 incident scripts"
+    ],
+    "ev": "Fix an injected service failure unaided using `systemctl status` and `journalctl -u`.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "LNX-6",
+    "name": "SSH hardening",
+    "stage": "FND",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "Keys, config, disable password login, scp/rsync.",
+    "why": "First hardening step on any cloud VM.",
+    "obj": [
+      "Key-only SSH on a fresh VM"
+    ],
+    "pre": [
+      "LNX-2"
+    ],
+    "nti": "NTI Linux Administration 1.",
+    "debi": "DEBI map: SSH, OS hardening (verified).",
+    "res": [
+      "Doc 20 section 12"
+    ],
+    "labs": [
+      "Harden your UTM VM"
+    ],
+    "ev": "Key-only SSH set up in the exit check.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "LNX-7",
+    "name": "Linux networking and firewall",
+    "stage": "FND",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "ip, ss, ufw.",
+    "why": "Host firewalls mirror security groups.",
+    "obj": [
+      "Open and close ports deliberately"
+    ],
+    "pre": [
+      "LNX-1",
+      "NET-3"
+    ],
+    "nti": "NTI Linux Administration 1.",
+    "debi": "DEBI map: iptables, host-based firewall (verified).",
+    "res": [
+      "Doc 20 section 12"
+    ],
+    "labs": [
+      "ufw on your VM"
+    ],
+    "ev": "Exit check: open, verify (`ss`) and close a port with `ufw` on a fresh VM without lookup.",
+    "hours": null,
+    "pri": "M",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "LNX-8",
+    "name": "Bash scripting",
+    "stage": "FND",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "Variables, conditionals, loops, functions, exit codes, cron; shellcheck clean.",
+    "why": "Pipelines and automation are mostly glue scripts.",
+    "obj": [
+      "Write a 20-line shellcheck-clean script"
+    ],
+    "pre": [
+      "LNX-1"
+    ],
+    "nti": "NTI Linux + Bash module.",
+    "debi": "DEBI map: Bash under programming (verified).",
+    "res": [
+      "The Linux Command Line part 4"
+    ],
+    "labs": [
+      "Automate a backup of the grad project DB"
+    ],
+    "ev": "Script passes shellcheck and runs from cron.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "PY-1–7",
+    "name": "Python core (group)",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "Data model, structures, generators/decorators, OOP, exceptions, concurrency, packaging.",
+    "why": "Your differentiator; used for automation (boto3) and reading the apps you deploy.",
+    "obj": [
+      "Pass the doc 06 PY exit check"
+    ],
+    "pre": [],
+    "nti": "NTI Python module (22 h): revision only; you already know Python.",
+    "debi": "Google course 7 'Automate Cybersecurity Tasks with Python' (unverified): do fast, for the security use cases.",
+    "res": [
+      "Real Python on failed items only"
+    ],
+    "labs": [
+      "boto3 scripts inside PS-7"
+    ],
+    "ev": "Doc 06 PY exit check (log-parser CLI + 3 tests).",
+    "hours": "NTI Python module: 22 h",
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "DB-1–6",
+    "name": "Databases (group)",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "SQL, schema design, indexes, transactions, SQL vs NoSQL, Redis.",
+    "why": "Maintain only; needed to defend the grad project.",
+    "obj": [
+      "Keep the CV defensible"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": "Google course 4 includes SQL (unverified).",
+    "res": [
+      "pgexercises",
+      "Use The Index, Luke"
+    ],
+    "labs": [],
+    "ev": "Doc 06 DB exit check when a backend interview is booked (G11).",
+    "hours": null,
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "ASE"
+    ]
+  },
+  {
+    "id": "WEB-1–8",
+    "name": "Django / Celery backend (group)",
+    "stage": "FND",
+    "lane": "code",
+    "src": "EXIST",
+    "desc": "HTTP, request lifecycle, ORM, auth, REST, WSGI/ASGI, Celery reliability, architecture.",
+    "why": "The grad project is the one app deployed securely (G12); you must be able to defend it.",
+    "obj": [
+      "Defend the grad project's backend through the project"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Django and Celery docs",
+      "TestDriven.io course if bought"
+    ],
+    "labs": [
+      "Kill a Celery worker mid-task"
+    ],
+    "ev": "Doc 06 WEB exit check; whiteboard the capstone.",
+    "hours": null,
+    "pri": "M",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "GIT-1–4",
+    "name": "Git model, workflows and recovery (group)",
+    "stage": "FND",
+    "lane": "code",
+    "src": "NTI",
+    "desc": "Commits and branches, merge vs rebase, reset/revert/reflog, PR hygiene, removing a secret from history.",
+    "why": "Every pipeline starts at a commit; leaked secrets in history are a real incident type.",
+    "obj": [
+      "Recover from 5 Git disasters",
+      "Remove a committed secret properly"
+    ],
+    "pre": [],
+    "nti": "NTI Git module (7 h, doc 17 §1). Not on the NTI roadmap.sh map.",
+    "debi": "Absent from the DEBI map.",
+    "res": [
+      "Learn Git Branching",
+      "Pro Git ch. 2, 3, 7"
+    ],
+    "labs": [
+      "Git disaster drills"
+    ],
+    "ev": "Doc 06 GIT exit check (5 disasters, ~45 min).",
+    "hours": "NTI Git module: 7 h",
+    "pri": "H",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "SEC-1",
+    "name": "Security principles",
+    "stage": "FND",
+    "lane": "sec",
+    "src": "SHARED",
+    "desc": "CIA, AAA, authN vs authZ, least privilege, defense in depth, zero trust.",
+    "why": "The vocabulary every later security competency uses.",
+    "obj": [
+      "Explain each principle with an example from your project"
+    ],
+    "pre": [],
+    "nti": "NTI map: CIA triad, authentication, authorization (verified).",
+    "debi": "DEBI map: CIA triad, defense in depth, zero trust (verified). Google course 1 'Foundations of Cybersecurity' (unverified).",
+    "res": [
+      "Professor Messer Security+ (selected)"
+    ],
+    "labs": [
+      "TryHackMe Cyber Security 101 rooms"
+    ],
+    "ev": "Part of the SEC exit check (30 questions at 80%+).",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "SEC-2",
+    "name": "Cryptography and PKI",
+    "stage": "FND",
+    "lane": "sec",
+    "src": "SHARED",
+    "desc": "Hashing vs encryption vs encoding, symmetric/asymmetric, signatures, PKI, TLS, password storage.",
+    "why": "KMS, TLS certificates and secret storage depend on it.",
+    "obj": [
+      "Explain which primitive fits which job"
+    ],
+    "pre": [
+      "SEC-1"
+    ],
+    "nti": "NTI map: symmetric/asymmetric encryption, SHA-256, bcrypt, PKI, certificate lifecycle (verified).",
+    "debi": "DEBI map: hashing, salting, key exchange, PKI, private vs public keys (verified).",
+    "res": [
+      "Messer crypto sections"
+    ],
+    "labs": [
+      "THM cryptography rooms"
+    ],
+    "ev": "Explain TLS certificate validation cold.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "SEC-3",
+    "name": "Attack types",
+    "stage": "FND",
+    "lane": "sec",
+    "src": "DEBI",
+    "desc": "Social engineering, malware, MITM/DoS/spoofing, injection/XSS/CSRF/SSRF, password attacks.",
+    "why": "You defend against what you can name.",
+    "obj": [
+      "Explain 10 attacks with detection and mitigation"
+    ],
+    "pre": [
+      "SEC-1"
+    ],
+    "nti": "NTI map: SQLi/XSS prevention (builder view).",
+    "debi": "DEBI map: large attack catalogue (verified). Google course 5 'Assets, Threats, and Vulnerabilities' (unverified).",
+    "res": [
+      "Messer threats sections"
+    ],
+    "labs": [
+      "THM rooms as assigned"
+    ],
+    "ev": "5 attacks explained with detection + mitigation (doc 06).",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "SEC-6",
+    "name": "Identity concepts",
+    "stage": "FND",
+    "lane": "sec",
+    "src": "SHARED",
+    "desc": "MFA, SSO and federation (SAML/OAuth/OIDC), RBAC.",
+    "why": "Cloud IAM (CLD-2, CSEC-1) and CI OIDC federation build on it.",
+    "obj": [
+      "Explain OIDC federation as used by GitHub Actions → AWS"
+    ],
+    "pre": [
+      "SEC-1"
+    ],
+    "nti": "NTI map: identity basics, IAM, least privilege, RBAC (verified).",
+    "debi": "DEBI map: Kerberos, LDAP, RADIUS, SSO, MFA (verified).",
+    "res": [
+      "Messer identity sections"
+    ],
+    "labs": [
+      "Enable MFA everywhere you own"
+    ],
+    "ev": "Explain an OIDC trust policy line by line.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CTR-1",
+    "name": "Dockerfile from a blank file",
+    "stage": "CDE",
+    "lane": "ctr",
+    "src": "NTI",
+    "desc": "Images vs containers, layers and cache, writing a Dockerfile cold.",
+    "why": "Doc 19 lists 'writing a Dockerfile cold' as a refresh item.",
+    "obj": [
+      "Write the grad project's Dockerfile from memory"
+    ],
+    "pre": [
+      "LNX-1"
+    ],
+    "nti": "NTI Docker module (21 h).",
+    "debi": null,
+    "res": [
+      "Docker docs: concepts"
+    ],
+    "labs": [
+      "PS-1"
+    ],
+    "ev": "Dockerfile rewritten from memory (PS-1).",
+    "hours": "NTI Docker module: 21 h (shared by CTR-1 to CTR-6)",
+    "pri": "H",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CTR-2",
+    "name": "Hardened images",
+    "stage": "CDE",
+    "lane": "ctr",
+    "src": "NTI",
+    "desc": "Multi-stage builds, small images, non-root user, .dockerignore, healthcheck, pinned base.",
+    "why": "The first security control a DevSecOps engineer owns.",
+    "obj": [
+      "Ship a minimal non-root image"
+    ],
+    "pre": [
+      "CTR-1"
+    ],
+    "nti": "NTI Docker module.",
+    "debi": null,
+    "res": [
+      "Docker build best practices"
+    ],
+    "labs": [
+      "PS-1"
+    ],
+    "ev": "PS-1 Dockerfile: multi-stage, non-root, healthcheck, pinned.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CTR-3",
+    "name": "Docker Compose",
+    "stage": "CDE",
+    "lane": "ctr",
+    "src": "EXIST",
+    "desc": "Networks and service DNS, volumes, env and secrets, ordering.",
+    "why": "You already run the grad project with Compose (doc 19).",
+    "obj": [
+      "Keep using it as the local stack"
+    ],
+    "pre": [
+      "CTR-1"
+    ],
+    "nti": "NTI Docker module.",
+    "debi": null,
+    "res": [
+      "Compose spec"
+    ],
+    "labs": [],
+    "ev": "Grad project runs with Compose.",
+    "hours": null,
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CTR-4",
+    "name": "Debug containers",
+    "stage": "CDE",
+    "lane": "ctr",
+    "src": "NTI",
+    "desc": "logs, exec, inspect, port mapping, DNS between services.",
+    "why": "Most container incidents are port, DNS or volume.",
+    "obj": [
+      "Fix 3 broken Compose setups"
+    ],
+    "pre": [
+      "CTR-3",
+      "NET-6"
+    ],
+    "nti": "NTI Docker module.",
+    "debi": null,
+    "res": [
+      "Docker docs"
+    ],
+    "labs": [
+      "3 broken Compose setups"
+    ],
+    "ev": "Doc 06 CTR exit check.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CTR-5",
+    "name": "Container internals",
+    "stage": "CDE",
+    "lane": "ctr",
+    "src": "NTI",
+    "desc": "Containers vs VMs, namespaces and cgroups, Compose vs Kubernetes.",
+    "why": "Needed to reason about isolation and escapes.",
+    "obj": [
+      "Explain what isolates a container"
+    ],
+    "pre": [
+      "CTR-1",
+      "LNX-3"
+    ],
+    "nti": "NTI Docker module.",
+    "debi": "DEBI map: virtualization basics, 'understand concept of isolation' (verified).",
+    "res": [
+      "Docker docs"
+    ],
+    "labs": [],
+    "ev": "2-minute explanation in English.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CTR-6",
+    "name": "Image scanning and triage",
+    "stage": "CDE",
+    "lane": "ctr",
+    "src": "NTI",
+    "desc": "Scan with Trivy; fix or justify findings.",
+    "why": "Vulnerability management applied to what you ship.",
+    "obj": [
+      "Triage scanner output, not just run it"
+    ],
+    "pre": [
+      "CTR-2"
+    ],
+    "nti": "NTI map: 'Image scanning' under container security (verified).",
+    "debi": null,
+    "res": [
+      "Trivy docs"
+    ],
+    "labs": [
+      "PS-1"
+    ],
+    "ev": "Trivy report with top findings fixed or justified in the README.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "K8S-1",
+    "name": "Kubernetes fundamentals",
+    "stage": "CDE",
+    "lane": "ctr",
+    "src": "NTI",
+    "desc": "Pods, deployments, services, config and secrets, basic RBAC.",
+    "why": "Most mid-level DevOps postings name it (doc 19 §H).",
+    "obj": [
+      "Deploy the grad project to a local cluster"
+    ],
+    "pre": [
+      "CTR-5"
+    ],
+    "nti": "NTI Kubernetes module (49 h).",
+    "debi": null,
+    "res": [
+      "kubernetes.io docs"
+    ],
+    "labs": [
+      "kind or k3s locally"
+    ],
+    "ev": "NTI assessment; PS-6 only if target postings ask (doc 19).",
+    "hours": "NTI Kubernetes module: 49 h",
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "CIE",
+      "DSO",
+      "CSE"
+    ]
+  },
+  {
+    "id": "K8S-3",
+    "name": "Kubernetes delivery: Helm, Kustomize, GitOps",
+    "stage": "CDE",
+    "lane": "ctr",
+    "src": "IND",
+    "desc": "Package the app with Helm or Kustomize and deploy it through GitOps (Argo CD).",
+    "why": "Common in mid-level DevOps postings; devopsroadmap.io teaches it in Modules 5–6. Only if your target postings ask (doc 19).",
+    "obj": [
+      "Argo CD keeps the local cluster in sync with Git"
+    ],
+    "pre": [
+      "K8S-1",
+      "CI-3"
+    ],
+    "nti": "NTI Kubernetes module (49 h) may touch Helm (unverified).",
+    "debi": null,
+    "res": [
+      "Helm docs",
+      "Argo CD docs",
+      "devopsroadmap.io Modules 5–6"
+    ],
+    "labs": [
+      "PS-6"
+    ],
+    "ev": "Argo CD syncs the grad project from Git into kind/k3s.",
+    "hours": null,
+    "pri": "L",
+    "existing": null,
+    "paths": [
+      "CIE",
+      "DSO"
+    ]
+  },
+  {
+    "id": "TST-1",
+    "name": "Testing with pytest",
+    "stage": "CDE",
+    "lane": "code",
+    "src": "IND",
+    "desc": "Fixtures, parametrize, mocking; testing Django views and Celery tasks.",
+    "why": "A pipeline is only as useful as its tests.",
+    "obj": [
+      "Add tests that a pipeline can gate on"
+    ],
+    "pre": [
+      "PY-1–7",
+      "WEB-1–8"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "pytest docs"
+    ],
+    "labs": [
+      "PS-2"
+    ],
+    "ev": "Tests run in PS-2's pipeline.",
+    "hours": null,
+    "pri": "M",
+    "existing": "refresh",
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "TST-2",
+    "name": "Integration testing",
+    "stage": "CDE",
+    "lane": "code",
+    "src": "IND",
+    "desc": "Test the app with its real dependencies (Postgres, Redis, Celery) in CI; stub the external AI service at its contract.",
+    "why": "Unit tests miss wiring failures; devopsroadmap.io makes integration tests part of its CI/CD module.",
+    "obj": [
+      "Run integration tests against service containers in CI"
+    ],
+    "pre": [
+      "TST-1"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "pytest docs",
+      "devopsroadmap.io Module 5"
+    ],
+    "labs": [
+      "PS-2"
+    ],
+    "ev": "PS-2's integration job catches a deliberately broken migration.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CI-1",
+    "name": "CI/CD concepts",
+    "stage": "CDE",
+    "lane": "code",
+    "src": "NTI",
+    "desc": "CI vs continuous delivery vs deployment; pipeline stages.",
+    "why": "Frames every DevSecOps control.",
+    "obj": [
+      "Explain each stage's purpose"
+    ],
+    "pre": [
+      "GIT-1–4"
+    ],
+    "nti": "NTI CI/CD + DevSecOps practice project (28 h).",
+    "debi": "Absent from the DEBI map.",
+    "res": [
+      "GitHub Actions docs"
+    ],
+    "labs": [],
+    "ev": "2-minute explanation.",
+    "hours": "NTI CI/CD module: 28 h (shared by CI-1 to CI-4, DSO-1)",
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CI-2",
+    "name": "GitHub Actions workflow",
+    "stage": "CDE",
+    "lane": "code",
+    "src": "NTI",
+    "desc": "Triggers, jobs, caching, service containers (Postgres/Redis) for tests.",
+    "why": "GitHub Actions is the tool your portfolio shows; NTI's tool is unverified.",
+    "obj": [
+      "Run the grad project's tests in CI"
+    ],
+    "pre": [
+      "CI-1",
+      "TST-1"
+    ],
+    "nti": "NTI CI/CD module (tool unverified).",
+    "debi": null,
+    "res": [
+      "GitHub Skills: test-with-actions"
+    ],
+    "labs": [
+      "PS-2"
+    ],
+    "ev": "Green pipeline on the grad project.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CI-3",
+    "name": "Build and publish images in CI",
+    "stage": "CDE",
+    "lane": "code",
+    "src": "NTI",
+    "desc": "Build, tag and push an image (ECR or GHCR).",
+    "why": "Deploys consume what CI publishes.",
+    "obj": [
+      "Tagged image on every merge"
+    ],
+    "pre": [
+      "CI-2",
+      "CTR-2"
+    ],
+    "nti": "NTI CI/CD module.",
+    "debi": null,
+    "res": [
+      "GitHub Skills: publish-docker-images"
+    ],
+    "labs": [
+      "PS-2"
+    ],
+    "ev": "Merge produces a tagged image.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CI-4",
+    "name": "CI secrets and branch protection",
+    "stage": "CDE",
+    "lane": "code",
+    "src": "NTI",
+    "desc": "Secrets in CI, required checks, branch protection.",
+    "why": "Stops bypassing the gates you build.",
+    "obj": [
+      "Protect main with required checks"
+    ],
+    "pre": [
+      "CI-2"
+    ],
+    "nti": "NTI CI/CD module.",
+    "debi": null,
+    "res": [
+      "GitHub docs"
+    ],
+    "labs": [
+      "PS-2"
+    ],
+    "ev": "A PR with a failing check cannot merge.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CI-5",
+    "name": "Release automation",
+    "stage": "CDE",
+    "lane": "code",
+    "src": "IND",
+    "desc": "Semantic Versioning, Conventional Commits, generated changelog, tagged releases; the app reports its version.",
+    "why": "Every deploy becomes traceable to a version; cheap and visible on a CV (devopsroadmap.io Modules 2 and 6).",
+    "obj": [
+      "Cut a tagged release from CI with a changelog"
+    ],
+    "pre": [
+      "CI-3",
+      "GIT-1–4"
+    ],
+    "nti": "NTI CI/CD module may cover it (unverified).",
+    "debi": null,
+    "res": [
+      "semver.org",
+      "conventionalcommits.org",
+      "release-please docs"
+    ],
+    "labs": [
+      "PS-2"
+    ],
+    "ev": "Tagged releases with a generated changelog; a /version endpoint returns the deployed version.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "DSO-1",
+    "name": "Pipeline security gates",
+    "stage": "CDE",
+    "lane": "code",
+    "src": "NTI",
+    "desc": "SAST (Bandit/Semgrep), dependency audit (pip-audit), secrets (gitleaks), image scan (Trivy); fail on high.",
+    "why": "The core DevSecOps deliverable; doc 19 project stage 2.",
+    "obj": [
+      "Choose and tune gates; explain each trade-off"
+    ],
+    "pre": [
+      "CI-2",
+      "CTR-6"
+    ],
+    "nti": "NTI CI/CD + DevSecOps practice project; NTI map: 'Automating security' (verified).",
+    "debi": "TryHackMe DevSecOps path rooms through DEBI access (doc 19 §D #6).",
+    "res": [
+      "Semgrep, Bandit, gitleaks, Trivy docs"
+    ],
+    "labs": [
+      "PS-2: plant a vulnerable dependency and a fake secret"
+    ],
+    "ev": "Pipeline blocks both planted issues; README explains each gate.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core",
+      "DSO",
+      "ASE",
+      "CSE"
+    ]
+  },
+  {
+    "id": "CLD-1",
+    "name": "Cloud concepts and cost control",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "Service models, shared responsibility, regions/AZs, pricing; budget alarm first.",
+    "why": "Shared responsibility defines what cloud security even covers.",
+    "obj": [
+      "Set a budget alarm before any lab"
+    ],
+    "pre": [
+      "NET-1"
+    ],
+    "nti": "NTI AWS module (49 h).",
+    "debi": "DEBI map: cloud models, IaaS/PaaS/SaaS, cloud vs on-prem, serverless (verified, concept only).",
+    "res": [
+      "Coursera 'Exam Prep: AWS SAA' (doc 19 §D #1)"
+    ],
+    "labs": [
+      "Budget alarm on your AWS account"
+    ],
+    "ev": "Budget alarm exists; explain shared responsibility.",
+    "hours": "NTI AWS module: 49 h (shared by CLD-1 to CLD-7, NET-8)",
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CLD-2",
+    "name": "AWS IAM basics",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "Users, groups, roles, policies (read JSON), MFA, no root use, access-key hygiene.",
+    "why": "The base of CSEC-1; most cloud breaches start with identity.",
+    "obj": [
+      "Read and write a least-privilege policy"
+    ],
+    "pre": [
+      "CLD-1",
+      "SEC-6"
+    ],
+    "nti": "NTI AWS module; NTI map: IAM, least privilege (verified).",
+    "debi": null,
+    "res": [
+      "AWS IAM user guide"
+    ],
+    "labs": [
+      "PS-3"
+    ],
+    "ev": "PS-3 uses roles only; no long-lived keys on the instance.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CLD-3",
+    "name": "VPC networking",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "VPC, public/private subnets, route tables, IGW, NAT, security groups vs NACLs.",
+    "why": "Where NET-2/3 become real.",
+    "obj": [
+      "Build a two-tier VPC by hand once, then in Terraform"
+    ],
+    "pre": [
+      "CLD-1",
+      "NET-2",
+      "NET-3"
+    ],
+    "nti": "NTI AWS module.",
+    "debi": null,
+    "res": [
+      "AWS VPC user guide"
+    ],
+    "labs": [
+      "PS-3"
+    ],
+    "ev": "Explain the packet path private subnet → NAT → internet (doc 19 'can explain cold').",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "NET-8",
+    "name": "Multi-tier network design",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "Subnets for a multi-tier app, stateful vs stateless filtering, L4 vs L7 LB, VPN concept.",
+    "why": "Secure network zoning in the cloud.",
+    "obj": [
+      "Subnet a /16 for public/private/DB tiers and justify each rule"
+    ],
+    "pre": [
+      "CLD-3"
+    ],
+    "nti": "NTI AWS module + SAA prep.",
+    "debi": "DEBI map: perimeter vs DMZ vs segmentation (verified).",
+    "res": [
+      "SAA prep"
+    ],
+    "labs": [
+      "PS-3 network design"
+    ],
+    "ev": "Doc 06 F3 check: /16 design with every rule justified.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CLD-4",
+    "name": "Deploy to compute",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "Run the grad project on EC2 or ECS with SSM/SSH access.",
+    "why": "Doc 19 project stage 3.",
+    "obj": [
+      "Deploy and reach it securely"
+    ],
+    "pre": [
+      "CLD-3",
+      "CTR-2",
+      "LNX-6"
+    ],
+    "nti": "NTI AWS module.",
+    "debi": null,
+    "res": [
+      "AWS docs"
+    ],
+    "labs": [
+      "PS-3"
+    ],
+    "ev": "App running on AWS with a documented teardown.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CLD-5",
+    "name": "S3 and managed data",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "S3 policies and Block Public Access; Postgres in a private subnet; Redis awareness.",
+    "why": "Public buckets and public databases are classic findings.",
+    "obj": [
+      "Keep data private by design"
+    ],
+    "pre": [
+      "CLD-2",
+      "CLD-3"
+    ],
+    "nti": "NTI AWS module.",
+    "debi": "DEBI map: common cloud storage, S3 (verified, names only).",
+    "res": [
+      "AWS S3 and RDS guides"
+    ],
+    "labs": [
+      "PS-3"
+    ],
+    "ev": "DB not reachable from the internet; S3 public access blocked.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CLD-6",
+    "name": "CloudWatch logs, metrics, alarms",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "Logs, metrics and alarms on AWS.",
+    "why": "Feeds OPS-2 and CSEC-4.",
+    "obj": [
+      "Alarm on something you can trigger"
+    ],
+    "pre": [
+      "CLD-4"
+    ],
+    "nti": "NTI AWS + Monitoring modules.",
+    "debi": null,
+    "res": [
+      "CloudWatch docs"
+    ],
+    "labs": [
+      "PS-5"
+    ],
+    "ev": "An alarm you triggered on purpose.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CLD-7",
+    "name": "Explain architecture and cost",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "Walk through the deployed architecture and its monthly cost.",
+    "why": "Interviewers ask exactly this.",
+    "obj": [
+      "5-minute walkthrough"
+    ],
+    "pre": [
+      "CLD-4",
+      "CLD-5"
+    ],
+    "nti": "NTI AWS module.",
+    "debi": null,
+    "res": [
+      "AWS pricing calculator"
+    ],
+    "labs": [],
+    "ev": "5-minute architecture and cost walkthrough (doc 06 M3 check).",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "IAC-1",
+    "name": "Terraform core",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "Providers, resources, variables, outputs, plan/apply, state.",
+    "why": "Doc 19 project stage 4; most postings name it.",
+    "obj": [
+      "Describe PS-3 in Terraform"
+    ],
+    "pre": [
+      "CLD-3"
+    ],
+    "nti": "NTI Terraform module (21 h).",
+    "debi": "DEBI map: 'Understand the concept of IaC' (verified, concept only).",
+    "res": [
+      "Terraform docs"
+    ],
+    "labs": [
+      "PS-4"
+    ],
+    "ev": "Whole PS-3 environment in Terraform.",
+    "hours": "NTI Terraform module: 21 h (shared by IAC-1, IAC-2)",
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "IAC-2",
+    "name": "Terraform state and modules",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "NTI",
+    "desc": "Remote state with locking, modules, destroy and re-apply.",
+    "why": "Makes environments reproducible and reviewable.",
+    "obj": [
+      "Destroy and re-apply cleanly"
+    ],
+    "pre": [
+      "IAC-1"
+    ],
+    "nti": "NTI Terraform module.",
+    "debi": null,
+    "res": [
+      "Terraform docs"
+    ],
+    "labs": [
+      "PS-4"
+    ],
+    "ev": "terraform destroy + apply works from a clean checkout.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "CI-6",
+    "name": "Multi-environment promotion",
+    "stage": "CDE",
+    "lane": "cloud",
+    "src": "IND",
+    "desc": "Dev and prod environments from the same Terraform; the same image promoted after checks, only config changes.",
+    "why": "Where config and secret mistakes surface; devopsroadmap.io Module 6 builds the same thing.",
+    "obj": [
+      "Promote one image from dev to prod with config-only differences"
+    ],
+    "pre": [
+      "IAC-2",
+      "CI-5"
+    ],
+    "nti": "NTI Terraform and CI/CD modules may cover it (unverified).",
+    "debi": null,
+    "res": [
+      "The Twelve-Factor App (config, dev/prod parity)",
+      "devopsroadmap.io Module 6"
+    ],
+    "labs": [
+      "PS-4"
+    ],
+    "ev": "Same image digest running in dev and prod; dev torn down to control cost.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "IAC-3",
+    "name": "Ansible configuration management",
+    "stage": "CDE",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "Inventories, playbooks, roles for host configuration.",
+    "why": "Named in junior DevOps postings (doc 19 §H).",
+    "obj": [
+      "Harden a VM with a playbook"
+    ],
+    "pre": [
+      "LNX-6",
+      "LNX-8"
+    ],
+    "nti": "NTI Ansible module (14 h).",
+    "debi": null,
+    "res": [
+      "Ansible docs"
+    ],
+    "labs": [
+      "Turn the LNX hardening steps into a playbook"
+    ],
+    "ev": "Playbook in a repo.",
+    "hours": "NTI Ansible module: 14 h",
+    "pri": "L",
+    "existing": null,
+    "paths": [
+      "CIE",
+      "DSO"
+    ]
+  },
+  {
+    "id": "LNX-9",
+    "name": "Resource triage",
+    "stage": "CDE",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "Disk, memory and CPU problems (df, du, free, top/htop).",
+    "why": "On-call basics.",
+    "obj": [
+      "Find what fills a disk"
+    ],
+    "pre": [
+      "LNX-3"
+    ],
+    "nti": "NTI Linux module.",
+    "debi": null,
+    "res": [
+      "Doc 20"
+    ],
+    "labs": [
+      "Doc 20 incident labs"
+    ],
+    "ev": "Fix an injected resource problem.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "OPS-1",
+    "name": "Logs, metrics, traces",
+    "stage": "CDE",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "The three signals; structured logging in Django and Celery.",
+    "why": "Detection needs good logs first.",
+    "obj": [
+      "Emit structured logs from the grad project"
+    ],
+    "pre": [
+      "LNX-5"
+    ],
+    "nti": "NTI Monitoring module (7 h): ops metrics.",
+    "debi": "DEBI covers security logs instead (complementary, doc 19 §C).",
+    "res": [
+      "Django logging docs"
+    ],
+    "labs": [
+      "PS-5"
+    ],
+    "ev": "Structured logs visible in CloudWatch or Grafana.",
+    "hours": "NTI Monitoring module: 7 h (shared by OPS-1 to OPS-3)",
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "OPS-2",
+    "name": "Health checks, alerts, dashboard",
+    "stage": "CDE",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "Health checks, alerts on failure (including Celery), a dashboard.",
+    "why": "Doc 19 project stage 5.",
+    "obj": [
+      "Alert on a real failure mode"
+    ],
+    "pre": [
+      "OPS-1",
+      "CLD-6"
+    ],
+    "nti": "NTI Monitoring module.",
+    "debi": null,
+    "res": [
+      "Prometheus/Grafana or CloudWatch docs"
+    ],
+    "labs": [
+      "PS-5"
+    ],
+    "ev": "One alert triggered on purpose.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "OPS-3",
+    "name": "Diagnose from telemetry",
+    "stage": "CDE",
+    "lane": "lnx",
+    "src": "NTI",
+    "desc": "Find an injected failure from telemetry only.",
+    "why": "Same skill as investigating an incident.",
+    "obj": [
+      "Diagnose without SSH"
+    ],
+    "pre": [
+      "OPS-2"
+    ],
+    "nti": "NTI Monitoring module.",
+    "debi": null,
+    "res": [],
+    "labs": [
+      "PS-5"
+    ],
+    "ev": "Injected failure found from telemetry (doc 06 M3 check).",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "CIE",
+      "CSO",
+      "DSO"
+    ]
+  },
+  {
+    "id": "OPS-4",
+    "name": "Automate an ops task",
+    "stage": "CDE",
+    "lane": "lnx",
+    "src": "IND",
+    "desc": "Automate a routine task (backup, deploy helper) in Bash or Python.",
+    "why": "Shows engineering, not clicking.",
+    "obj": [
+      "Remove one manual step"
+    ],
+    "pre": [
+      "LNX-8"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [],
+    "labs": [
+      "Backup script from LNX-8"
+    ],
+    "ev": "Script in the repo, used by you.",
+    "hours": null,
+    "pri": "L",
+    "existing": null,
+    "paths": [
+      "CIE",
+      "DSO"
+    ]
+  },
+  {
+    "id": "SEC-4",
+    "name": "Vulnerability, threat and risk",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "SHARED",
+    "desc": "CVE and CVSS, the vulnerability-management lifecycle.",
+    "why": "Turns scanner output into decisions.",
+    "obj": [
+      "Prioritize findings by risk, not count"
+    ],
+    "pre": [
+      "SEC-1"
+    ],
+    "nti": "NTI map: managing threats and risks (verified).",
+    "debi": "DEBI map: basics of vulnerability management, definition of risk (verified). Google course 2 'Play It Safe' (unverified).",
+    "res": [
+      "Messer"
+    ],
+    "labs": [
+      "Re-triage PS-1 Trivy findings with CVSS"
+    ],
+    "ev": "Risk-ranked findings list for the grad project.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "VM-1",
+    "name": "Vulnerability scanning practice",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "NTI",
+    "desc": "Nessus or OpenVAS and Nmap against your own hosts; scan → fix → verify.",
+    "why": "Classic security engineering task.",
+    "obj": [
+      "Run a full scan-to-fix cycle"
+    ],
+    "pre": [
+      "SEC-4",
+      "NET-6"
+    ],
+    "nti": "NTI map: Nessus, OpenVAS, Qualys, Nmap, automated patching (verified).",
+    "debi": "DEBI map: nmap, port scanners (verified).",
+    "res": [
+      "OpenVAS docs"
+    ],
+    "labs": [
+      "Scan your own VM only"
+    ],
+    "ev": "Scan-to-fix report.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "CSO",
+      "CSE",
+      "DSO"
+    ]
+  },
+  {
+    "id": "SEC-5",
+    "name": "Security controls",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "DEBI",
+    "desc": "Firewall, IDS/IPS, segmentation, VPN, EDR, SIEM: what each sees and stops.",
+    "why": "Maps directly onto cloud controls in Stage 4.",
+    "obj": [
+      "Pick the right control for a threat"
+    ],
+    "pre": [
+      "SEC-1",
+      "NET-3"
+    ],
+    "nti": "NTI map: IDS/IPS, DDoS mitigation, secure network zoning (verified).",
+    "debi": "DEBI map: hardening concepts, NIDS/NIPS, EDR, DLP, firewalls (verified).",
+    "res": [
+      "Messer"
+    ],
+    "labs": [
+      "THM rooms as assigned"
+    ],
+    "ev": "SEC exit check.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "NSEC-1",
+    "name": "FortiGate administration (NSE 4)",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "DEBI",
+    "desc": "FortiGate policies, NAT, VPN, IPS, troubleshooting.",
+    "why": "Decided in doc 19 G15; challenged in the written roadmap for cloud-security value.",
+    "obj": [
+      "Configure a FortiGate VM lab"
+    ],
+    "pre": [
+      "SEC-5",
+      "NET-7"
+    ],
+    "nti": null,
+    "debi": "DEBI Fortinet track (doc 19, likely; exam funding unverified).",
+    "res": [
+      "Coursera Fortinet FortiGate Administrator course"
+    ],
+    "labs": [
+      "FortiGate VM lab"
+    ],
+    "ev": "Lab write-up with policies, NAT and VPN.",
+    "hours": "FortiGate course ~7 h video; exam prep 60–100 h (third-party estimate, doc 19)",
+    "pri": "L",
+    "existing": null,
+    "paths": [
+      "CSO"
+    ]
+  },
+  {
+    "id": "SEC-7",
+    "name": "Detection and incident-response lifecycle",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "DEBI",
+    "desc": "Logging, detection, NIST IR phases, MITRE ATT&CK vocabulary.",
+    "why": "The bridge to CSEC-4 and CSEC-7.",
+    "obj": [
+      "Walk an incident through all phases"
+    ],
+    "pre": [
+      "SEC-5"
+    ],
+    "nti": "NTI map: IR lifecycle, forensics, containment, RCA (verified): revision only.",
+    "debi": "DEBI map: IR process, threat hunting, ATT&CK, kill chain (verified). Google course 6 'Sound the Alarm: Detection and Response' (unverified).",
+    "res": [
+      "NIST SP 800-61"
+    ],
+    "labs": [
+      "THM IR rooms"
+    ],
+    "ev": "SEC exit check; IR-1 runbook.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "LOG-1",
+    "name": "Log analysis and SIEM practice",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "DEBI",
+    "desc": "Query logs, correlate events, triage alerts in a SIEM.",
+    "why": "Method you reuse on CloudTrail in CSEC-4.",
+    "obj": [
+      "Triage an alert end to end"
+    ],
+    "pre": [
+      "SEC-7",
+      "LNX-5"
+    ],
+    "nti": "NTI map: SIEM, alert types, log analysis (verified).",
+    "debi": "DEBI map: SIEM, event logs, syslogs, netflow, packet captures, firewall logs (verified). Google course 6 labs (Chronicle, Suricata; unverified).",
+    "res": [],
+    "labs": [
+      "THM SOC rooms as assigned"
+    ],
+    "ev": "Triage write-up of one investigated alert.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core",
+      "CSO",
+      "CSE"
+    ]
+  },
+  {
+    "id": "IR-1",
+    "name": "Incident-response practice",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "SHARED",
+    "desc": "Write a runbook, run a tabletop, write a blameless postmortem.",
+    "why": "Shows you can act, not just recite phases.",
+    "obj": [
+      "Run one tabletop end to end"
+    ],
+    "pre": [
+      "SEC-7"
+    ],
+    "nti": "NTI map: IR lifecycle, root cause analysis (verified).",
+    "debi": "DEBI map: incident response process (verified).",
+    "res": [
+      "NIST SP 800-61"
+    ],
+    "labs": [
+      "Tabletop: leaked access key"
+    ],
+    "ev": "Runbook + postmortem in the repo.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core",
+      "CSO",
+      "CSE"
+    ]
+  },
+  {
+    "id": "SEC-8",
+    "name": "Governance and frameworks",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "SHARED",
+    "desc": "ISO 27001, NIST CSF, CIS, SOC 2; risk treatment.",
+    "why": "Reference level; lets you map controls to frameworks.",
+    "obj": [
+      "Map your controls to CIS"
+    ],
+    "pre": [
+      "SEC-1"
+    ],
+    "nti": "NTI map: SOC 2, ISO 27001, NIST, audit and compliance mapping (verified).",
+    "debi": "DEBI map: ISO, NIST, CIS, CSF, RMF (verified).",
+    "res": [
+      "CIS AWS Foundations Benchmark"
+    ],
+    "labs": [],
+    "ev": "PS-7 README maps controls to CIS.",
+    "hours": null,
+    "pri": "L",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "WIN-1",
+    "name": "Windows fundamentals slice",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "DEBI",
+    "desc": "Services, users/UAC, Event Viewer, PowerShell basics, Defender.",
+    "why": "Interview basics; SOC work if that path is chosen.",
+    "obj": [
+      "Read the Windows Security log"
+    ],
+    "pre": [
+      "SEC-1"
+    ],
+    "nti": null,
+    "debi": "DEBI map: Windows OS, PowerShell, Group Policy (verified).",
+    "res": [
+      "THM Windows fundamentals rooms"
+    ],
+    "labs": [],
+    "ev": "Explain 3 security event IDs.",
+    "hours": "2–3 h (doc 06)",
+    "pri": "L",
+    "existing": null,
+    "paths": [
+      "CSO"
+    ]
+  },
+  {
+    "id": "TM-1",
+    "name": "Threat modeling",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "NTI",
+    "desc": "STRIDE (and PASTA awareness), attack-surface mapping.",
+    "why": "Every portfolio README carries one (doc 19 §G).",
+    "obj": [
+      "One-page threat model per project stage"
+    ],
+    "pre": [
+      "SEC-3",
+      "WEB-1–8"
+    ],
+    "nti": "NTI map: STRIDE, PASTA, attack-surface mapping (verified).",
+    "debi": "DEBI map: kill chain, Diamond model (complementary).",
+    "res": [
+      "OWASP threat modeling cheat sheet"
+    ],
+    "labs": [
+      "Grad project threat model"
+    ],
+    "ev": "Threat model in the grad project README.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core",
+      "DSO",
+      "CSE",
+      "ASE"
+    ]
+  },
+  {
+    "id": "APPSEC-1",
+    "name": "Exploit then fix on your own app",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "SHARED",
+    "desc": "SQLi, XSS, CSRF, broken access control, SSRF, misconfig, vulnerable deps, secrets (OWASP Top 10:2025).",
+    "why": "Your backend background is the edge here.",
+    "obj": [
+      "Exploit and fix each class on the grad project"
+    ],
+    "pre": [
+      "SEC-3",
+      "WEB-1–8"
+    ],
+    "nti": "NTI map: OWASP Top 10, SQLi/XSS prevention, input validation, Burp (verified).",
+    "debi": "DEBI map: web-based attacks and OWASP Top 10 (verified).",
+    "res": [
+      "PortSwigger Web Security Academy"
+    ],
+    "labs": [
+      "Local copy of the grad project only"
+    ],
+    "ev": "Committed OWASP self-review with 3+ real fixes (doc 06).",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core",
+      "ASE",
+      "DSO"
+    ]
+  },
+  {
+    "id": "APPSEC-2",
+    "name": "Security review write-up",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "IND",
+    "desc": "Finding, severity, evidence, fix.",
+    "why": "The AppSec deliverable format.",
+    "obj": [
+      "Write findings a developer can act on"
+    ],
+    "pre": [
+      "APPSEC-1"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "OWASP ASVS"
+    ],
+    "labs": [],
+    "ev": "One review document in the repo.",
+    "hours": null,
+    "pri": "L",
+    "existing": null,
+    "paths": [
+      "ASE"
+    ]
+  },
+  {
+    "id": "DSO-2",
+    "name": "Software supply chain",
+    "stage": "SEN",
+    "lane": "sec",
+    "src": "NTI",
+    "desc": "SBOMs (Syft), dependency risk, image signing concept.",
+    "why": "Growing requirement in DevSecOps roles.",
+    "obj": [
+      "Generate and read an SBOM"
+    ],
+    "pre": [
+      "DSO-1"
+    ],
+    "nti": "NTI map: supply-chain security, SBOMs, build-pipeline hardening, dependency risk management (verified).",
+    "debi": null,
+    "res": [
+      "Syft, cosign docs"
+    ],
+    "labs": [
+      "Add SBOM to PS-2"
+    ],
+    "ev": "SBOM artifact published by the pipeline.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "DSO",
+      "CSE"
+    ]
+  },
+  {
+    "id": "CSEC-1",
+    "name": "AWS IAM depth",
+    "stage": "CSS",
+    "lane": "csec",
+    "src": "IND",
+    "desc": "Policy evaluation logic, roles and trust policies, permission boundaries, OIDC from CI (no long-lived keys).",
+    "why": "The single most tested cloud-security skill.",
+    "obj": [
+      "Explain why a request is allowed or denied"
+    ],
+    "pre": [
+      "CLD-2",
+      "CI-4"
+    ],
+    "nti": "NTI map: IAM, least privilege, large-scale identity strategy (verified, concepts).",
+    "debi": null,
+    "res": [
+      "AWS IAM policy evaluation docs"
+    ],
+    "labs": [
+      "Switch PS-2 to OIDC; least-privilege deploy role"
+    ],
+    "ev": "Deploy role with reasoning per statement in the README.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "CSE",
+      "DSO",
+      "CSO"
+    ]
+  },
+  {
+    "id": "CSEC-2",
+    "name": "Multi-account governance",
+    "stage": "CSS",
+    "lane": "csec",
+    "src": "IND",
+    "desc": "AWS Organizations, SCPs, IAM Identity Center.",
+    "why": "How real companies enforce guardrails.",
+    "obj": [
+      "Write and test an SCP"
+    ],
+    "pre": [
+      "CSEC-1"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "AWS Organizations docs"
+    ],
+    "labs": [
+      "PS-7"
+    ],
+    "ev": "SCP set with tests.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "CSE"
+    ]
+  },
+  {
+    "id": "CSEC-3",
+    "name": "Audit logging and posture",
+    "stage": "CSS",
+    "lane": "csec",
+    "src": "IND",
+    "desc": "CloudTrail to a locked bucket, AWS Config, Security Hub, CIS AWS Foundations.",
+    "why": "You cannot detect what you do not log.",
+    "obj": [
+      "Raise the CIS score and explain each fix"
+    ],
+    "pre": [
+      "CSEC-1",
+      "CLD-5"
+    ],
+    "nti": "NTI map: CSPM (verified, name only).",
+    "debi": null,
+    "res": [
+      "CIS AWS Foundations Benchmark"
+    ],
+    "labs": [
+      "PS-7"
+    ],
+    "ev": "CIS score before and after.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "CSE",
+      "CSO"
+    ]
+  },
+  {
+    "id": "CSEC-4",
+    "name": "Cloud threat detection",
+    "stage": "CSS",
+    "lane": "csec",
+    "src": "IND",
+    "desc": "GuardDuty, EventBridge rules, detections as code, tested with Stratus Red Team.",
+    "why": "Detection engineering on cloud events.",
+    "obj": [
+      "Write and test 5 detections"
+    ],
+    "pre": [
+      "CSEC-3",
+      "LOG-1"
+    ],
+    "nti": null,
+    "debi": "Method from LOG-1 (DEBI SOC practice).",
+    "res": [
+      "Stratus Red Team docs"
+    ],
+    "labs": [
+      "PS-7"
+    ],
+    "ev": "Detection repo with test evidence.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "CSE",
+      "CSO"
+    ]
+  },
+  {
+    "id": "CSEC-5",
+    "name": "Data protection",
+    "stage": "CSS",
+    "lane": "csec",
+    "src": "IND",
+    "desc": "KMS key policies, Secrets Manager / SSM Parameter Store, S3 encryption.",
+    "why": "Doc 19 stage 3 already puts secrets in SSM.",
+    "obj": [
+      "Explain a key policy"
+    ],
+    "pre": [
+      "CLD-5",
+      "SEC-2"
+    ],
+    "nti": "NTI map: Key Management Service (verified, name only).",
+    "debi": null,
+    "res": [
+      "AWS KMS docs"
+    ],
+    "labs": [
+      "PS-3, PS-7"
+    ],
+    "ev": "Key policy with reasoning.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "CSE",
+      "DSO"
+    ]
+  },
+  {
+    "id": "CSEC-6",
+    "name": "Network and edge protection",
+    "stage": "CSS",
+    "lane": "csec",
+    "src": "IND",
+    "desc": "Private subnets, VPC endpoints, WAF on the ALB, least-privilege security groups.",
+    "why": "Secure zoning in practice.",
+    "obj": [
+      "Remove all unnecessary public exposure"
+    ],
+    "pre": [
+      "NET-8",
+      "SEC-5"
+    ],
+    "nti": "NTI map: secure network zoning, DDoS mitigation (verified).",
+    "debi": null,
+    "res": [
+      "AWS WAF docs"
+    ],
+    "labs": [
+      "PS-7"
+    ],
+    "ev": "Exposure diagram with every public path justified.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "CSE"
+    ]
+  },
+  {
+    "id": "CSEC-7",
+    "name": "Cloud incident response",
+    "stage": "CSS",
+    "lane": "csec",
+    "src": "IND",
+    "desc": "Leaked-key playbook, isolate an instance, collect evidence from CloudTrail.",
+    "why": "The most common real cloud incident.",
+    "obj": [
+      "Run the leaked-key playbook"
+    ],
+    "pre": [
+      "CSEC-4",
+      "IR-1"
+    ],
+    "nti": null,
+    "debi": "IR method from DEBI (SEC-7, IR-1).",
+    "res": [
+      "AWS Security Incident Response Guide"
+    ],
+    "labs": [
+      "PS-7 tabletop"
+    ],
+    "ev": "Playbook + postmortem.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "CSE",
+      "CSO"
+    ]
+  },
+  {
+    "id": "CSEC-8",
+    "name": "Policy as code",
+    "stage": "CSS",
+    "lane": "csec",
+    "src": "IND",
+    "desc": "Checkov/tfsec in CI; OPA at concept level.",
+    "why": "Guardrails before deploy, not after.",
+    "obj": [
+      "Block an insecure Terraform change in CI"
+    ],
+    "pre": [
+      "IAC-2",
+      "DSO-1"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Checkov docs"
+    ],
+    "labs": [
+      "PS-4"
+    ],
+    "ev": "PR with an insecure resource blocked.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "DSO",
+      "CSE"
+    ]
+  },
+  {
+    "id": "CSEC-9",
+    "name": "Cloud attack paths",
+    "stage": "CSS",
+    "lane": "csec",
+    "src": "IND",
+    "desc": "IAM privilege escalation, SSRF to metadata, public S3, in deliberately vulnerable labs.",
+    "why": "You defend better once you have attacked it.",
+    "obj": [
+      "Complete the labs and explain each fix"
+    ],
+    "pre": [
+      "CSEC-1",
+      "APPSEC-1"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "flAWS, flAWS2, CloudGoat (free)"
+    ],
+    "labs": [
+      "Lab accounts only"
+    ],
+    "ev": "Write-ups with the defensive fix.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "CSE"
+    ]
+  },
+  {
+    "id": "K8S-2",
+    "name": "Kubernetes security",
+    "stage": "CSS",
+    "lane": "ctr",
+    "src": "IND",
+    "desc": "RBAC, Pod Security Admission, NetworkPolicies, Kyverno, Falco, kube-bench.",
+    "why": "Only if target postings ask (doc 19).",
+    "obj": [
+      "Harden a cluster and prove it"
+    ],
+    "pre": [
+      "K8S-1",
+      "SEC-5"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Kubernetes security docs"
+    ],
+    "labs": [
+      "PS-6"
+    ],
+    "ev": "Before/after kube-bench results.",
+    "hours": null,
+    "pri": "L",
+    "existing": null,
+    "paths": [
+      "DSO",
+      "CSE"
+    ]
+  },
+  {
+    "id": "JOB-1",
+    "name": "Two CV versions",
+    "stage": "JOB",
+    "lane": "career",
+    "src": "IND",
+    "desc": "Backend CV and 'Backend engineer, training in DevSecOps' CV; list a tool only after a finished project stage.",
+    "why": "Doc 19 §H; applications must not wait for certificates.",
+    "obj": [
+      "Keep both CVs current each month"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Doc 19 §H"
+    ],
+    "labs": [],
+    "ev": "Both CVs live.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "JOB-2",
+    "name": "Portfolio READMEs",
+    "stage": "JOB",
+    "lane": "career",
+    "src": "IND",
+    "desc": "Per project stage: architecture diagram, threat model, pipeline description, what you'd do next.",
+    "why": "Interviewers drill into one deep project (doc 19).",
+    "obj": [
+      "Every finished stage is CV-ready on its own"
+    ],
+    "pre": [
+      "TM-1",
+      "CLD-7"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [],
+    "labs": [
+      "PS-1 to PS-7 READMEs"
+    ],
+    "ev": "README per finished stage.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "JOB-3",
+    "name": "Application pipeline",
+    "stage": "JOB",
+    "lane": "career",
+    "src": "IND",
+    "desc": "Up to 2 targeted applications a week (doc 19 §H targets).",
+    "why": "Learning must not delay applications.",
+    "obj": [
+      "Apply steadily to the right titles"
+    ],
+    "pre": [
+      "JOB-1"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Doc 19 §H"
+    ],
+    "labs": [],
+    "ev": "Ticked application tasks (doc 19 K1).",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "COMM-1",
+    "name": "Explain any competency in English",
+    "stage": "JOB",
+    "lane": "career",
+    "src": "IND",
+    "desc": "2–5 minutes, no long pauses.",
+    "why": "Spoken English is in most postings.",
+    "obj": [
+      "Explain on demand"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "Claude mock interviews"
+    ],
+    "labs": [],
+    "ev": "Spoken checks (doc 19 K4).",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "COMM-2",
+    "name": "STAR stories",
+    "stage": "JOB",
+    "lane": "career",
+    "src": "IND",
+    "desc": "Formula Student, the capstone, ICPC: each under 2 minutes.",
+    "why": "Behavioral rounds.",
+    "obj": [
+      "3 polished stories"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [],
+    "labs": [],
+    "ev": "3 stories under 2 min each.",
+    "hours": null,
+    "pri": "M",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "COMM-3",
+    "name": "Whiteboard the capstone",
+    "stage": "JOB",
+    "lane": "career",
+    "src": "IND",
+    "desc": "3-minute whiteboard; answer 'what would you change?'.",
+    "why": "The question you will get in every interview.",
+    "obj": [
+      "Draw and defend the deployed system"
+    ],
+    "pre": [
+      "CLD-7",
+      "WEB-1–8"
+    ],
+    "nti": null,
+    "debi": null,
+    "res": [],
+    "labs": [],
+    "ev": "3-minute whiteboard passed in a mock.",
+    "hours": null,
+    "pri": "H",
+    "existing": null,
+    "paths": [
+      "core"
+    ]
+  },
+  {
+    "id": "DSA-1",
+    "name": "Algorithm problems",
+    "stage": "JOB",
+    "lane": "career",
+    "src": "EXIST",
+    "desc": "Medium problems with complexity analysis.",
+    "why": "Only if interviews ask (doc 19).",
+    "obj": [
+      "Stay warm, not drill"
+    ],
+    "pre": [],
+    "nti": null,
+    "debi": null,
+    "res": [
+      "NeetCode roadmap"
+    ],
+    "labs": [],
+    "ev": "Give the optimal approach and its complexity for a medium problem aloud, then code it.",
+    "hours": null,
+    "pri": "L",
+    "existing": "have",
+    "paths": [
+      "ASE",
+      "core"
+    ]
+  }
+]

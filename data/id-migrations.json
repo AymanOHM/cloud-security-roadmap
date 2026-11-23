@@ -1,0 +1,4 @@
+{
+  "_comment": "Map retired or renamed competency IDs to their replacement so saved progress can follow them. Example: {\"OLD-1\": \"NEW-1\"}. Never reuse a retired ID for a different competency.",
+  "migrations": {}
+}

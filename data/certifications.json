@@ -1,0 +1,85 @@
+[
+  {
+    "id": "SAA-C03",
+    "name": "AWS Solutions Architect – Associate",
+    "when": "~Jan–Mar 2027 (2–4 weeks after NTI's AWS block)",
+    "start": "2027-01",
+    "end": "2027-03",
+    "status": "Decided (doc 19 G16)",
+    "cost": "$150 list; NTI discount voucher (% unknown)",
+    "fills": "AWS services, which neither roadmap names",
+    "verdict": "Keep",
+    "comps": [
+      "CLD-1",
+      "CLD-2",
+      "CLD-3",
+      "NET-8",
+      "CLD-5"
+    ]
+  },
+  {
+    "id": "NSE4",
+    "name": "Fortinet NSE 4 – FortiOS Administrator",
+    "when": "Mar–May 2027",
+    "start": "2027-03",
+    "end": "2027-05",
+    "status": "Decided (G15); challenged in the written roadmap",
+    "cost": "~$400 if unfunded (unverified); DEBI funding unverified",
+    "fills": "Vendor firewall admin",
+    "verdict": "Challenge: drop unless the exam is funded",
+    "comps": [
+      "NSEC-1"
+    ]
+  },
+  {
+    "id": "SECPLUS",
+    "name": "CompTIA Security+ (SY0-801)",
+    "when": "Decide ~May 2027",
+    "start": "2027-05",
+    "end": "2027-07",
+    "status": "Deferred (G14)",
+    "cost": "$439 retail",
+    "fills": "HR filter for security roles",
+    "verdict": "Conditional on job geography and funding",
+    "comps": [
+      "SEC-1",
+      "SEC-4",
+      "SEC-5",
+      "SEC-7"
+    ]
+  },
+  {
+    "id": "SCS-C03",
+    "name": "AWS Security – Specialty",
+    "when": "Q4 2027 or later",
+    "start": "2027-10",
+    "end": "2027-12",
+    "status": "Target",
+    "cost": "$300",
+    "fills": "Proves the Stage 4 specialization",
+    "verdict": "Target after PS-7",
+    "comps": [
+      "CSEC-1",
+      "CSEC-3",
+      "CSEC-4",
+      "CSEC-5",
+      "CSEC-7"
+    ]
+  },
+  {
+    "id": "CKA",
+    "name": "CKA (then CKS)",
+    "when": "Only if postings demand Kubernetes",
+    "start": "2027-06",
+    "end": "2027-09",
+    "status": "Optional",
+    "cost": "NTI discount voucher",
+    "fills": "Kubernetes depth",
+    "verdict": "Optional",
+    "comps": [
+      "K8S-1",
+      "K8S-3",
+      "K8S-2"
+    ]
+  }
+]
