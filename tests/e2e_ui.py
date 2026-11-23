@@ -5,6 +5,7 @@ Run: python3 tests/e2e_ui.py   (exit code 1 on any failure; screenshots go to bu
 """
 import asyncio
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -157,10 +158,31 @@ async def mobile(b, errs):
     await m.close()
 
 
+def build_with_timetable(tmp, name, blob):
+    """Build the current data with the timetable replaced by `blob` (None = no timetable)."""
+    data = Path(tmp) / f"data-{name}"
+    subprocess.run(["cp", "-R", str(ROOT / "data"), str(data)], check=True)
+    tt = data / "timetable.enc.json"
+    if blob is None:
+        tt.unlink(missing_ok=True)
+    else:
+        tt.write_text(json.dumps(blob), encoding="utf-8")
+    out = Path(tmp) / name / "index.html"
+    r = subprocess.run([sys.executable, str(ROOT / "tools" / "build.py"), "--data", str(data), "--out", str(out)],
+                       capture_output=True, text=True)
+    return r.returncode, out
+
+
 async def timetable(b, errs):
     pg = await b.new_page(viewport={"width": 1280, "height": 900}, accept_downloads=True)
     pg.on("pageerror", lambda e: errs.append("timetable: " + str(e)))
-    await pg.goto(URL)
+    if (ROOT / "data" / "timetable.enc.json").exists():
+        await pg.goto(URL)
+        await pg.click("#tab-time")
+        check(await pg.locator("#ttunlock #ttpw").count() == 1, "the published timetable shows the unlock form")
+    tmp_none = tempfile.mkdtemp()  # removed at the end of the test
+    _, none_out = build_with_timetable(tmp_none, "none", None)
+    await pg.goto(none_out.as_uri())
     await pg.click("#tab-time")
     check("No timetable is published" in await pg.inner_text("#v-time"), "timetable view explains when none is published")
     await pg.click("#v-time details summary")
@@ -176,13 +198,8 @@ async def timetable(b, errs):
     check(set(blob) == {"v", "kdf", "iter", "cipher", "salt", "iv", "ct"} and "Project block" not in json.dumps(blob),
           "encrypt panel produces ciphertext only")
     with tempfile.TemporaryDirectory() as tmp:
-        data = Path(tmp) / "data"
-        subprocess.run(["cp", "-R", str(ROOT / "data"), str(data)], check=True)
-        (data / "timetable.enc.json").write_text(json.dumps(blob), encoding="utf-8")
-        out = Path(tmp) / "t" / "index.html"
-        r = subprocess.run([sys.executable, str(ROOT / "tools" / "build.py"), "--data", str(data), "--out", str(out)],
-                           capture_output=True, text=True)
-        check(r.returncode == 0, "build accepts the encrypted timetable")
+        code, out = build_with_timetable(tmp, "t", blob)
+        check(code == 0, "build accepts the encrypted timetable")
         await pg.goto(out.as_uri())
         await pg.click("#tab-time")
         await pg.fill("#ttpw", "wrong password")
@@ -197,6 +214,7 @@ async def timetable(b, errs):
         html = out.read_text(encoding="utf-8")
         check("Project block" not in html, "the built page holds no plain-text timetable")
     await pg.close()
+    shutil.rmtree(tmp_none, ignore_errors=True)
 
 
 async def main():
