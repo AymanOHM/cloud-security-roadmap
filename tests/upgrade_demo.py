@@ -20,6 +20,7 @@ import tempfile
 from pathlib import Path
 
 from playwright.async_api import async_playwright
+from nav import open_view
 
 ROOT = Path(__file__).resolve().parent.parent
 KEY2 = "ntidebi-roadmap-v2"
@@ -96,7 +97,7 @@ async def main(ref):
             ctx2 = await b.new_context(accept_downloads=True)
             pg2 = await ctx2.new_page()
             await pg2.goto(new_url)
-            await pg2.click("#tabs button[data-v=dash]")
+            await open_view(pg2, "dash")
             await pg2.set_input_files("#imp", files=[{"name": "export.json", "mimeType": "application/json",
                                                         "buffer": json.dumps(exported).encode()}])
             await pg2.wait_for_selector("dialog#dlg[open] [data-dlg=merge]")

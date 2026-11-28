@@ -33,6 +33,7 @@ python3 -m pytest tests/         # unit tests (validator)
 python3 tests/e2e_smoke.py       # browser smoke test of dist/index.html (needs Playwright + Chromium)
 python3 tests/e2e_persistence.py # progress survives renames/removals/additions, imports, seed
 python3 tests/e2e_ui.py          # keyboard, search/deep links, clusters, mobile, encrypted timetable
+python3 tests/e2e_today.py       # Today, session log, Track/Learn drawer, Route lens, phone bottom bar
 python3 tests/upgrade_demo.py    # export from an older build (git ref), upgrade, import: nothing lost
 python3 tools/seed_from_records.py  # records snapshot (private/) -> progress seed (private/)
 ```

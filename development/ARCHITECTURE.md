@@ -43,20 +43,33 @@ data/*.json ──► tools/docgen.py ──► build/docgen/*.md  (tables for R
 | `existing` | null·"have"·"refresh" | The owner already has it / partly has it |
 | `paths` | string[] | `"core"` and/or career path IDs (DSO, CSE, CSO, ASE, CIE) |
 
-## 3. App structure (`app/template.html`, ~610 lines)
-Sections, in file order: CSS (dark theme tokens in `:root`) → HTML shell (header, tabs, one `<section>` per view,
-side `#panel`) → script: storage · helpers · tabs · shared graph helpers (`Viewer` zoom/pan, `drawNode`,
-`drawEdges`) · stage map layout · flowchart layout (longest-path depth columns + barycenter ordering) · shared
-state render (`renderGraphState`) · toolbars · Kanban · side panel (competency and stage) · checklist · career
-paths · compare · projects · certs · dashboard (incl. skills radar) · header/refresh.
+## 3. App structure (`app/template.html`, ~1,700 lines; UX redesign 28 Nov 2026)
+Sections, in file order: CSS (Wayfind tokens in `:root`, a `night` colourway for dark mode, lane line colours
+`--line-*`) → HTML shell (top bar with the three destinations, `#notice`, one `<section>` per destination, the
+`#panel` drawer, `#dlg`) → script: storage · helpers · map graph (`Viewer` zoom/pan, `drawNode`, `drawEdges`,
+`drawFlow`) · view state and URL routing · session log · Today · Roadmap lenses (List, Board, Route, Map) ·
+drawer (Track | Learn, stage and group panels) · Plan sections · Data · orphans, notices, import · lateness ·
+timetable · search, keyboard, colour mode, start.
 
+- **Destinations:** Today (`#v-today`, landing), Roadmap (`#v-roadmap` with lenses `#v-checklist` List,
+  `#v-kanban` Board, `#v-route` Route, `#v-flow` Map), Plan (`#v-plan` with `#v-paths`, `#v-projects`,
+  `#v-certs`, `#v-compare`, `#v-time`, `#v-skills`) and Data (`#v-data`: export, import, reset, orphans, mode).
+  On a phone (≤ 760 px) the destinations move to a bottom bar and the drawer fills the screen.
+- **URL:** `#NET-3` opens a competency (as before; the drawer's open state replaces the hash and restores the
+  view's hash on close). Views: `#today`, `#roadmap/<lens>?stage=&path=&status=&src=&q=`, `#roadmap/route/<ID>`,
+  `#plan/<section>`, `#data`. Filters are one shared set (`F`) for every lens; changing them replaces the hash,
+  moving between views pushes it, so Back works. `hashchange` and `popstate` both route through `onHash()`.
 - **Global data:** `const D = /*DATA*/` (build payload: version, schemaVersion, stages, lanes, sources, paths,
-  ntiHours, ntiPart2Hours, comps, projects, certs, compare, migrations).
-- **Derived:** `byId`, `dependents`, `projByComp`, `isBlocked(id)` = not done and any prerequisite not done.
-- **Views:** flow, roadmap (stage map), kanban, checklist, paths, compare, projects, certs, dash. Graph views
-  share selection, path filter, "locked only" and "all dependencies" toggles.
-- **Re-render model:** state change → `save()` → `refreshAll()` (header, graph state, current view, open panel).
-  Simple and fast enough for ~100 nodes.
+  ntiHours, ntiPart2Hours, comps, projects, certs, compare, migrations, timetable).
+- **Derived:** `byId`, `dependents`, `projByComp`, `isBlocked(id)`, `stateOf(id)` (ready, locked, ip, done),
+  `nextUp()` (ready, earliest stage, highest priority).
+- **Route lens:** the selected competency, its prerequisites one and two steps back and what it unlocks one and
+  two steps ahead, as HTML "stations" with the connecting lines drawn in an SVG overlay after layout.
+- **Map lens:** the former flowchart (longest-path depth columns + barycenter ordering, group clusters per
+  D-04, the ongoing JOB band). The former stage map is retired; its content lives in the List's stage headers.
+- **Re-render model:** state change → `save()` → `refreshAll()` (notices, header, map state, current view, open
+  drawer). Simple and fast enough for ~100 competencies.
+- **Font:** Chivo Mono (SIL OFL, `app/fonts/`), inlined by `tools/build.py` as base64.
 
 ## 4. Current persistence (v1.2)
 - `localStorage["ntidebi-roadmap-v1"] = {status: {ID: "ns"|"ip"|"done"}, notes: {ID: text}, evidence: {ID: text},
@@ -68,7 +81,11 @@ paths · compare · projects · certs · dashboard (incl. skills radar) · heade
 
 ## 5. Persistence design (implemented in Stage 3, data 1.3)
 1. **Envelope:** `{app: "nti-debi-roadmap", storageVersion: 2, dataVersion, savedAt, progress: {ID: {status,
-   notes, evidence, updated, level?, u?, e?, d?, link?}}, orphans: {…}, lastExportAt}`. Keep the same
+   notes, evidence, updated, level?, u?, e?, d?, link?, log?}}, orphans: {…}, lastExportAt}`. `log` (added 28 Nov
+   2026, still storage version 2) is the session log, newest first: `[{d: "YYYY-MM-DD", min?, text?, lv?}]`, at
+   most 1,000 entries, only ever typed by the owner. Logging never sets a status unless the owner ticks "Also
+   mark in progress"; `lv` also sets `level`. Merges keep the sessions of both sides once each. Builds before
+   this one drop `log` on import (`cleanEntry` allowlist), so import an export into this build or later. Keep the same
    localStorage key family; migrate v1 → v2 on first load and keep a one-time copy under `…-v1-backup`.
 2. **ID migrations on load:** apply `D.migrations` (chained), merging into the new ID (newer `updated` wins per
    field, notes concatenated). Unknown IDs go to `orphans`, shown on the dashboard with "reassign / delete".

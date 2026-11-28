@@ -24,6 +24,7 @@ import tempfile
 from pathlib import Path
 
 from playwright.async_api import async_playwright
+from nav import open_view
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "tools"))
@@ -80,7 +81,7 @@ async def stored(pg):
 
 
 async def import_file(pg, obj, button):
-    await pg.click("#tabs button[data-v=dash]")
+    await open_view(pg, 'dash')
     await pg.set_input_files("#imp", files=[{"name": "in.json", "mimeType": "application/json",
                                                "buffer": json.dumps(obj).encode()}])
     await pg.wait_for_selector(f"dialog#dlg[open] [data-dlg={button}]")
@@ -124,7 +125,7 @@ async def main():
                 s.progress['NET-3'] = {status: 'done', level: 'E4', link: 'https://y', u: 'partial', updated: new Date().toISOString()};
                 localStorage.setItem('ntidebi-roadmap-v2', JSON.stringify(s)) }""")
             await pg.reload()
-            await pg.click("#tabs button[data-v=checklist]")
+            await open_view(pg, 'checklist')
             warned = await pg.evaluate("[...document.querySelectorAll('#v-checklist tr')].filter(r => r.textContent.includes('no evidence')).map(r => r.querySelector('[data-open]').textContent)")
             check("NET-2" in warned and "LNX-1" in warned and "NET-3" not in warned,
                   f"'Completed without evidence' until E4 + link ({warned})")
@@ -163,7 +164,7 @@ async def main():
             await pg.click("#notice [data-act=seen]")
             await pg.reload()
             check("changed since" not in await pg.inner_text("#notice"), "notice stays dismissed after 'Got it'")
-            await pg.click("#tabs button[data-v=dash]")
+            await open_view(pg, 'dash')
             await pg.select_option('select[data-orphto="COMM-2"]', "COMM-1")
             await pg.click('[data-orph="COMM-2"][data-a=move]')
             s = await stored(pg)
@@ -194,11 +195,11 @@ async def main():
                 storageVersion: 2, createdAt: '2026-11-01T00:00:00Z', lastChangeAt: '2026-11-20T00:00:00Z',
                 progress: {'NET-1': {status: 'ip'}}, orphans: {}})) }""")
             await pg3.reload()
-            await pg3.click("#tabs button[data-v=projects]")
+            await open_view(pg3, 'projects')
             proj = await pg3.inner_text("#v-projects")
             check("Late: window ended" in proj, "a project past its window shows Late")
-            await pg3.click("#tabs button[data-v=dash]")
-            check("Past their window" in await pg3.inner_text("#v-dash"), "dashboard lists items past their window")
+            await open_view(pg3, "today")
+            check("Late: window ended" in await pg3.inner_text("#v-today"), "Today lists items past their window")
             check("Back up your progress" in await pg3.inner_text("#notice"), "backup reminder after 7 days without export")
             check(errs == [], f"no JS errors ({errs})")
             await b.close()

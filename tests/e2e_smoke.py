@@ -15,12 +15,13 @@ import sys
 from pathlib import Path
 
 from playwright.async_api import async_playwright
+from nav import open_view
 
 ROOT = Path(__file__).resolve().parent.parent
 URL = (ROOT / "dist" / "index.html").as_uri()
 SHOTS = ROOT / "build" / "screens"
 KEY = "ntidebi-roadmap-v2"
-VIEWS = ["flow", "roadmap", "kanban", "checklist", "paths", "compare", "projects", "certs", "dash"]
+VIEWS = ["today", "flow", "route", "kanban", "checklist", "paths", "compare", "projects", "certs", "skills", "dash"]
 fails = []
 
 
@@ -42,10 +43,10 @@ async def main():
         await pg.goto(URL)
         await pg.wait_for_timeout(400)
         for v in VIEWS:
-            await pg.click(f"#tabs button[data-v={v}]")
+            await open_view(pg, v)
             await pg.wait_for_timeout(150)
             await pg.screenshot(path=str(SHOTS / f"{v}.png"))
-        await pg.click("#tabs button[data-v=flow]")
+        await open_view(pg, 'flow')
         node = pg.locator("#cv-flow g.node[aria-label]").first
         label = await node.get_attribute("aria-label")
         texts = await node.evaluate("n => [...n.querySelectorAll('text')].map(t => t.textContent)")
@@ -59,7 +60,7 @@ async def main():
         await pg.wait_for_timeout(300)
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
         check(saved and saved["progress"].get(pid.strip(), {}).get("status") == "ip", "status persists across reload")
-        await pg.click("#tabs button[data-v=kanban]")
+        await open_view(pg, 'kanban')
         await pg.wait_for_timeout(200)
         card = pg.locator('.kcol[data-col="ns"] .kcard').first
         cid = await card.get_attribute("data-id")
@@ -67,7 +68,7 @@ async def main():
         await pg.wait_for_timeout(200)
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
         check(saved["progress"].get(cid, {}).get("status") == "done", f"kanban drag sets {cid} to done")
-        await pg.click("#tabs button[data-v=dash]")
+        await open_view(pg, 'dash')
         async with pg.expect_download() as dl:
             await pg.click("#exp")
         path = await (await dl.value).path()
@@ -92,7 +93,7 @@ async def main():
                 await pg.click("dialog#dlg [data-dlg=replace]")
             await pg.wait_for_timeout(150)
         for v in VIEWS:
-            await pg.click(f"#tabs button[data-v={v}]")
+            await open_view(pg, v)
             await pg.wait_for_timeout(60)
         check(await pg.evaluate("window.__x") is None, "crafted import runs no script")
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")
@@ -100,7 +101,7 @@ async def main():
         check(prog == {"NET-3": {"status": "ip"}, "NET-4": {"evidence": "repo link"}},
               f"import keeps only valid statuses and string fields ({prog})")
         check(list(saved["orphans"]) == ["NOPE-1"], "an unknown ID is kept as an orphan, not dropped")
-        await pg.click("#tabs button[data-v=flow]")
+        await open_view(pg, 'flow')
         await pg.locator("#cv-flow g.node[aria-label]").first.click()
         await pg.fill("#pnotes", "a note")
         saved = await pg.evaluate(f"JSON.parse(localStorage.getItem('{KEY}'))")

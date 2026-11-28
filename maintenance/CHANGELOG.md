@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## app 2026-11-28 (2): UX redesign — Today, Roadmap, Plan (no data change; storage stays v2)
+- **Three destinations instead of ten tabs.** Today (landing), Roadmap and Plan, plus Data. On a phone they sit
+  in a bottom bar; the competency drawer becomes a full-screen sheet.
+- **Today:** what's in progress, each with a one-step session form; Up next (ready, in roadmap order) with Start;
+  Needs attention (late windows, completed without evidence, backup, orphans, the next stage window); this
+  week's sessions; today's timetable slots once unlocked.
+- **Session log (new, optional `log` field per competency, AUDIT-style rule: owner-entered only):** a line of
+  what you did, minutes, optionally a new evidence level. It never changes a status unless "Also mark in
+  progress" is ticked. Shown in the drawer, removable with a confirming second click; kept on merge.
+- **Roadmap lenses with one filter bar** (search, stage, path, status, source) kept in the URL: List (the
+  checklist, with "Waiting on" links per row and stage headers that open each gate), Board (the Kanban; one
+  column at a time on a phone), Route (new: one competency as a station, two steps back and two ahead), Map
+  (the flowchart). The stage map is retired into the List and the Route.
+- **Drawer split into Track | Learn.** Status sits above both; Track holds the session form, evidence, notes and
+  sessions; Learn holds the description, objectives, the competency's line, NTI/DEBI material, labs and paths.
+- **Plan:** career paths, projects (drawn as a line of stations), certifications, NTI vs DEBI, timetable and
+  Skills (the dashboard's breakdowns and radar). Export, import and reset moved to Data.
+- **Look:** Wayfind: cool grey paper, blue-black ink, Chivo Mono throughout (SIL OFL, inlined), square 2 px
+  borders, cobalt for what is in progress, amber for figures on the ink departure board; a night colourway for
+  dark mode. Lanes keep a line colour as a small square.
+- **Kept:** competency IDs, `#ID` deep links, the `ntidebi-roadmap-v2` envelope and keys, migrations, orphans,
+  import preview and seed, the encrypted timetable, group clusters on the map.
+- **Tests:** new `tests/e2e_today.py`; `tests/nav.py` opens a view the way a person would. Existing browser tests
+  changed only where they drove the old tabs or the stage map (approved by the owner).
+
 ## app 2026-11-28: redesign (no data or storage change)
 - New look across all ten views: graphite dark mode and a warm paper light mode, following the OS with an
   Auto / Light / Dark button in the top bar (kept under its own `ntidebi-mode` key, never in progress data).

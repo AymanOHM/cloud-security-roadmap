@@ -12,11 +12,12 @@ import tempfile
 from pathlib import Path
 
 from playwright.async_api import async_playwright
+from nav import open_view
 
 ROOT = Path(__file__).resolve().parent.parent
 URL = (ROOT / "dist" / "index.html").as_uri()
 SHOTS = ROOT / "build" / "screens"
-VIEWS = ["flow", "roadmap", "kanban", "checklist", "paths", "compare", "projects", "certs", "time", "dash"]
+VIEWS = ["today", "checklist", "kanban", "route", "flow", "paths", "projects", "certs", "compare", "time", "skills", "dash"]
 fails = []
 
 
@@ -50,13 +51,12 @@ async def desktop(b, errs):
     await pg.goto(URL)
     await pg.wait_for_timeout(300)
 
-    # tabs: ARIA roles and arrow keys
-    roles = await pg.evaluate("[...document.querySelectorAll('#tabs button')].map(b => b.getAttribute('role') + ':' + b.getAttribute('aria-selected'))")
-    check(roles[0] == "tab:true" and all(r == "tab:false" for r in roles[1:]), "tabs use role=tab with aria-selected")
-    await pg.focus("#tab-flow")
-    await pg.keyboard.press("ArrowRight")
-    check(await pg.get_attribute("#tab-roadmap", "aria-selected") == "true", "ArrowRight moves to the next view")
-    await pg.click("#tab-flow")
+    # navigation: Today is the landing view; the current destination and lens are marked and kept in the URL
+    check(await pg.get_attribute('#nav [data-nav="today"]', "aria-current") == "page", "Today is the landing view, marked aria-current")
+    await open_view(pg, "flow")
+    check(await pg.get_attribute('#nav [data-nav="roadmap"]', "aria-current") == "page"
+          and await pg.get_attribute('#lenses [data-lens="map"]', "aria-current") == "page", "the open destination and lens are marked aria-current")
+    check(pg.url.endswith("#roadmap/map"), f"the view is kept in the URL ({pg.url.split('#')[-1]})")
 
     # keyboard on graph nodes: Space opens, Escape closes and returns focus
     await pg.focus('#cv-flow g.node[data-id="NET-2"]')
@@ -69,13 +69,22 @@ async def desktop(b, errs):
     label = await pg.get_attribute('#cv-flow g.node[data-id="NET-6"]', "aria-label")
     check("NET-6" in label and "locked" in label, f"node name includes ID and status ({label})")
 
-    # stage map: source on each node, headers focusable
-    await pg.click("#tab-roadmap")
-    await pg.wait_for_timeout(150)
-    texts = await pg.evaluate("""[...document.querySelectorAll('#cv-roadmap g.node[data-id="NET-1"] text')].map(t => t.textContent)""")
-    check("DEBI" in texts, f"stage-map node names its source ({texts})")
-    check(await pg.locator("#cv-roadmap g.stagehd[tabindex='0']").count() == 5, "stage headers are keyboard-focusable")
-    await pg.click("#tab-flow")
+    # list (replaces the stage map): each row names its source and line; each stage opens its gate from the keyboard
+    await open_view(pg, "checklist")
+    row = await pg.evaluate("""document.querySelector('#v-checklist a[data-open="NET-1"]').closest('tr').textContent""")
+    check("DEBI" in row and "Networking" in row, "list row names its source and line")
+    check(await pg.locator("#v-checklist button[data-stage]").count() == 5, "each stage's gate opens from a button")
+    # filters live in the URL and survive a reload
+    await pg.select_option("#fstage", "FND")
+    await pg.select_option("#fstatus", "ready")
+    check("stage=FND" in pg.url and "status=ready" in pg.url, f"filters are kept in the URL ({pg.url.split('#')[-1]})")
+    await pg.reload()
+    await pg.wait_for_timeout(300)
+    check(await pg.input_value("#fstatus") == "ready" and await pg.locator("#v-checklist tbody tr").count() > 0, "a filtered link reopens with its filters")
+    await open_view(pg, "board")
+    check(await pg.locator('.kcol[data-col="locked"] .kcard').count() == 0, "the board uses the same filters")
+    await pg.click("#fclear")
+    await open_view(pg, "flow")
 
     # search and deep links
     await pg.keyboard.press("/")
@@ -90,11 +99,11 @@ async def desktop(b, errs):
     check(await pg.inner_text("#panel .pid") == "LNX-3", "deep link #LNX-3 opens that competency")
 
     # clusters (D-04): groups collapsed in the flowchart, expanded on demand
-    await pg.goto(URL)
+    await pg.goto(URL + "#roadmap/map")
     await pg.wait_for_timeout(300)
     check(await pg.locator('#cv-flow g.node[data-id="PY-1–7"]').count() == 1
           and await pg.locator('#cv-flow g.node[data-id="PY-3"]').count() == 0, "Python group is one collapsed node")
-    check(await pg.locator('#cv-roadmap g.node[data-id="PY-3"]').count() == 1, "stage map shows the members individually")
+    check(await pg.locator('#v-checklist a[data-open="PY-3"]').count() == 1, "the list shows the members individually")
     await pg.click('#cv-flow g.node[data-id="PY-1–7"]')
     check("Python core" in await pg.inner_text("#panel h2"), "clicking a group opens the group panel")
     await pg.click("#gtog")
@@ -107,7 +116,7 @@ async def desktop(b, errs):
     check(edges > 50, f"edges still drawn ({edges})")
 
     # JOB band (A-19)
-    await pg.goto(URL)
+    await pg.goto(URL + "#roadmap/map")
     await pg.wait_for_timeout(300)
     ys = await pg.evaluate("""['JOB-1','NET-1'].map(id => document.querySelector(`#cv-flow g.node[data-id="${id}"]`).transform.baseVal[0].matrix.f)""")
     check(ys[0] > ys[1], "job-readiness items sit in the ongoing band, not in 'Start here'")
@@ -131,7 +140,7 @@ async def desktop(b, errs):
     check(await transform(pg) == before, "resizing keeps the user's zoom")
 
     # Kanban: locked card can't be dropped on Ready (A-13); cards are focusable
-    await pg.click("#tab-kanban")
+    await open_view(pg, "kanban")
     await pg.wait_for_timeout(150)
     card = pg.locator('.kcol[data-col="locked"] .kcard').first
     cid = await card.get_attribute("data-id")
@@ -141,7 +150,7 @@ async def desktop(b, errs):
     check(await pg.locator(".kcard[tabindex='0'][role=button]").count() > 50, "Kanban cards are keyboard-focusable")
 
     # cert timeline derived from data (A-20); contrast token
-    await pg.click("#tab-certs")
+    await open_view(pg, "certs")
     months = await pg.evaluate("[...document.querySelectorAll('.tlmonths div')].map(d => d.textContent)")
     check(months[0].startswith("Nov 2026") and months[-1].startswith("Dec"), f"cert timeline spans today to the last cert ({months[0]} … {months[-1]})")
     # the quietest text colour stays readable on every surface it sits on, in both colour modes (WCAG AA 4.5:1)
@@ -159,18 +168,18 @@ async def mobile(b, errs):
     await m.goto(URL)
     await m.wait_for_timeout(300)
     for v in VIEWS:
-        await m.click(f"#tab-{v}")
+        await open_view(m, v)
         await m.wait_for_timeout(120)
         over = await m.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth")
         check(over <= 0, f"390 px: {v} has no page-level horizontal overflow ({over}px)")
         await m.screenshot(path=str(SHOTS / f"m-{v}.png"))
-    await m.click("#tab-flow")
+    await open_view(m, "flow")
     k = await m.evaluate("+document.querySelector('#cv-flow g.vp').getAttribute('transform').match(/scale\\(([\\d.]+)\\)/)[1]")
     check(k >= 0.75, f"phone flowchart scale keeps text readable (scale {k})")
     tb = await m.evaluate("document.querySelector('#v-flow .toolbar').getBoundingClientRect().height")
     check(tb < 844 * 0.2, f"phone toolbar is compact ({tb:.0f}px)")
-    await m.click("#tab-kanban")
-    w = await m.evaluate("document.querySelector('.kcol').getBoundingClientRect().width")
+    await open_view(m, "kanban")
+    w = await m.evaluate("document.querySelector('.kcol.mshow').getBoundingClientRect().width")
     check(w <= 390, f"Kanban columns stack at 390 px (column {w:.0f}px)")
     await m.close()
 
@@ -195,12 +204,12 @@ async def timetable(b, errs):
     pg.on("pageerror", lambda e: errs.append("timetable: " + str(e)))
     if (ROOT / "data" / "timetable.enc.json").exists():
         await pg.goto(URL)
-        await pg.click("#tab-time")
+        await open_view(pg, "time")
         check(await pg.locator("#ttunlock #ttpw").count() == 1, "the published timetable shows the unlock form")
     tmp_none = tempfile.mkdtemp()  # removed at the end of the test
     _, none_out = build_with_timetable(tmp_none, "none", None)
     await pg.goto(none_out.as_uri())
-    await pg.click("#tab-time")
+    await open_view(pg, "time")
     check("No timetable is published" in await pg.inner_text("#v-time"), "timetable view explains when none is published")
     await pg.click("#v-time details summary")
     await pg.fill("#ttrows", "Mon 18:00–18:45 | Course item\nThu 16:00–19:00 | Project block")
@@ -218,7 +227,7 @@ async def timetable(b, errs):
         code, out = build_with_timetable(tmp, "t", blob)
         check(code == 0, "build accepts the encrypted timetable")
         await pg.goto(out.as_uri())
-        await pg.click("#tab-time")
+        await open_view(pg, "time")
         await pg.fill("#ttpw", "wrong password")
         await pg.click("#ttunlock button[type=submit]")
         await pg.wait_for_selector("#ttunlock [role=alert]", timeout=20000)

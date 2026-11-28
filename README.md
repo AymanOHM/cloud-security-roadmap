@@ -5,8 +5,10 @@ DEBI's Cybersecurity track) with independent learning. It aims at a junior DevOp
 DevSecOps and cloud security, with 107 competencies in five stages, eight project stages and a certification
 plan.
 
-It comes with an **offline, single-file tracker**: flowchart, stage map, Kanban board, checklist, career
-paths, NTI vs DEBI comparison, projects, certification timeline, timetable and a progress dashboard.
+It comes with an **offline, single-file tracker** in three places: **Today** (what you're on, what's next, a
+one-step session log), **Roadmap** (every competency as a list, a board, one competency's route, or the whole
+map, with one set of filters kept in the URL) and **Plan** (career paths, projects, certifications, NTI vs DEBI,
+timetable, skills).
 
 - **Live site:** https://aymanohm.github.io/cloud-security-roadmap/
 - **Written roadmap:** [`ROADMAP.md`](ROADMAP.md)
@@ -15,11 +17,14 @@ paths, NTI vs DEBI comparison, projects, certification timeline, timetable and a
 Open the site, or open `dist/index.html` from a local build. Everything works offline; nothing is sent anywhere.
 
 - **Progress stays in your browser** (localStorage). The local file and the website keep **separate** progress:
-  export on one (Dashboard → Export) and import on the other. Import shows a preview and downloads a backup first.
+  export on one (Data → Export) and import on the other. Import shows a preview and downloads a backup first.
 - **Evidence, not completion.** A competency counts as done at evidence level E4 with a link; a finished course
   is E0–E2 at most. "Completed" without that shows a warning.
-- **Find things:** the search box (`/`), links like `#NET-3`, and "Focus chain" for one competency's
-  prerequisites and what it unlocks. Keyboard: arrow keys between tabs, Enter or Space to open, Escape to close.
+- **Find things:** the search box (`/`), links like `#NET-3` or `#roadmap/list?stage=FND&status=ready`, and the
+  Route lens for one competency's prerequisites and what it unlocks. Keyboard: Enter or Space opens, Escape closes,
+  arrow keys switch a competency's Track and Learn tabs.
+- **Log a session** from Today or a competency's Track tab: a line of what you did, the minutes, optionally a new
+  evidence level. A session never changes a status unless you tick "Also mark in progress".
 - **Timetable:** published only as encrypted data and unlocked with the owner's password.
 
 ## Change the roadmap
@@ -43,6 +48,7 @@ python3 -m pytest tests/           # validator and seed-parser unit tests
 python3 tests/e2e_smoke.py         # every view renders; status, export, import safety
 python3 tests/e2e_persistence.py   # progress survives renames, removals and additions; import/export
 python3 tests/e2e_ui.py            # keyboard, search, deep links, phone layout, encrypted timetable
+python3 tests/e2e_today.py         # Today, the session log, the Track/Learn drawer, the Route lens
 ```
 
 GitHub Actions runs all of them on every push and pull request, and deploys `dist/` to GitHub Pages from `main`

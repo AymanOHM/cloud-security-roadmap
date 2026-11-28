@@ -44,9 +44,13 @@ def main():
         print("app/template.html has no /*DATA*/null placeholder")
         sys.exit(1)
     blob = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
-    # The one embedded font (Host Grotesk, SIL OFL 1.1, app/fonts/OFL.txt), inlined so the page stays offline.
-    font = ROOT / "app" / "fonts" / "host-grotesk-latin-wght-normal.woff2"
-    tpl = tpl.replace("__FONT_HOST_GROTESK__", base64.b64encode(font.read_bytes()).decode("ascii"))
+    # Embedded fonts (SIL OFL 1.1, app/fonts/OFL.txt), inlined so the page stays offline. A placeholder the
+    # template doesn't use is simply not replaced.
+    for marker, name in (("__FONT_CHIVO_MONO__", "chivo-mono-latin-wght-normal.woff2"),
+                         ("__FONT_HOST_GROTESK__", "host-grotesk-latin-wght-normal.woff2")):
+        if marker in tpl:
+            font = ROOT / "app" / "fonts" / name
+            tpl = tpl.replace(marker, base64.b64encode(font.read_bytes()).decode("ascii"))
     out = Path(args.out).resolve() if args.out else ROOT / "dist" / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(tpl.replace("/*DATA*/null", blob), encoding="utf-8")
