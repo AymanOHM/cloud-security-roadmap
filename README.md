@@ -49,6 +49,7 @@ python3 tests/e2e_smoke.py         # every view renders; status, export, import 
 python3 tests/e2e_persistence.py   # progress survives renames, removals and additions; import/export
 python3 tests/e2e_ui.py            # keyboard, search, deep links, phone layout, encrypted timetable
 python3 tests/e2e_today.py         # Today, the session log, the Track/Learn drawer, the Route lens
+python3 tests/e2e_sync.py          # opt-in sync between browsers through a GitHub Gist (GitHub faked)
 ```
 
 GitHub Actions runs all of them on every push and pull request, and deploys `dist/` to GitHub Pages from `main`

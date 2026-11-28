@@ -102,7 +102,7 @@ timetable · search, keyboard, colour mode, start.
 7. **Progress seed (decided, AUDIT D-06):** re-importable seed produced locally by `tools/seed_from_records.py`
    from the records snapshot in `private/progress/`. On import, the records own `level`, `u`/`e`/`d` and
    `lastVerified`; the app owns status, notes and link. Always a preview first. The seed never sets "done".
-8. **Never** send progress anywhere. GitHub Pages hosts code only.
+8. **Progress leaves the browser only through opt-in sync** (§5a, AUDIT D-11). GitHub Pages hosts code only.
 
 **As implemented (Stage 3):** keys `ntidebi-roadmap-v2` (envelope), `ntidebi-roadmap-v1` (left untouched),
 `ntidebi-roadmap-v1-backup` (one-time copy) and `ntidebi-roadmap-v2-prev` (state before the last import or reset).
@@ -111,6 +111,25 @@ crafted file can't inject markup. The envelope keeps `seen` (data version + ID l
 Lateness (AUDIT D-10) reads `due` on stages and projects (YYYY-MM-DD, null = no window) and `end` on certs.
 Tests: `tests/e2e_persistence.py` (rename, remove and add survive an update; v1 migration; seed; import on a
 fresh origin) and `tests/upgrade_demo.py` (export from the data 1.2 build, upgrade, import, nothing lost).
+
+## 5a. Sync across devices (28 Nov 2026, AUDIT D-11)
+Opt-in, off by default; with it off the app makes no network request. The owner pastes a fine-grained GitHub token
+(only *Gists: read and write*) on the Data page.
+- **Keys:** `ntidebi-sync` = `{token, gistId, lastSyncAt, lastError}`; `ntidebi-sync-base` = the `{progress,
+  orphans}` last agreed with the gist. Neither is part of the envelope, so exports never carry the token.
+- **Gist:** secret (`public: false`), one file `ntidebi-roadmap-progress.json` holding the whole v2 envelope.
+  Connect lists the account's gists and reuses the one with that file, otherwise creates it from this browser.
+- **Sync = pull, merge, push.** The pulled file goes through `parseAny` and `normalize` like an import (so old IDs
+  migrate and crafted content is cleaned). If it isn't a v2 envelope, nothing is pushed. `merge3(base, local,
+  remote)` per entry: the side that changed wins; if both changed, per field: the changed side wins, a deleted vs.
+  edited field keeps the edit, differing notes/evidence are joined, anything else takes the newer `updated`.
+  Sessions merge as a set, and a session removed on either side stays removed. Push only when the result differs
+  from the gist, then store the result as the new base.
+- **When:** on load, 2.5 s after the last `touch()`, when the tab becomes visible (if the last sync is older than 20 s),
+  on hiding with changes pending, and on `online` after an error. A remote change redraws without re-rendering a
+  drawer field that has focus.
+- The app also calls `navigator.storage.persist()` so the browser doesn't evict progress.
+- Tests: `tests/e2e_sync.py` fakes the Gists API with Playwright routing.
 
 ## 6. Known technical debt
 See AUDIT A-08 … A-11. The single-file template is acceptable at this size; split into source modules only with

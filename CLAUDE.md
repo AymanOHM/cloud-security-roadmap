@@ -19,7 +19,7 @@ If `private/` is missing (e.g. a fresh clone), stop and ask the owner for it; do
 - **Never fabricate or infer learning progress.** Progress comes only from the owner (in the app) or from the Study Plan records (`private/progress/`). A course finished is not a competency completed.
 - **Study-plan decisions are the owner's.** Don't change decisions listed in `private/docs/STUDY_PLAN.md` §5; if something conflicts, add it to `private/docs/AUDIT.md` with a recommendation and ask.
 - **`data/*.json` is the single source of truth for roadmap content.** Never hand-edit `dist/`. Keep competency IDs stable; retired or renamed IDs go in `data/id-migrations.json`.
-- **Keep the output a single self-contained file that works from `file://` and offline.** No runtime CDN, no fetch of data at runtime, no build-time framework unless the owner approves it after you explain why.
+- **Keep the output a single self-contained file that works from `file://` and offline.** No runtime CDN, no fetch of data at runtime, no build-time framework unless the owner approves it after you explain why. The one approved network use is opt-in progress sync to the owner's own GitHub Gist (AUDIT D-11, ARCHITECTURE §5a); it must stay off by default.
 - **NTI course material must never enter the repo** (NTI's terms forbid publishing it). Only the owner's own summaries and module names/hours.
 - Back up before destructive changes (git commit or a copy under `archive/`).
 - Explain significant architectural decisions before implementing them.
@@ -34,6 +34,7 @@ python3 tests/e2e_smoke.py       # browser smoke test of dist/index.html (needs 
 python3 tests/e2e_persistence.py # progress survives renames/removals/additions, imports, seed
 python3 tests/e2e_ui.py          # keyboard, search/deep links, clusters, mobile, encrypted timetable
 python3 tests/e2e_today.py       # Today, session log, Track/Learn drawer, Route lens, phone bottom bar
+python3 tests/e2e_sync.py        # opt-in Gist sync between two browsers (GitHub faked)
 python3 tests/upgrade_demo.py    # export from an older build (git ref), upgrade, import: nothing lost
 python3 tools/seed_from_records.py  # records snapshot (private/) -> progress seed (private/)
 ```

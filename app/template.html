@@ -831,7 +831,7 @@ function load(){
 const ALL = D.comps.map(c=>c.id);
 let S = load();
 function save(){S.savedAt=nowISO();S.dataVersion=D.version;if(!S.seen)S.seen={dataVersion:D.version,ids:ALL.slice()};writeKey(KEY2,JSON.stringify(S))}
-function touch(){S.lastChangeAt=nowISO();save()}
+function touch(){S.lastChangeAt=nowISO();save();syncSoon()}
 if(LOADINFO.fromV1||LOADINFO.renamed.length)save();
 const P = id => S.progress[id]||{};
 const entry = id => S.progress[id]||(S.progress[id]={});
@@ -842,7 +842,7 @@ function setStatus(id,v){if(!has(ST_LABEL,v))return;entry(id).status=v;entry(id)
 function setField(id,k,v){const e=entry(id);if(v===""||v==null)delete e[k];else e[k]=v;e.updated=nowISO();if(!Object.keys(e).some(x=>x!=="updated"))delete S.progress[id];touch()}
 /* D-03: "Completed" needs E4 and an evidence link, otherwise it carries a warning. */
 const noEvidence = id => st(id)==="done" && !(P(id).level==="E4" && P(id).link);
-function needsBackup(){if(!S.lastChangeAt)return false;const ref=S.lastExportAt||S.createdAt;
+function needsBackup(){if(!S.lastChangeAt||(syncOn()&&SY.lastSyncAt&&!SY.lastError))return false;const ref=S.lastExportAt||S.createdAt;
   return (!S.lastExportAt||S.lastChangeAt>S.lastExportAt)&&(Date.now()-Date.parse(ref))>BACKUP_DAYS*DAY}
 function download(obj,name){const blob=new Blob([JSON.stringify(obj,null,1)],{type:"application/json"});const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
@@ -850,6 +850,109 @@ const stamp = () => new Date().toISOString().slice(0,19).replace(/[:T]/g,"-");
 function exportNow(reason){S.lastExportAt=nowISO();save();download(S,`roadmap-progress-${reason?reason+"-":""}${stamp()}.json`)}
 /* Keep the previous state in storage and as a downloaded file before anything replaces it. */
 function backupNow(reason){writeKey(KEY2_PREV,JSON.stringify(S));exportNow("backup-before-"+reason)}
+
+/* ---------- sync (opt-in): one secret GitHub Gist shared by every browser and device ----------
+   The token and gist ID live in their own key (SYNC_KEY), never in progress or exports.
+   Each sync pulls the gist, three-way merges it with this browser against the last synced
+   state (SYNC_BASE_KEY), then pushes the result. Edits on one side win over an unchanged other side,
+   so deletions and resets travel too; when both sides changed one field, the newer entry wins and
+   differing notes are joined. Sessions are merged as a set. Remote content is sanitized by parseAny. */
+const SYNC_KEY="ntidebi-sync",SYNC_BASE_KEY="ntidebi-sync-base",SYNC_FILE="ntidebi-roadmap-progress.json";
+const SYNC_DESC="NTI + DEBI roadmap progress (synced by the tracker; keep secret)",GH_API="https://api.github.com";
+const SYNC_DELAY=2500,SYNC_STALE=20000;
+let SY=(()=>{try{const o=JSON.parse(readKey(SYNC_KEY)||"null");return isObj(o)&&typeof o.token==="string"?o:null}catch(e){return null}})();
+let syncBusy=false,syncAgain=false,syncTimer=null,syncState="idle";
+const syncOn = () => !!(SY&&SY.token&&SY.gistId);
+const writeSY = () => SY?writeKey(SYNC_KEY,JSON.stringify(SY)):(()=>{try{localStorage.removeItem(SYNC_KEY);localStorage.removeItem(SYNC_BASE_KEY)}catch(e){}})();
+function canon(v){if(Array.isArray(v))return "["+v.map(canon).join(",")+"]";
+  if(isObj(v))return "{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}";return JSON.stringify(v)}
+const same = (a,b) => canon(a)===canon(b);
+const sessKey = x => canon([x.d,x.min||0,x.text||"",x.lv||""]);
+/* Three-way merge of one entry. b = last synced, l = this browser, r = the gist. */
+function merge3Entry(b,l,r){
+  if(same(l,b))return r;if(same(r,b)||same(l,r))return l;
+  if(!l||!r)return l||r;   // deleted on one side, edited on the other: keep the edit
+  b=b||{};const lNew=(Date.parse(l.updated||0)||0)>=(Date.parse(r.updated||0)||0),e={};
+  for(const k of new Set([...Object.keys(l),...Object.keys(r),...Object.keys(b)])){
+    if(k==="log"||k==="updated")continue;const lv=l[k],rv=r[k],bv=b[k];let v;
+    if(same(lv,bv))v=rv;else if(same(rv,bv)||same(lv,rv))v=lv;
+    else if(lv===undefined||rv===undefined)v=lv===undefined?rv:lv;
+    else if((k==="notes"||k==="evidence")&&typeof lv==="string"&&typeof rv==="string")v=lNew?rv+"\n---\n"+lv:lv+"\n---\n"+rv;
+    else v=lNew?lv:rv;
+    if(v!==undefined)e[k]=v}
+  const bk=new Set((b.log||[]).map(sessKey)),lk=new Set((l.log||[]).map(sessKey)),rk=new Set((r.log||[]).map(sessKey)),seen=new Set(),log=[];
+  for(const x of [...(l.log||[]),...(r.log||[])]){const k=sessKey(x);
+    if(seen.has(k)||(bk.has(k)&&!(lk.has(k)&&rk.has(k))))continue;seen.add(k);log.push(x)}   // removed on either side stays removed
+  if(log.length)e.log=log.sort((p,q)=>q.d.localeCompare(p.d)).slice(0,LOG_MAX);
+  const u=[l.updated,r.updated].filter(Boolean).sort().pop();if(u&&Object.keys(e).length)e.updated=u;
+  return Object.keys(e).length?e:undefined}
+function merge3(b,l,r){b=b||{};l=l||{};r=r||{};const out={};
+  for(const id of new Set([...Object.keys(b),...Object.keys(l),...Object.keys(r)])){const e=merge3Entry(b[id],l[id],r[id]);if(e)out[id]=e}
+  return out}
+function syncError(st,what){
+  if(st===401)return "GitHub rejected the token (expired or revoked). Paste a new one.";
+  if(st===403)return "The token can't use gists. Give it the Gists (read and write) account permission.";
+  if(st===404)return "The sync gist wasn't found. Disconnect and connect again to create or find it.";
+  if(st===0)return "Couldn't reach GitHub (offline?). Changes are saved here and will sync later.";
+  return `GitHub answered ${st} while ${what}.`}
+async function gh(method,path,body,token){
+  let r;try{r=await fetch(GH_API+path,{method,cache:"no-store",headers:Object.assign({Accept:"application/vnd.github+json",Authorization:"Bearer "+token,"X-GitHub-Api-Version":"2022-11-28"},body?{"Content-Type":"application/json"}:{}),body:body?JSON.stringify(body):undefined})}
+  catch(e){const x=new Error(syncError(0));x.status=0;throw x}
+  if(!r.ok){const x=new Error(syncError(r.status,method+" "+path.split("?")[0]));x.status=r.status;throw x}
+  return r.status===204?null:r.json()}
+async function gistContent(g){const f=g&&g.files&&g.files[SYNC_FILE];if(!f)return null;
+  if(!f.truncated)return f.content;const r=await fetch(f.raw_url,{cache:"no-store"});if(!r.ok)throw new Error(syncError(r.status,"reading the gist"));return r.text()}
+const envText = () => JSON.stringify(S);
+function readBase(){try{const o=JSON.parse(readKey(SYNC_BASE_KEY)||"null");return isObj(o)?o:null}catch(e){return null}}
+/* Connect: find this tracker's gist in the account, or create it from this browser's progress. */
+async function syncConnect(token){
+  token=token.trim();if(!token)throw new Error("Paste a token first.");
+  let page=1,found=null;
+  while(!found&&page<=10){const list=await gh("GET",`/gists?per_page=100&page=${page}`,null,token);
+    found=list.find(g=>g.files&&g.files[SYNC_FILE]);if(list.length<100)break;page++}
+  let gistId;
+  if(found)gistId=found.id;
+  else{const g=await gh("POST","/gists",{description:SYNC_DESC,public:false,files:{[SYNC_FILE]:{content:envText()}}},token);gistId=g.id}
+  SY={token,gistId,lastSyncAt:null,lastError:null};try{localStorage.removeItem(SYNC_BASE_KEY)}catch(e){}
+  writeSY();await syncNow()}
+function syncDisconnect(){clearTimeout(syncTimer);SY=null;writeSY();syncState="idle"}
+function syncSoon(){if(!syncOn())return;clearTimeout(syncTimer);syncState="pending";syncTimer=setTimeout(syncNow,SYNC_DELAY)}
+/* Pull, merge, push. Never pushes when the gist holds something it can't read. */
+async function syncNow(){
+  if(!syncOn())return;clearTimeout(syncTimer);
+  if(syncBusy){syncAgain=true;return}syncBusy=true;syncState="syncing";renderSyncStatus();
+  try{
+    const g=await gh("GET","/gists/"+encodeURIComponent(SY.gistId),null,SY.token);
+    const txt=await gistContent(g);let rem={progress:{},orphans:{}};
+    if(txt&&txt.trim()){let parsed=null;try{parsed=parseAny(JSON.parse(txt))}catch(e){}
+      if(!parsed||parsed.kind!=="v2")throw new Error("The sync gist holds something that isn't tracker progress, so nothing was overwritten. Check the gist on GitHub.");
+      rem=normalize(parsed.progress,parsed.orphans)}
+    const base=readBase()||{progress:{},orphans:{}},before=canon([S.progress,S.orphans]);
+    const progress=merge3(base.progress,S.progress,rem.progress),orphans=merge3(base.orphans,S.orphans,rem.orphans);
+    const localChanged=canon([progress,orphans])!==before;
+    if(localChanged){S.progress=progress;S.orphans=orphans;S.lastChangeAt=nowISO()}
+    save();
+    if(canon([progress,orphans])!==canon([rem.progress,rem.orphans]))
+      await gh("PATCH","/gists/"+encodeURIComponent(SY.gistId),{files:{[SYNC_FILE]:{content:envText()}}},SY.token);
+    writeKey(SYNC_BASE_KEY,JSON.stringify({progress,orphans}));
+    SY.lastSyncAt=nowISO();SY.lastError=null;writeSY();syncState="ok";
+    if(localChanged)syncRefresh()}
+  catch(e){if(SY){SY.lastError=e.message||String(e);writeSY()}syncState="error"}
+  finally{syncBusy=false;renderSyncStatus();renderNotices();if(syncAgain){syncAgain=false;syncSoon()}}}
+/* Redraw after a pull without stealing focus from a field being typed in. */
+function syncRefresh(){const a=document.activeElement,typing=a&&panel.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName);
+  renderNotices();renderHeader();renderGraphState();if(!GRAPHS[curView])renderView(curView);if(!typing&&selId&&panel.classList.contains("on"))openComp(selId)}
+function syncLabel(){if(!syncOn())return "Not connected";
+  if(syncState==="syncing")return "Syncing…";if(syncState==="pending")return "Changes waiting to sync";
+  if(SY.lastError)return "Sync problem: "+SY.lastError;
+  return SY.lastSyncAt?"Synced "+new Date(SY.lastSyncAt).toLocaleString():"Connected, not synced yet"}
+function renderSyncStatus(){const s=document.getElementById("syncstat");if(s)s.textContent=syncLabel()}
+document.addEventListener("visibilitychange",()=>{if(!syncOn())return;
+  if(document.visibilityState==="hidden"){if(syncState==="pending")syncNow()}
+  else if(!SY.lastSyncAt||Date.now()-Date.parse(SY.lastSyncAt)>SYNC_STALE)syncNow()});
+window.addEventListener("online",()=>{if(syncOn()&&SY.lastError)syncNow()});
+/* Ask the browser not to evict this site's storage (Safari otherwise clears it after 7 days unused). */
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}
 
 /* ---------- helpers ---------- */
 const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1489,12 +1592,19 @@ function renderSkills(){
 /* ---------- Data: backups, import, reset, orphans ---------- */
 function renderData(){
   const v=document.getElementById("v-data");
-  v.innerHTML=`<div class="page"><div class="phead"><div><h1>Data</h1><p class="lead">Progress lives in this browser only (localStorage). The local file and the website keep separate progress: export in one, import in the other. The Study Plan records stay the official source of truth (doc 14).</p></div></div>
+  v.innerHTML=`<div class="page"><div class="phead"><div><h1>Data</h1><p class="lead">Progress is saved in this browser. Turn on sync to share it with every browser and device you use, including the local file and the website; otherwise export in one and import in the other. The Study Plan records stay the official source of truth (doc 14).</p></div></div>
   ${storageOK?"":`<div class="warn mb-lg">This browser blocked localStorage, so progress won't survive a reload. Use Export.</div>`}
   <div class="dgrid">
    <div class="box"><h2>Back up and restore</h2>
     <p class="mini mb-sm">${S.lastExportAt?`Last export: ${esc(new Date(S.lastExportAt).toLocaleString())}.`:"Not exported yet."} Import shows a preview first and downloads a backup before changing anything.</p>
     <div class="databand"><button type="button" class="btn primary" id="exp">Export progress (JSON)</button><label class="btn filebtn">Import progress or records seed<input type="file" id="imp" accept="application/json,.json"></label></div></div>
+   <div class="box"><h2>Sync across devices</h2>${syncOn()?`
+    <p class="mini mb-sm" id="syncstat" role="status">${esc(syncLabel())}</p>
+    <p class="mini mb-sm">Saved to a secret gist in your GitHub account. Every browser connected with a token for that account shares the same progress.</p>
+    <div class="databand"><button type="button" class="btn primary" id="syncnow">Sync now</button><button type="button" class="btn" id="syncoff">Disconnect this browser</button></div>`:`
+    <p class="mini mb-sm">Keeps one copy of your progress in a secret gist on your GitHub account. Create a <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a> with only the <b>Gists: read and write</b> account permission, paste it here, then do the same in each browser. The token stays in this browser and is never exported.</p>
+    <form id="syncform" class="databand"><input type="password" id="synctok" autocomplete="off" spellcheck="false" placeholder="github_pat_…" aria-label="GitHub token"><button type="submit" class="btn primary">Connect</button></form>
+    <p class="mini" id="syncstat" role="status">${SY&&SY.lastError?esc(SY.lastError):""}</p>`}</div>
    <div class="box"><h2>Start over</h2><p class="mini mb-sm">Clears every status, note, session and evidence entry in this browser. A backup file is downloaded first.</p>
     <button type="button" class="btn danger" id="rst">Reset all progress</button></div>
    <div class="box"><h2>Colour mode</h2><p class="mini mb-sm">Kept in this browser, separate from your progress.</p>
@@ -1503,8 +1613,13 @@ function renderData(){
   </div>
   ${orphansHTML()}</div>`;
   v.querySelector("#exp").onclick=()=>{exportNow("");renderNotices();renderData()};
+  const sf=v.querySelector("#syncform");
+  if(sf)sf.onsubmit=async e=>{e.preventDefault();const stat=v.querySelector("#syncstat"),btn=sf.querySelector("button");btn.disabled=true;stat.textContent="Connecting…";
+    try{await syncConnect(v.querySelector("#synctok").value);renderData()}catch(err){SY=null;writeSY();stat.textContent=err.message||String(err);btn.disabled=false}};
+  if(v.querySelector("#syncnow"))v.querySelector("#syncnow").onclick=()=>syncNow();
+  if(v.querySelector("#syncoff"))v.querySelector("#syncoff").onclick=()=>{if(confirm("Stop syncing this browser? Its progress stays here and in the gist; the token is removed from this browser.")){syncDisconnect();renderData();renderNotices()}};
   v.querySelector("#imp").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)readImport(f)};
-  v.querySelector("#rst").onclick=()=>{if(confirm("Reset all statuses, notes, sessions and evidence? A backup file is downloaded first.")){backupNow("reset");const keep=S.lastExportAt;S=blankEnv();S.firstRunDismissed=true;S.lastExportAt=keep;save();closePanel(false);refreshAll()}};
+  v.querySelector("#rst").onclick=()=>{if(confirm(`Reset all statuses, notes, sessions and evidence? A backup file is downloaded first.${syncOn()?" Sync is on, so every connected browser is reset too.":""}`)){backupNow("reset");const keep=S.lastExportAt;S=blankEnv();S.firstRunDismissed=true;S.lastExportAt=keep;save();syncSoon();closePanel(false);refreshAll()}};
   v.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{setMode(b.dataset.mode);renderData();v.querySelector(`[data-mode="${curMode}"]`).focus()});
   v.querySelectorAll("[data-orph]").forEach(b=>b.onclick=()=>{const id=b.dataset.orph,sel=v.querySelector(`select[data-orphto="${CSS.escape(id)}"]`);
     if(b.dataset.a==="move"){const to=sel&&sel.value;if(!to||!byId[to])return;S.progress[to]=mergeEntry(S.progress[to],stripOrphan(S.orphans[id]));delete S.orphans[id];touch();refreshAll()}
@@ -1554,7 +1669,7 @@ let backupSnoozed=false, changeDetails=false;
 function renderNotices(){
   const n=document.getElementById("notice");const parts=[];
   if(LOADINFO.fresh&&!S.firstRunDismissed&&!Object.keys(S.progress).length)
-    parts.push(`<div class="notice" data-n="first"><b>No saved progress in this browser.</b> The local file and the website keep separate progress. If you've used the other one, export there and import here.<span class="acts"><button type="button" class="btn primary" data-act="import">Import progress</button><button type="button" class="btn" data-act="fresh">Start fresh</button></span></div>`);
+    parts.push(`<div class="notice" data-n="first"><b>No saved progress in this browser.</b> Each browser, device, the local file and the website keep their own copy. Turn on sync to share one copy, or import an export.<span class="acts"><button type="button" class="btn primary" data-act="syncdata">Set up sync</button><button type="button" class="btn" data-act="import">Import progress</button><button type="button" class="btn" data-act="fresh">Start fresh</button></span></div>`);
   const dc=LOADINFO.dataChange;
   if(dc){const ren=dc.renamed.map(([id,r])=>`${esc(id)} to ${r.to?esc(r.to):r.split?("split into "+esc(r.split.join(", "))):"removed"}`);
     parts.push(`<div class="notice" data-n="change"><b>The roadmap changed since your last visit</b>${dc.from?` (data ${esc(dc.from)} to ${esc(D.version)})`:""}: ${dc.added.length} added, ${dc.removed.length} removed, ${dc.renamed.length} renamed or split. Your progress was carried over${Object.keys(S.orphans).length?`; ${Object.keys(S.orphans).length} entries need a home (Data, Orphaned progress)`:""}.
@@ -1562,9 +1677,13 @@ function renderNotices(){
       ${changeDetails?`<div class="details">${dc.added.length?`<div>Added: ${dc.added.map(esc).join(", ")}</div>`:""}${dc.removed.length?`<div>Removed: ${dc.removed.map(esc).join(", ")}</div>`:""}${ren.length?`<div>Renamed or split: ${ren.join("; ")}</div>`:""}</div>`:""}</div>`)}
   if(!backupSnoozed&&needsBackup()){const days=Math.floor((Date.now()-Date.parse(S.lastExportAt||S.createdAt))/DAY);
     parts.push(`<div class="notice" data-n="backup"><b>Back up your progress.</b> ${S.lastExportAt?`Last export ${days} days ago`:"Never exported"}, and there are changes since. Progress lives only in this browser.<span class="acts"><button type="button" class="btn primary" data-act="export">Export now</button><button type="button" class="btn" data-act="later">Later</button></span></div>`)}
+  if(syncOn()&&SY.lastError&&syncState!=="syncing")
+    parts.push(`<div class="notice" data-n="sync"><b>Sync problem.</b> ${esc(SY.lastError)}<span class="acts"><button type="button" class="btn" data-act="syncretry">Retry</button><button type="button" class="btn" data-act="syncdata">Sync settings</button></span></div>`);
   n.innerHTML=parts.join("");
 }
 document.getElementById("notice").addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act;
+  if(a==="syncretry"){syncNow();return}
+  if(a==="syncdata"){go("data");return}
   if(a==="import")pickImport();
   if(a==="fresh"){S.firstRunDismissed=true;save()}
   if(a==="details")changeDetails=!changeDetails;
@@ -1724,6 +1843,7 @@ renderHeader();renderNotices();
   if(r&&r.comp){const grp=!!groupById[r.comp];showView(grp?"map":"today");lastViewHash="#"+viewHash();
     requestAnimationFrame(()=>{if(grp){GRAPHS.map.fit();openGroup(r.comp,{center:true})}else select(r.comp,{expand:true,focus:false})})}
   else{if(r&&r.filters)Object.assign(F,r.filters);if(r&&r.route)routeId=r.route;showView(r?r.view:"today");lastViewHash="#"+viewHash()}})();
+if(syncOn())syncNow();
 </script>
 </body>
 </html>

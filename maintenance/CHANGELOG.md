@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## app 2026-11-28 (3): opt-in sync across browsers and devices (no data change; storage stays v2)
+- **Why:** progress lives per browser and per origin, so the local file, the website, other browsers and the
+  phone each kept their own copy, and progress looked lost after the redesign. The owner approved cloud sync
+  (AUDIT D-11).
+- **Sync (Data page, off by default):** paste a fine-grained GitHub token with only *Gists: read and write*. The
+  first browser creates a secret gist (`ntidebi-roadmap-progress.json`); every other browser finds it and merges in.
+  Each sync pulls, three-way merges against the last synced state, then pushes. Edits travel, and so do cleared
+  fields, removed sessions and resets. When both sides changed one field, the newer entry wins and differing notes
+  are joined. Changes push 2.5 s after the last edit, and the app pulls on open and when the tab comes back.
+- **Safety:** the token and gist ID live in their own key (`ntidebi-sync`), never in progress or exports. A gist
+  holding anything that isn't tracker progress is never overwritten. Errors show as a notice and local changes
+  are kept. With sync off the app makes no network request.
+- **Storage:** the app asks the browser for persistent storage, so Safari's 7-day eviction doesn't apply where granted.
+- **Tests:** new `tests/e2e_sync.py` (fake GitHub API; two browsers converge; deletions, conflicts, reset,
+  rejected token, foreign gist content, token never exported). Existing suites unchanged and passing.
+
 ## app 2026-11-28 (2): UX redesign — Today, Roadmap, Plan (no data change; storage stays v2)
 - **Three destinations instead of ten tabs.** Today (landing), Roadmap and Plan, plus Data. On a phone they sit
   in a bottom bar; the competency drawer becomes a full-screen sheet.

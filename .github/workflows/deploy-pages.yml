@@ -46,6 +46,8 @@ jobs:
         run: python tests/e2e_ui.py
       - name: Today, session log and route tests
         run: python tests/e2e_today.py
+      - name: Sync tests (GitHub faked)
+        run: python tests/e2e_sync.py
       - uses: actions/configure-pages@v6
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
       - uses: actions/upload-pages-artifact@v5
