@@ -20,6 +20,20 @@ VIEWS = ["flow", "roadmap", "kanban", "checklist", "paths", "compare", "projects
 fails = []
 
 
+# Resolve two colour tokens to sRGB through a canvas (computed styles may stay in oklch) and return contrast ratios.
+CONTRAST_JS = """mode => {
+  const root = document.documentElement, prev = root.dataset.mode;
+  root.dataset.mode = mode;
+  const cs = getComputedStyle(root), cx = document.createElement('canvas').getContext('2d', {willReadFrequently: true});
+  const rgb = tok => { cx.clearRect(0, 0, 1, 1); cx.fillStyle = cs.getPropertyValue(tok).trim(); cx.fillRect(0, 0, 1, 1); return [...cx.getImageData(0, 0, 1, 1).data].slice(0, 3) };
+  const lum = c => { const [r, g, b] = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }); return 0.2126 * r + 0.7152 * g + 0.0722 * b };
+  const ratio = (a, b) => { const [x, y] = [lum(rgb(a)), lum(rgb(b))].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05) };
+  const out = {};
+  for (const bg of ['--color-paper', '--color-paper-2', '--color-paper-3']) out[bg] = +ratio('--color-muted', bg).toFixed(2);
+  if (prev) root.dataset.mode = prev; else delete root.dataset.mode;
+  return out }"""
+
+
 def check(cond, msg):
     print(("PASS " if cond else "FAIL ") + msg)
     if not cond:
@@ -130,8 +144,11 @@ async def desktop(b, errs):
     await pg.click("#tab-certs")
     months = await pg.evaluate("[...document.querySelectorAll('.tlmonths div')].map(d => d.textContent)")
     check(months[0].startswith("Nov 2026") and months[-1].startswith("Dec"), f"cert timeline spans today to the last cert ({months[0]} … {months[-1]})")
-    faint = await pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--faint').trim()")
-    check(faint == "#8b949e", "--faint raised for contrast")
+    # the quietest text colour stays readable on every surface it sits on, in both colour modes (WCAG AA 4.5:1)
+    for mode in ("light", "dark"):
+        ratios = await pg.evaluate(CONTRAST_JS, mode)
+        worst = min(ratios.values())
+        check(worst >= 4.5, f"{mode} mode: muted text contrast {worst:.2f}:1 or better ({ratios})")
     check(await pg.evaluate("getComputedStyle(document.querySelector('#cv-flow')).touchAction") == "none", "canvas has touch-action:none")
     await pg.close()
 

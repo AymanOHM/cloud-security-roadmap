@@ -8,6 +8,7 @@ Usage: python3 tools/build.py [--data DIR] [--out FILE]
   --data / --out build another dataset to another file (used by the upgrade tests).
 """
 import argparse
+import base64
 import json
 import sys
 from pathlib import Path
@@ -43,6 +44,9 @@ def main():
         print("app/template.html has no /*DATA*/null placeholder")
         sys.exit(1)
     blob = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
+    # The one embedded font (Host Grotesk, SIL OFL 1.1, app/fonts/OFL.txt), inlined so the page stays offline.
+    font = ROOT / "app" / "fonts" / "host-grotesk-latin-wght-normal.woff2"
+    tpl = tpl.replace("__FONT_HOST_GROTESK__", base64.b64encode(font.read_bytes()).decode("ascii"))
     out = Path(args.out).resolve() if args.out else ROOT / "dist" / "index.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(tpl.replace("/*DATA*/null", blob), encoding="utf-8")

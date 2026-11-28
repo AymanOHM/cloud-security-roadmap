@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## app 2026-11-28: redesign (no data or storage change)
+- New look across all ten views: graphite dark mode and a warm paper light mode, following the OS with an
+  Auto / Light / Dark button in the top bar (kept under its own `ntidebi-mode` key, never in progress data).
+  Host Grotesk (SIL OFL, `app/fonts/`) is inlined by `tools/build.py`, so the page still works offline.
+- Colour now means status: amber in progress and "unlocks", blue "needs", green done, red locked or late.
+  Source (NTI, DEBI, ...) is a text label instead of a colour.
+- Dashboard opens with the completed count set large, then Next up; projects read as a trail; Kanban cards
+  lose the side stripe; the details panel header is held by layout, not `position: sticky`.
+- Wording: dashes and middle-dot lists replaced with words and commas; evidence marks and lock/clip symbols
+  are text or drawn icons instead of emoji. IDs, hooks, deep links, storage and import/export unchanged.
+- Test: the `--faint == #8b949e` check became a contrast check of the quietest text on every surface in both
+  modes (WCAG AA 4.5:1).
+
 ## data 1.3 · 2026-11-23 (after publishing): prerequisites narrowed
 - The six competencies that depended on a whole former group now name only the members they need (the group
   expansion had made them wait on every member): TST-1 ← PY-3, PY-5, WEB-2 · CI-1 ← GIT-1 · CI-5 ← CI-3, GIT-4 ·
